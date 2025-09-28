@@ -5,7 +5,21 @@ from .api_auth_views import LoginView, LogoutView, UserDetailView
 # Create a router and register our viewsets with it.
 router = DefaultRouter()
 router.register(r'posts', api_views.PostViewSet, basename='post')
-# ... existing router registrations
+router.register(r'accounts', api_views.AccountViewSet, basename='account')
+router.register(r'contacts', api_views.ContactViewSet, basename='contact')
+router.register(r'tasks', api_views.TaskViewSet, basename='task')
+router.register(r'deals', api_views.DealViewSet, basename='deal')
+router.register(r'deal-stages', api_views.DealStageViewSet, basename='dealstage')
+router.register(r'interactions', api_views.InteractionViewSet, basename='interaction')
+router.register(r'quotes', api_views.QuoteViewSet, basename='quote')
+router.register(r'quote-items', api_views.QuoteItemViewSet, basename='quoteitem')
+router.register(r'invoices', api_views.InvoiceViewSet, basename='invoice')
+router.register(r'invoice-items', api_views.InvoiceItemViewSet, basename='invoiceitem')
+router.register(r'custom-fields', api_views.CustomFieldViewSet, basename='customfield')
+router.register(r'custom-field-values', api_views.CustomFieldValueViewSet, basename='customfieldvalue')
+router.register(r'activity-logs', api_views.ActivityLogViewSet, basename='activitylog')
+router.register(r'task-templates', api_views.TaskTemplateViewSet, basename='tasktemplate')
+router.register(r'default-work-order-items', api_views.DefaultWorkOrderItemViewSet, basename='defaultworkorderitem')
 router.register(r'task-types', api_views.TaskTypeViewSet, basename='tasktype')
 
 # The API URLs are now determined automatically by the router.
@@ -19,9 +33,13 @@ urlpatterns = [
     # Search
     path('search/', search_views.SearchAPIView.as_view(), name='api_search'),
     path('search/filters/', search_views.SearchFiltersAPIView.as_view(), name='api_search_filters'),
+    path('my-contacts/', api_views.MyContactsView.as_view(), name='my-contacts'),
 
     # Auth
     path('auth/login/', LoginView.as_view(), name='api_login'),
     path('auth/logout/', LogoutView.as_view(), name='api_logout'),
     path('auth/user/', UserDetailView.as_view(), name='api_user_detail'),
+
+    # User Roles
+    path('user-roles/', api_views.UserRoleManagementView.as_view(), name='user-roles'),
 ]

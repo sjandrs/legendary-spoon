@@ -225,7 +225,7 @@ const TaskDashboard = () => {
                             className="task-status"
                             style={{ color: getStatusColor(task.status) }}
                           >
-                            {task.status.replace('_', ' ')}
+                            {task.status ? task.status.replace('_', ' ') : 'No Status'}
                           </span>
                         </div>
                       </div>
@@ -235,7 +235,7 @@ const TaskDashboard = () => {
                           <p className="task-description">{task.description}</p>
                         )}
                         <div className="task-info">
-                          <span className="task-type">📋 {task.task_type.replace('_', ' ')}</span>
+                          <span className="task-type">📋 {task.task_type ? task.task_type.replace('_', ' ') : 'No Type'}</span>
                           {task.due_date && (
                             <span className={`task-due ${task.is_overdue ? 'overdue' : ''}`}>
                               📅 Due: {new Date(task.due_date).toLocaleDateString()}

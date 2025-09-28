@@ -220,9 +220,16 @@ class DealStageViewSet(viewsets.ModelViewSet):
     queryset = DealStage.objects.all()
     serializer_class = DealStageSerializer
 
+from .filters import DealFilter
+
 class DealViewSet(viewsets.ModelViewSet):
     queryset = Deal.objects.all()
     serializer_class = DealSerializer
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
+    filterset_class = DealFilter  # Use the custom filter class
+    search_fields = ['name', 'description', 'account__name']
+    ordering_fields = ['name', 'value', 'expected_close_date']
+    ordering = ['-expected_close_date']
 
     def get_queryset(self):
         user = self.request.user
@@ -332,7 +339,7 @@ class DashboardStatsView(APIView):
 
     def get(self, request, *args, **kwargs):
         # Data for Deals by Stage Chart
-        deals_by_stage = list(Deal.objects.values('stage__name').annotate(count=Count('id')).order_by('stage__name'))
+        deals_by_stage = list(Deal.objects.values('stage__id', 'stage__name').annotate(count=Count('id')).order_by('stage__name'))
 
         # Data for Sales Performance Doughnut Chart - More explicit queries
         won_count = Deal.objects.filter(status='won').count()

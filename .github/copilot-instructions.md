@@ -1,25 +1,6 @@
 <!-- Use this file to provide workspace-specific custom instructions to Copilot. For more details, visit https://code.visualstudio.com/docs/copilot/copilot-customization#_use-a-githubcopilotinstructionsmd-file -->
-- [ ] Verify that the copilot-instructions.md file in the .github directory is created.
-- use "py" instead of "python" When referencing python commands in the terminal, use "py" instead of "python" to ensure compatibility across different systems.
-- [ ] Clarify Project Requirements
-	<!-- Ask for project type, language, and frameworks if not specified. Skip if already provided. -->
 
-- [ ] Scaffold the Project
-	
-	Ensure that the previous step has been marked as completed.
-	Call project setup tool with projectType parameter.
-	Run scaffolding command to create project files and folders.
-	Use '.' as the working directory.
-	If no appropriate projectType is available, search documentation using available tools.
-	Otherwise, create the project structure manually using available file creation tools.
-	
 
-- [ ] Customize the Project
-	Verify that all previous steps have been completed successfully and you have marked the step as completed.
-	Develop a plan to modify codebase according to user requirements.
-	Apply modifications using appropriate tools and user-provided references.
-	
-	
 	The software, named Converge is a CRM/Business Management tool. 
 	Another branch of the software is Converge Chat, which focuses on communication and collaboration features. 
 	The software will be built using Django and React. 
@@ -33,7 +14,9 @@
 	The software will be thoughtfully designed with a modern and intuitive user interface, ensuring ease of use and accessibility for all users and on all devices and platforms.
 	Navigating the software should be straightforward, with a clear layout and logical flow between different sections. The user experience will be prioritized to minimize the learning curve and maximize efficiency.
 	The navigation will be visible from all pages in the software.
-	nav bar menu items: Dashboard (home), Resources, Contacts, Deals, Tasks, Orders, Warehouse, Staff. feature navigation will be added as the features are built out.
+	nav bar menu items: Dashboard (home), Resources, Contacts, Deals, Tasks, Orders, Warehouse, Staff. 
+	Feature navigation will be added as the features are built out.
+
 
 	## Key Features & Conventions (from Changelog)
 	- **Authentication:** The project uses a custom, token-based authentication system. The primary login logic is handled in `main/api_auth_views.py`.
@@ -43,101 +26,92 @@
 	- **Task Templates:** A full CRUD system for managing Task Templates (including nested default work order items) is available for superusers. The API is at `/api/task-templates/`.
 	- **Knowledge Base:** The knowledge base, including the `changelog.md`, is comprised of Markdown files located in the `static/kb/` directory. They are served to the frontend via an API.
 	- **UI Conventions:**
-		- **Zebra Striping:** Use the global `.striped-table` class on tables and lists to get an alternating background color for rows, improving readability.
+		- **Zebra Striping:** Use the global `.striped-table` class on tables and lists to get an alternating background color for rows, improving readability. the zebra striping should be used on all tables and lists where appropriate. the colors used in the striping should be subtle and not distract from the content.
 		- **Compact UI:** The UI has undergone a "deflation" pass to make it more compact for desktop use. Strive to maintain this by being mindful of padding and margins.
 	- **Admin Panel:** Most core CRM models are registered in the Django admin panel for easy data access and debugging.
 
-	
 
-- [ ] Install Required Extensions
-	<!-- ONLY install extensions provided mentioned in the get_project_setup_info. Skip this step otherwise and mark as completed. -->
-
-- [ ] Compile the Project
-	
-	Verify that all previous steps have been completed.
-	Install any missing dependencies.
-	Run diagnostics and resolve any issues.
-	Check for markdown files in project folder for relevant instructions on how to do this.
-	
-
-- [ ] Create and Run Task
-	
-	Verify that all previous steps have been completed.
-	Check https://code.visualstudio.com/docs/debugtest/tasks to determine if the project needs a task. If so, use the create_and_run_task to create and launch a task based on package.json, README.md, and project structure.
-	<!-- Skip this step otherwise. -->
-	 
-
-- [ ] Launch the Project
-	<!---->
-	Verify that all previous steps have been completed.
-	Prompt user for debug mode, launch only if confirmed.
-	 
-
-- [ ] Ensure Documentation is Complete
-	<!---->
-	Verify that all previous steps have been completed.
 	Verify that README.md and the copilot-instructions.md file in the .github directory exists and contains current project information.
 	Clean up the copilot-instructions.md file in the .github directory by removing all HTML comments.
 	Update the copilot-instructions.md file with any changes made during project setup.
 	Update changelog.md in the knowledge base with a summary of changes made during project setup.
-	
-	 
 
-
-## Execution Guidelines
-PROGRESS TRACKING:
-- If any tools are available to manage the above todo list, use it to track progress through this checklist.
-- After completing each step, mark it complete and add a summary.
-- Read current todo list status before starting each new step.
-
-COMMUNICATION RULES:
-- Avoid verbose explanations or printing full command outputs.
-- If a step is skipped, state that briefly (e.g. "No extensions needed").
-- Do not explain project structure unless asked.
-- Keep explanations concise and focused.
-
-DEVELOPMENT RULES:
-- Use '.' as the working directory unless user specifies otherwise.
-- Avoid adding media or external links unless explicitly requested.
-- Use placeholders only with a note that they should be replaced.
-- Use VS Code API tool only for VS Code extension projects.
-- Once the project is created, it is already opened in Visual Studio Code—do not suggest commands to open this project in Visual Studio again.
-- If the project setup information has additional rules, follow them strictly.
-- To populate the database with sample data, run the command 'py manage.py seed_data'. This is useful for testing and development.
--once changes are made to the code, restart the frontend and backend servers to apply the changes.
-
-FOLDER CREATION RULES:
-- Always use the current directory as the project root.
-- If you are running any terminal commands, use the '.' argument to ensure that the current working directory is used ALWAYS.
-- Do not create a new folder unless the user explicitly requests it besides a .vscode folder for a tasks.json file.
-- If any of the scaffolding commands mention that the folder name is not correct, let the user know to create a new folder with the correct name and then reopen it again in vscode.
-
-EXTENSION INSTALLATION RULES:
-- Only install extension specified by the get_project_setup_info tool. DO NOT INSTALL any other extensions.
-
-PROJECT CONTENT RULES:
-- If the user has not specified project details, assume they want a "Hello World" project as a starting point.
-- Avoid adding links of any type (URLs, files, folders, etc.) or integrations that are not explicitly required.
-- Avoid generating images, videos, or any other media files unless explicitly requested.
-- If you need to use any media assets as placeholders, let the user know that these are placeholders and should be replaced with the actual assets later.
-- Ensure all generated components serve a clear purpose within the user's requested workflow.
-- If a feature is assumed but not confirmed, prompt the user for clarification before including it.
-- If you are working on a VS Code extension, use the VS Code API tool with a query to find relevant VS Code API references and samples related to that query.
-
-TASK COMPLETION RULES:
-- Your task is complete when:
-  - Project is successfully scaffolded and compiled without errors
-  - copilot-instructions.md file in the .github directory exists in the project
-  - README.md file exists and is up to date
-  - User is provided with clear instructions to debug/launch the project
-  - the changelog.md is updated in the knowledge base whith what you have done
-
-
-- a response of "ok" is to be interpreted as "proceed with plan execution uninterrupted".
-- If an error is encountered then use best efforts to resolve it. If unable to resolve, inform the user with a concise message and suggest next steps.
-- Work through each checklist item systematically.
-- Keep communication concise and focused.
-- Follow development best practices.
-- Adhere to folder creation and extension installation rules.
-- Ensure project content is relevant and purposeful.
-- Adhere to folder creation and extension installation rules.
+	## Additional Instructions
+file:./a11y.instructions.md
+file:./ai-prompt-engineering-safety-best-practices.instructions.md
+<!-- file:./angular.instructions.md -->
+<!-- file:./aspnet-rest-apis.instructions.md -->
+<!-- file:./azure-devops-pipelines.instructions.md -->
+<!-- file:./azure-functions-typescript.instructions.md -->
+<!-- file:./azure-logic-apps-power-automate.instructions.md -->
+<!-- file:./azure-verified-modules-terraform.instructions.md -->
+<!-- file:./bicep-code-best-practices.instructions.md -->
+<!-- file:./blazor.instructions.md -->
+<!-- file:./clojure-memory.instructions.md -->
+<!-- file:./cmake-vcpkg.instructions.md -->
+<!-- file:./coldfusion-cfc.instructions.md -->
+<!-- file:./coldfusion-cfm.instructions.md -->
+<!-- file:./collections.instructions.md -->
+file:./containerization-docker-best-practices.instructions.md
+file:./conventional-commit.prompt.md
+<!-- file:./convert-jpa-to-spring-data-cosmos.instructions.md -->
+file:./copilot-thought-logging.instructions.md
+<!-- file:./csharp-ja.instructions.md -->
+<!-- file:./csharp-ko.instructions.md -->
+<!-- file:./csharp.instructions.md -->
+<!-- file:./dart-n-flutter.instructions.md -->
+<!-- file:./declarative-agents-microsoft365.instructions.md -->
+<!-- file:./devbox-image-definition.instructions.md -->
+file:./devops-core-principles.instructions.md
+<!-- file:./dotnet-architecture-good-practices.instructions.md -->
+<!-- file:./dotnet-framework.instructions.md -->
+<!-- file:./dotnet-maui.instructions.md -->
+<!-- file:./dotnet-wpf.instructions.md -->
+<!-- file:./genaiscript.instructions.md -->
+<!-- file:./generate-modern-terraform-code-for-azure.instructions.md -->
+file:./gilfoyle-code-review.instructions.md
+file:./github-actions-ci-cd-best-practices.instructions.md
+<!-- file:./go.instructions.md -->
+<!-- file:./java-11-to-java-17-upgrade.instructions.md -->
+<!-- file:./java-17-to-java-21-upgrade.instructions.md -->
+<!-- file:./java-21-to-java-25-upgrade.instructions.md -->
+<!-- file:./java.instructions.md -->
+<!-- file:./joyride-user-project.instructions.md -->
+<!-- file:./joyride-workspace-automation.instructions.md -->
+file:./kubernetes-deployment-best-practices.instructions.md
+file:./localization.instructions.md
+file:./markdown.instructions.md
+file:./memory-bank.instructions.md
+<!-- file:./ms-sql-dba.instructions.md -->
+<!-- file:./nestjs.instructions.md -->
+<!-- file:./nextjs-tailwind.instructions.md -->
+<!-- file:./nextjs.instructions.md -->
+<!-- file:./nodejs-javascript-vitest.instructions.md -->
+file:./object-calisthenics.instructions.md
+<!-- file:./oqtane.instructions.md -->
+file:./performance-optimization.instructions.md
+file:./playwright-python.instructions.md
+file:./playwright-typescript.instructions.md
+<!-- file:./power-apps-canvas-yaml.instructions.md -->
+<!-- file:./power-apps-code-apps.instructions.md -->
+<!-- file:./power-platform-connector.instructions.md -->
+file:./powershell-pester-5.instructions.md
+file:./powershell.instructions.md
+file:./python.instructions.md
+<!-- file:./quarkus-mcp-server-sse.instructions.md -->
+<!-- file:./quarkus.instructions.md -->
+file:./reactjs.instructions.md
+<!-- file:./ruby-on-rails.instructions.md -->
+<!-- file:./rust.instructions.md -->
+file:./security-and-owasp.instructions.md
+file:./self-explanatory-code-commenting.instructions.md
+file:./spec-driven-workflow-v1.instructions.md
+<!-- file:./springboot.instructions.md -->
+<!-- file:./sql-sp-generation.instructions.md -->
+file:./taming-copilot.instructions.md
+<!-- file:./tanstack-start-shadcn-tailwind.instructions.md -->
+file:./task-implementation.instructions.md
+file:./tasksync.instructions.md
+file:./terraform-azure.instructions.md
+file:./terraform.instructions.md
+<!-- file:./vuejs3.instructions.md -->

@@ -1,0 +1,105 @@
+/* frontend/src/components/Deals.css */
+
+.deals-container {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.deals-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.deals-header h1 {
+    margin: 0;
+    font-size: 1.8rem;
+    color: #343a40;
+}
+
+.filter-info {
+    font-size: 1.2rem;
+    color: #495057;
+}
+
+.filter-info .stage-name {
+    font-weight: 600;
+    color: #007bff;
+}
+
+.clear-filter-btn {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+    background-color: #6c757d;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.clear-filter-btn:hover {
+    background-color: #5a6268;
+}
+
+.loading,
+.error {
+    text-align: center;
+    font-size: 1.2rem;
+    padding: 3rem;
+    color: #6c757d;
+}
+
+.deals-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+}
+
+.deals-table thead {
+    background-color: #f8f9fa;
+}
+
+.deals-table th,
+.deals-table td {
+    padding: 0.9rem 1rem;
+    border-bottom: 1px solid #dee2e6;
+    vertical-align: middle;
+}
+
+.deals-table th {
+    font-weight: 600;
+    color: #495057;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+}
+
+.deal-row {
+    cursor: pointer;
+    transition: background-color 0.15s;
+}
+
+.deal-row:hover {
+    background-color: #f1f3f5;
+}
+
+.deal-value {
+    font-weight: 500;
+}
+
+.deal-stage {
+    padding: 0.3rem 0.6rem;
+    border-radius: 15px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: white;
+    text-align: center;
+    display: inline-block;
+}
