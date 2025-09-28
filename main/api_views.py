@@ -17,21 +17,29 @@ import logging
 from django.conf import settings
 
 from .models import (
-    Post, CustomUser, Account, Contact, Task, Deal, DealStage, Interaction, Quote,
-    Invoice, CustomField, CustomFieldValue, ActivityLog, TaskTemplate,
-    DefaultWorkOrderItem, TaskType, QuoteItem, InvoiceItem, Interaction
+    Post, CustomUser, Account, Contact, Project, Deal, DealStage, Interaction, Quote,
+    Invoice, CustomField, CustomFieldValue, ActivityLog, ProjectTemplate,
+    DefaultWorkOrderItem, ProjectType, QuoteItem, InvoiceItem, Interaction, Tag
 )
 from .serializers import (
-    PostSerializer, UserSerializer, AccountSerializer, ContactSerializer, TaskSerializer,
+    PostSerializer, UserSerializer, AccountSerializer, ContactSerializer, ProjectSerializer,
     ActivityLogSerializer, DealStageSerializer, DealSerializer, InteractionSerializer,
     QuoteSerializer, InvoiceSerializer, CustomFieldSerializer, CustomFieldValueSerializer,
     ContactWithCustomFieldsSerializer, AccountWithCustomFieldsSerializer,
     CustomUserSerializer, SavedSearchSerializer, GlobalSearchIndexSerializer,
-    BulkOperationSerializer, SearchResultSerializer, TaskTemplateSerializer,
-    DefaultWorkOrderItemSerializer, TaskTypeSerializer, QuoteItemSerializer, InvoiceItemSerializer
+    BulkOperationSerializer, SearchResultSerializer, ProjectTemplateSerializer,
+    DefaultWorkOrderItemSerializer, ProjectTypeSerializer, QuoteItemSerializer, InvoiceItemSerializer,
+    TagSerializer
 )
 
 logger = logging.getLogger(__name__)
+
+class TagViewSet(viewsets.ModelViewSet):
+    queryset = Tag.objects.all().order_by('name')
+    serializer_class = TagSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    filter_backends = [filters.SearchFilter]
+    search_fields = ['name']
 
 class PostViewSet(viewsets.ModelViewSet):
     """
@@ -70,9 +78,8 @@ class AccountViewSet(viewsets.ModelViewSet):
         # Log activity
         ActivityLog.objects.create(
             user=self.request.user,
-            action=ActivityLog.ActionChoices.CREATE,
-            resource_type='Account',
-            resource_id=serializer.instance.id,
+            action='create',
+            content_object=serializer.instance,
             description=f'Created account: {serializer.instance.name}'
         )
     
@@ -82,14 +89,18 @@ class AccountViewSet(viewsets.ModelViewSet):
         # Log activity
         ActivityLog.objects.create(
             user=self.request.user,
-            action=ActivityLog.ActionChoices.UPDATE,
-            resource_type='Account',
-            resource_id=serializer.instance.id,
+            action='update',
+            content_object=serializer.instance,
             description=f'Updated account: {serializer.instance.name}'
         )
 
 class ContactViewSet(viewsets.ModelViewSet):
     queryset = Contact.objects.all()
+    permission_classes = [permissions.IsAuthenticated]
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
+    filterset_fields = ['owner', 'account']
+    search_fields = ['first_name', 'last_name', 'email', 'account__name']
+    ordering_fields = ['last_name', 'first_name', 'created_at']
     
     def get_serializer_class(self):
         if self.action == 'retrieve':
@@ -97,13 +108,8 @@ class ContactViewSet(viewsets.ModelViewSet):
         return ContactSerializer
 
     def get_queryset(self):
-        user = self.request.user
-        if user.groups.filter(name='Sales Manager').exists():
-            # Sales managers can see all contacts
-            return Contact.objects.all()
-        else:
-            # Sales reps can only see their own contacts
-            return Contact.objects.filter(owner=user)
+        # Return all contacts for any authenticated user
+        return Contact.objects.all()
 
     def perform_create(self, serializer):
         # Automatically set the owner to the current user
@@ -112,9 +118,8 @@ class ContactViewSet(viewsets.ModelViewSet):
         # Log activity
         ActivityLog.objects.create(
             user=self.request.user,
-            action=ActivityLog.ActionChoices.CREATE,
-            resource_type='Contact',
-            resource_id=serializer.instance.id,
+            action='create',
+            content_object=serializer.instance,
             description=f'Created contact: {serializer.instance.first_name} {serializer.instance.last_name}'
         )
     
@@ -124,15 +129,14 @@ class ContactViewSet(viewsets.ModelViewSet):
         # Log activity
         ActivityLog.objects.create(
             user=self.request.user,
-            action=ActivityLog.ActionChoices.UPDATE,
-            resource_type='Contact',
-            resource_id=serializer.instance.id,
+            action='update',
+            content_object=serializer.instance,
             description=f'Updated contact: {serializer.instance.first_name} {serializer.instance.last_name}'
         )
 
-class TaskViewSet(viewsets.ModelViewSet):
-    queryset = Task.objects.all()
-    serializer_class = TaskSerializer
+class ProjectViewSet(viewsets.ModelViewSet):
+    queryset = Project.objects.all()
+    serializer_class = ProjectSerializer
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['status', 'priority', 'task_type', 'assigned_to', 'deal', 'account', 'contact']
     search_fields = ['title', 'description']
@@ -151,14 +155,13 @@ class TaskViewSet(viewsets.ModelViewSet):
         # Log activity
         ActivityLog.objects.create(
             user=self.request.user,
-            action=ActivityLog.ActionChoices.CREATE,
-            resource_type='Task',
-            resource_id=instance.id,
-            description=f'Created task: {instance.title}'
+            action='create',
+            content_object=instance,
+            description=f'Created project: {instance.title}'
         )
     
     def perform_update(self, serializer):
-        # Check if task was marked as completed
+        # Check if project was marked as completed
         old_instance = self.get_object()
         old_status = old_instance.status
         serializer.save()
@@ -167,53 +170,50 @@ class TaskViewSet(viewsets.ModelViewSet):
             if serializer.instance.status == 'completed':
                 ActivityLog.objects.create(
                     user=self.request.user,
-                    action=ActivityLog.ActionChoices.UPDATE,
-                    resource_type='Task',
-                    resource_id=serializer.instance.id,
-                    description=f'Completed task: {serializer.instance.title}'
+                    action='complete',
+                    content_object=serializer.instance,
+                    description=f'Completed project: {serializer.instance.title}'
                 )
             else:
                 ActivityLog.objects.create(
                     user=self.request.user,
-                    action=ActivityLog.ActionChoices.UPDATE,
-                    resource_type='Task',
-                    resource_id=serializer.instance.id,
-                    description=f'Updated task: {serializer.instance.title}'
+                    action='update',
+                    content_object=serializer.instance,
+                    description=f'Updated project status to {serializer.instance.get_status_display()}: {serializer.instance.title}'
                 )
         else:
             ActivityLog.objects.create(
                 user=self.request.user,
-                action=ActivityLog.ActionChoices.UPDATE,
-                resource_type='Task',
-                resource_id=serializer.instance.id,
-                description=f'Updated task: {serializer.instance.title}'
+                action='update',
+                content_object=serializer.instance,
+                description=f'Updated project: {serializer.instance.title}'
             )
     
     @action(detail=False, methods=['get'])
-    def my_tasks(self, request):
-        """Get tasks assigned to the current user"""
-        tasks = self.queryset.filter(assigned_to=request.user)
-        serializer = self.get_serializer(tasks, many=True)
+    def my_projects(self, request):
+        """Get projects assigned to the current user"""
+        projects = self.queryset.filter(assigned_to=request.user)
+        serializer = self.get_serializer(projects, many=True)
         return Response(serializer.data)
     
     @action(detail=False, methods=['get'])
     def overdue(self, request):
-        """Get overdue tasks"""
-        tasks = [task for task in self.queryset.all() if task.is_overdue]
-        serializer = self.get_serializer(tasks, many=True)
+        """Get overdue projects"""
+        projects = [project for project in self.queryset.all() if project.is_overdue]
+        serializer = self.get_serializer(projects, many=True)
         return Response(serializer.data)
     
     @action(detail=False, methods=['get'])
     def upcoming(self, request):
-        """Get tasks due in the next 7 days"""
+        """Get projects due in the next 7 days"""
         from datetime import date, timedelta
         upcoming_date = date.today() + timedelta(days=7)
-        tasks = self.queryset.filter(
+        projects = self.queryset.filter(
             due_date__lte=upcoming_date,
             due_date__gte=date.today(),
             status__in=['pending', 'in_progress']
         )
-        serializer = self.get_serializer(tasks, many=True)
+        serializer = self.get_serializer(projects, many=True)
         return Response(serializer.data)
 
 class DealStageViewSet(viewsets.ModelViewSet):
@@ -504,19 +504,19 @@ class MarkdownFileView(APIView):
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-class TaskTemplateViewSet(viewsets.ModelViewSet):
+class ProjectTemplateViewSet(viewsets.ModelViewSet):
     """
-    API endpoint for managing Task Templates.
+    API endpoint for managing Project Templates.
     Allows creating, viewing, updating, and deleting templates.
     Superusers have full access.
     """
-    queryset = TaskTemplate.objects.all()
-    serializer_class = TaskTemplateSerializer
+    queryset = ProjectTemplate.objects.all()
+    serializer_class = ProjectTemplateSerializer
     permission_classes = [IsAuthenticated] # Further checks can be done in methods
 
     def get_queryset(self):
         # Allow any authenticated user to view templates
-        return TaskTemplate.objects.all().order_by('name')
+        return ProjectTemplate.objects.all().order_by('name')
 
     def perform_create(self, serializer):
         # Only superusers can create templates
@@ -540,9 +540,9 @@ class TaskTemplateViewSet(viewsets.ModelViewSet):
         instance.delete()
 
     @action(detail=True, methods=['post'])
-    def create_task_from_template(self, request, pk=None):
+    def create_project_from_template(self, request, pk=None):
         """
-        Creates a new Task instance based on this template.
+        Creates a new Project instance based on this template.
         Expects 'contact_id' in the request data.
         """
         template = self.get_object()
@@ -556,31 +556,27 @@ class TaskTemplateViewSet(viewsets.ModelViewSet):
         except Contact.DoesNotExist:
             return Response({'error': 'Contact not found.'}, status=status.HTTP_404_NOT_FOUND)
 
-        # Create the new task
-        new_task = Task.objects.create(
+        # Create the new project
+        new_project = Project.objects.create(
             title=template.default_title,
             description=template.default_description,
             task_type=template.default_task_type,
             priority=template.default_priority,
-            due_date=request.data.get('due_date'), # Assumes due_date is provided
+            due_date=request.data.get('due_date'),
             contact=contact,
             account=contact.account,
             created_by=request.user,
-            assigned_to=request.user # Default to creator, can be overridden
+            # ... other fields as needed
         )
 
-        # Here you would create the Work Order and add the default items.
-        # This logic will be added once the Work Order models exist.
-        # For now, we just return the created task.
-
-        return Response(TaskSerializer(new_task).data, status=status.HTTP_201_CREATED)
+        return Response(ProjectSerializer(new_project).data, status=status.HTTP_201_CREATED)
 
 class DefaultWorkOrderItemViewSet(viewsets.ModelViewSet):
     """
     API endpoint that allows default work order items to be viewed or edited.
     """
     queryset = DefaultWorkOrderItem.objects.all()
-    serializer_class = TaskTemplateSerializer
+    serializer_class = DefaultWorkOrderItemSerializer
     permission_classes = [viewsets.ModelViewSet.permission_classes[0]] # IsAuthenticatedOrReadOnly
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['task_template__name', 'description', 'owner__username']
@@ -595,9 +591,8 @@ class DefaultWorkOrderItemViewSet(viewsets.ModelViewSet):
         # Log activity
         ActivityLog.objects.create(
             user=self.request.user,
-            action=ActivityLog.ActionChoices.CREATE,
-            resource_type='DefaultWorkOrderItem',
-            resource_id=serializer.instance.id,
+            action='create',
+            content_object=serializer.instance,
             description=f'Created default work order item: {serializer.instance.description}'
         )
     
@@ -607,15 +602,14 @@ class DefaultWorkOrderItemViewSet(viewsets.ModelViewSet):
         # Log activity
         ActivityLog.objects.create(
             user=self.request.user,
-            action=ActivityLog.ActionChoices.UPDATE,
-            resource_type='DefaultWorkOrderItem',
-            resource_id=serializer.instance.id,
+            action='update',
+            content_object=serializer.instance,
             description=f'Updated default work order item: {serializer.instance.description}'
         )
 
-class TaskTypeViewSet(viewsets.ModelViewSet):
-    queryset = TaskType.objects.all().order_by('name')
-    serializer_class = TaskTypeSerializer
+class ProjectTypeViewSet(viewsets.ModelViewSet):
+    queryset = ProjectType.objects.all().order_by('name')
+    serializer_class = ProjectTypeSerializer
     permission_classes = [permissions.IsAdminUser]
 
 class GlobalSearchView(APIView):
@@ -675,16 +669,16 @@ class GlobalSearchView(APIView):
             })
 
         # Search in Tasks
-        task_results = Task.objects.filter(
+        task_results = Project.objects.filter(
             Q(title__icontains=query) | Q(description__icontains=query)
         ).distinct()[:5]
 
         for task in task_results:
             results.append({
-                'type': 'task',
+                'type': 'project',
                 'id': task.id,
                 'title': task.title,
-                'url': f"/api/tasks/{task.id}/",
+                'url': f"/api/projects/{task.id}/",
                 'snippet': task.description[:75] + '...' if task.description else ''
             })
 

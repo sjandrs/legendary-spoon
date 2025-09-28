@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { post, get } from '../api';
+import api from '../api';
 import AuthContext from '../contexts/AuthContext';
 import './TaskForm.css';
 
@@ -9,7 +9,7 @@ const TaskForm = () => {
     const navigate = useNavigate();
     const { user } = useContext(AuthContext);
     
-    const { contactId, contactName } = location.state || {};
+    const { contact } = location.state || {};
 
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
@@ -22,15 +22,16 @@ const TaskForm = () => {
     const [error, setError] = useState(null);
     const [success, setSuccess] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
+    const [contactDetails, setContactDetails] = useState(null);
 
     useEffect(() => {
-        const fetchData = async () => {
+        const fetchInitialData = async () => {
             setIsLoading(true);
             setError(null);
             try {
                 const [usersResponse, taskTypesResponse] = await Promise.all([
-                    get('/api/user-roles/'),
-                    get('/api/task-types/')
+                    api.get('/api/user-roles/'),
+                    api.get('/api/task-types/')
                 ]);
 
                 const userList = Array.isArray(usersResponse.data.users) ? usersResponse.data.users : [];
@@ -40,13 +41,16 @@ const TaskForm = () => {
                     setAssignedTo(user.id);
                 }
 
-                const activeTypes = taskTypesResponse.data.results 
-                    ? taskTypesResponse.data.results.filter(t => t.is_active) 
-                    : taskTypesResponse.data.filter(t => t.is_active);
+                const activeTypes = (taskTypesResponse.data.results || taskTypesResponse.data).filter(t => t.is_active);
                 setTaskTypes(activeTypes);
 
                 if (activeTypes.length > 0) {
                     setTaskType(activeTypes[0].id);
+                }
+
+                if (contact && contact.id) {
+                    const contactResponse = await api.get(`/api/contacts/${contact.id}/`);
+                    setContactDetails(contactResponse.data);
                 }
 
             } catch (err) {
@@ -57,8 +61,8 @@ const TaskForm = () => {
             }
         };
 
-        fetchData();
-    }, [user]);
+        fetchInitialData();
+    }, [user, contact]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -77,11 +81,12 @@ const TaskForm = () => {
             priority,
             task_type: taskType,
             assigned_to: assignedTo,
-            contact: contactId,
+            contact: contactDetails ? contactDetails.id : null,
+            account: contactDetails ? contactDetails.account?.id : null,
         };
 
         try {
-            await post('/api/tasks/', taskData);
+            await api.post('/api/tasks/', taskData);
             setSuccess('Task created successfully! Redirecting...');
             setTitle('');
             setDescription('');
@@ -101,7 +106,24 @@ const TaskForm = () => {
     return (
         <div className="task-form-container">
             <h2>Create New Task</h2>
-            {contactName && <h3 className="task-form-contact-info">For Contact: {contactName}</h3>}
+            
+            {contactDetails && (
+                <div className="task-form-contact-card">
+                    <div className="contact-avatar">
+                        {contactDetails.first_name && contactDetails.last_name
+                            ? `${contactDetails.first_name[0]}${contactDetails.last_name[0]}`.toUpperCase()
+                            : <span>👤</span>}
+                    </div>
+                    <div className="contact-card-details">
+                        <div className="contact-card-name">{contactDetails.first_name} {contactDetails.last_name}</div>
+                        <div className="contact-card-row"><span className="contact-card-label">Email:</span> {contactDetails.email || <span className="contact-card-faded">N/A</span>}</div>
+                        <div className="contact-card-row"><span className="contact-card-label">Phone:</span> {contactDetails.phone_number || <span className="contact-card-faded">N/A</span>}</div>
+                        {contactDetails.account && (
+                            <div className="contact-card-row"><span className="contact-card-label">Account:</span> {contactDetails.account.name}</div>
+                        )}
+                    </div>
+                </div>
+            )}
             
             {error && <p className="error-message">{error}</p>}
             {success && <p className="success-message">{success}</p>}
@@ -115,7 +137,7 @@ const TaskForm = () => {
                     
                     <div className="form-group">
                         <label htmlFor="due-date">Due Date</label>
-                        <input id="due-date" type="datetime-local" value={dueDate} onChange={e => setDueDate(e.target.value)} required />
+                        <input id="due-date" type="date" value={dueDate} onChange={e => setDueDate(e.target.value)} required />
                     </div>
 
                     <div className="form-group">

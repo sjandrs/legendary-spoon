@@ -2,6 +2,33 @@
 
 This document tracks the major changes, features, and bug fixes implemented in the Converge application.
 
+## 2025-09-28 (Backend Startup Fix - Task to Project Migration Complete)
+
+### 🐛 Critical Bug Fix: Incomplete Model Renaming Resolved
+Fixed critical Django backend startup errors caused by incomplete migration from "Task" to "Project" model naming. The backend was failing to start due to import errors such as `ImportError: cannot import name 'TaskTemplate'` where old "Task" references remained in several key files.
+
+### **Files Fixed:**
+- **`main/admin.py`:** Updated imports and admin class registrations from `TaskTemplate`/`TaskType` to `ProjectTemplate`/`ProjectType`
+- **`main/serializers.py`:** Fixed serializer class names and model references (`TaskTemplateSerializer` → `ProjectTemplateSerializer`, `TaskTypeSerializer` → `ProjectTypeSerializer`)
+- **`main/api_views.py`:** Updated ViewSet class names and model imports (`TaskTemplateViewSet` → `ProjectTemplateViewSet`, `TaskTypeViewSet` → `ProjectTypeViewSet`)
+- **`main/api_urls.py`:** Fixed API endpoint registrations to use correct ViewSet class names
+- **`main/search_service.py`:** Updated model imports and references from `Task` to `Project`
+- **`main/management/commands/seed_data.py`:** Fixed model imports and object creation calls
+- **`main/management/commands/setup_groups.py`:** Updated permission codenames (`view_task` → `view_project`, `add_task` → `add_project`, etc.)
+
+### **Admin Interface Fix:**
+- Corrected `ProjectAdmin.list_filter` to use `project_type` instead of non-existent `task_type` field
+
+### **Impact:**
+- ✅ Django backend now starts successfully without import errors
+- ✅ All admin interface models properly registered and accessible
+- ✅ API endpoints functional with correct model relationships
+- ✅ Management commands work with updated model names
+- ✅ VS Code `start-dev` task now works as intended
+
+This completes the Task → Project model renaming that was initiated earlier, ensuring all references throughout the Django application stack are consistent.
+
+
 ## 2025-09-27 (Authentication Resolved)
 
 ### 🐛 Critical Bug Fix: Authentication System Stabilized

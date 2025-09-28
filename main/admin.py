@@ -5,7 +5,7 @@ from django.contrib.auth.models import Group, Permission
 from django import forms
 from django.contrib.contenttypes.models import ContentType
 from django.core.paginator import Paginator
-from .models import CustomUser, Category, Tag, Page, Post, Comment, RichTextContent, Account, Contact, Task, Deal, DealStage, Interaction, Quote, QuoteItem, Invoice, InvoiceItem, CustomField, CustomFieldValue, TaskTemplate, DefaultWorkOrderItem, TaskType
+from .models import CustomUser, Category, Tag, Page, Post, Comment, RichTextContent, Account, Contact, Project, Deal, DealStage, Interaction, Quote, QuoteItem, Invoice, InvoiceItem, CustomField, CustomFieldValue, ProjectTemplate, DefaultWorkOrderItem, ProjectType
 
 class HistoryPaginationMixin:
     history_per_page = 20
@@ -182,7 +182,7 @@ class CommentAdmin(HistoryPaginationMixin, admin.ModelAdmin):
 	search_fields = ("content",)
 
 # CRM admin registrations
-from .models import Account, Contact, Task, Deal, DealStage, Interaction, Quote, QuoteItem, Invoice, InvoiceItem, CustomField, CustomFieldValue, TaskTemplate, DefaultWorkOrderItem, TaskType
+from .models import Account, Contact, Project, Deal, DealStage, Interaction, Quote, QuoteItem, Invoice, InvoiceItem, CustomField, CustomFieldValue, ProjectTemplate, DefaultWorkOrderItem, ProjectType
 
 @admin.register(Account)
 class AccountAdmin(HistoryPaginationMixin, admin.ModelAdmin):
@@ -196,11 +196,11 @@ class ContactAdmin(HistoryPaginationMixin, admin.ModelAdmin):
     search_fields = ('first_name', 'last_name', 'email')
     list_filter = ('account', 'owner')
 
-@admin.register(Task)
-class TaskAdmin(HistoryPaginationMixin, admin.ModelAdmin):
+@admin.register(Project)
+class ProjectAdmin(HistoryPaginationMixin, admin.ModelAdmin):
     list_display = ('title', 'status', 'priority', 'due_date', 'assigned_to')
     search_fields = ('title', 'description')
-    list_filter = ('status', 'priority', 'assigned_to', 'task_type')
+    list_filter = ('status', 'priority', 'assigned_to', 'project_type')
 
 @admin.register(Deal)
 class DealAdmin(HistoryPaginationMixin, admin.ModelAdmin):
@@ -246,8 +246,8 @@ class CustomFieldValueAdmin(HistoryPaginationMixin, admin.ModelAdmin):
     # This might be slow on large datasets
     list_filter = ('custom_field',)
 
-@admin.register(TaskTemplate)
-class TaskTemplateAdmin(HistoryPaginationMixin, admin.ModelAdmin):
+@admin.register(ProjectTemplate)
+class ProjectTemplateAdmin(HistoryPaginationMixin, admin.ModelAdmin):
     list_display = ('name', 'created_by', 'created_at')
     search_fields = ('name', 'description', 'default_title')
 
@@ -256,8 +256,8 @@ class DefaultWorkOrderItemAdmin(HistoryPaginationMixin, admin.ModelAdmin):
     list_display = ('template', 'item_type', 'description', 'quantity', 'unit_price')
     list_filter = ('item_type', 'template')
 
-@admin.register(TaskType)
-class TaskTypeAdmin(admin.ModelAdmin):
+@admin.register(ProjectType)
+class ProjectTypeAdmin(admin.ModelAdmin):
     list_display = ('name', 'is_active')
     list_filter = ('is_active',)
     search_fields = ('name',)

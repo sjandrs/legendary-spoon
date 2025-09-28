@@ -5,8 +5,9 @@ import ProtectedRoute from './components/ProtectedRoute';
 import HomePage from './components/HomePage';
 import PostList from './components/PostList';
 import PostDetail from './components/PostDetail';
-import ContactList from './components/ContactList';
+import Contacts from './components/Contacts';
 import ContactDetail from './components/ContactDetail';
+import ContactForm from './components/ContactForm';
 import DashboardPage from './components/DashboardPage';
 import CustomFieldsSettings from './components/CustomFieldsSettings';
 import UserRoleManagement from './components/UserRoleManagement';
@@ -74,7 +75,7 @@ const MainLayout = () => {
                 <div className="dropdown-menu-content">
                   <Link to="/tasks">Task Dashboard</Link>
                   <Link to="/tasks/admin">Task Templates</Link>
-                  <Link to="/tasks/types">Manage Types</Link>
+                  <Link to="/tasks/types" element={<TaskTypeSettings />}>Manage Types</Link>
                 </div>
               )}
             </li>
@@ -134,8 +135,10 @@ function App() {
           <Route path="/tasks/types" element={<TaskTypeSettings />} />
           <Route path="/posts" element={<PostList />} />
           <Route path="/posts/:id" element={<PostDetail />} />
-          <Route path="/contacts" element={<ContactList />} />
+          <Route path="/contacts" element={<Contacts />} />
+          <Route path="/contacts/new" element={<ContactForm />} />
           <Route path="/contacts/:id" element={<ContactDetail />} />
+          <Route path="/contacts/:id/edit" element={<ContactForm />} />
           <Route path="/deals/:id" element={<DealDetail />} />
           <Route path="/deals" element={<Deals />} />
           <Route path="/work-orders" element={<WorkOrders />} />

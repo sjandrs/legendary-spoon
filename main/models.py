@@ -109,13 +109,14 @@ class Account(models.Model):
     address = models.TextField(blank=True)
     notes = models.TextField(blank=True)
     owner = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, blank=True, related_name='owned_accounts')
+    tags = models.ManyToManyField(Tag, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return self.name
 
-class TaskType(models.Model):
+class ProjectType(models.Model):
     name = models.CharField(max_length=100, unique=True)
     is_active = models.BooleanField(default=True)
 
@@ -130,13 +131,14 @@ class Contact(models.Model):
     phone_number = models.CharField(max_length=20, blank=True)
     title = models.CharField(max_length=100, blank=True)
     owner = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, blank=True, related_name='owned_contacts')
+    tags = models.ManyToManyField(Tag, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return f"{self.first_name} {self.last_name}"
 
-class Task(models.Model):
+class Project(models.Model):
     PRIORITY_CHOICES = [
         ('low', 'Low'),
         ('medium', 'Medium'),
@@ -153,17 +155,17 @@ class Task(models.Model):
 
     title = models.CharField(max_length=255)
     description = models.TextField(blank=True)
-    task_type = models.ForeignKey(TaskType, on_delete=models.SET_NULL, null=True, blank=True)
+    project_type = models.ForeignKey(ProjectType, on_delete=models.SET_NULL, null=True, blank=True)
     priority = models.CharField(max_length=10, choices=PRIORITY_CHOICES, default='medium')
-    due_date = models.DateTimeField()
+    due_date = models.DateField()
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
     completed = models.BooleanField(default=False)
     completed_at = models.DateTimeField(null=True, blank=True)
-    assigned_to = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='tasks')
-    contact = models.ForeignKey(Contact, on_delete=models.CASCADE, related_name='tasks', null=True, blank=True)
-    account = models.ForeignKey(Account, on_delete=models.CASCADE, related_name='tasks', null=True, blank=True)
-    deal = models.ForeignKey('Deal', on_delete=models.CASCADE, related_name='tasks', null=True, blank=True)
-    created_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='created_tasks', null=True, blank=True)
+    assigned_to = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='projects')
+    contact = models.ForeignKey(Contact, on_delete=models.CASCADE, related_name='projects', null=True, blank=True)
+    account = models.ForeignKey(Account, on_delete=models.CASCADE, related_name='projects', null=True, blank=True)
+    deal = models.ForeignKey('Deal', on_delete=models.CASCADE, related_name='projects', null=True, blank=True)
+    created_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='created_projects', null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -337,17 +339,17 @@ class CustomFieldValue(models.Model):
 
 
 # Models for Task Templates
-class TaskTemplate(models.Model):
+class ProjectTemplate(models.Model):
     name = models.CharField(max_length=255, unique=True)
     description = models.TextField(blank=True)
     
-    # Default values for the Task itself
+    # Default values for the Project itself
     default_title = models.CharField(max_length=255)
     default_description = models.TextField(blank=True)
-    default_task_type = models.ForeignKey(TaskType, on_delete=models.SET_NULL, null=True, blank=True)
-    default_priority = models.CharField(max_length=10, choices=Task.PRIORITY_CHOICES, default='medium')
+    default_project_type = models.ForeignKey(ProjectType, on_delete=models.SET_NULL, null=True, blank=True)
+    default_priority = models.CharField(max_length=10, choices=Project.PRIORITY_CHOICES, default='medium')
 
-    created_by = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, related_name='task_templates')
+    created_by = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, related_name='project_templates')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -361,7 +363,7 @@ class DefaultWorkOrderItem(models.Model):
         ('equipment', 'Serialized Equipment'),
     ]
     
-    template = models.ForeignKey(TaskTemplate, on_delete=models.CASCADE, related_name='default_items')
+    template = models.ForeignKey(ProjectTemplate, on_delete=models.CASCADE, related_name='default_items')
     item_type = models.CharField(max_length=20, choices=ITEM_TYPE_CHOICES)
     description = models.CharField(max_length=255)
     quantity = models.DecimalField(max_digits=10, decimal_places=2, default=1)

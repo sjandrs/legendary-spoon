@@ -186,7 +186,7 @@ const TemplateForm = ({ template, onSave, onCancel }) => {
                 <hr />
                 <h4>Default Task Values</h4>
                 <div className="form-group">
-                    <label>Default Task Title</label>
+                    <label>Default Project Title</label>
                     <input
                         type="text"
                         name="default_title"
@@ -196,7 +196,7 @@ const TemplateForm = ({ template, onSave, onCancel }) => {
                     />
                 </div>
                 <div className="form-group">
-                    <label>Default Task Description</label>
+                    <label>Default Project Description</label>
                     <textarea
                         name="default_description"
                         value={formData.default_description || ''}

@@ -1,7 +1,7 @@
 from django.core.management.base import BaseCommand
 from django.contrib.auth.models import Group, Permission
 from django.contrib.contenttypes.models import ContentType
-from main.models import Account, Contact, Deal, Task, Quote, Invoice
+from main.models import Account, Contact, Deal, Project, Quote, Invoice
 
 class Command(BaseCommand):
     help = 'Creates default user groups with appropriate permissions'
@@ -21,7 +21,7 @@ class Command(BaseCommand):
         account_ct = ContentType.objects.get_for_model(Account)
         contact_ct = ContentType.objects.get_for_model(Contact)
         deal_ct = ContentType.objects.get_for_model(Deal)
-        task_ct = ContentType.objects.get_for_model(Task)
+        task_ct = ContentType.objects.get_for_model(Project)
         quote_ct = ContentType.objects.get_for_model(Quote)
         invoice_ct = ContentType.objects.get_for_model(Invoice)
 
@@ -36,9 +36,9 @@ class Command(BaseCommand):
             Permission.objects.get(content_type=deal_ct, codename='view_deal'),
             Permission.objects.get(content_type=deal_ct, codename='add_deal'),
             Permission.objects.get(content_type=deal_ct, codename='change_deal'),
-            Permission.objects.get(content_type=task_ct, codename='view_task'),
-            Permission.objects.get(content_type=task_ct, codename='add_task'),
-            Permission.objects.get(content_type=task_ct, codename='change_task'),
+            Permission.objects.get(content_type=task_ct, codename='view_project'),
+            Permission.objects.get(content_type=task_ct, codename='add_project'),
+            Permission.objects.get(content_type=task_ct, codename='change_project'),
             Permission.objects.get(content_type=quote_ct, codename='view_quote'),
             Permission.objects.get(content_type=quote_ct, codename='add_quote'),
             Permission.objects.get(content_type=quote_ct, codename='change_quote'),
@@ -52,7 +52,7 @@ class Command(BaseCommand):
             Permission.objects.get(content_type=account_ct, codename='delete_account'),
             Permission.objects.get(content_type=contact_ct, codename='delete_contact'),
             Permission.objects.get(content_type=deal_ct, codename='delete_deal'),
-            Permission.objects.get(content_type=task_ct, codename='delete_task'),
+            Permission.objects.get(content_type=task_ct, codename='delete_project'),
             Permission.objects.get(content_type=quote_ct, codename='delete_quote'),
             Permission.objects.get(content_type=invoice_ct, codename='delete_invoice'),
         ]

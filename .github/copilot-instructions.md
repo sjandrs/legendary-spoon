@@ -1,117 +1,247 @@
-<!-- Use this file to provide workspace-specific custom instructions to Copilot. For more details, visit https://code.visualstudio.com/docs/copilot/copilot-customization#_use-a-githubcopilotinstructionsmd-file -->
+# Converge CRM Development Guide
+
+**Converge** is a Django/React CRM and Business Management platform targeting small-to-medium businesses. This guide covers essential patterns and workflows for productive development.
+
+## Architecture Overview
+
+**Backend:** Django REST Framework with custom token authentication (`main/api_auth_views.py`)
+**Frontend:** React + Vite with Axios API client (`frontend/src/api.js`)
+**Database:** SQLite (development), with custom `CustomUser` model extending `AbstractUser`
+**Project Structure:** Clean separation - Django backend serves RESTful APIs, React frontend consumes them
+
+## Critical Developer Workflows
+
+### Starting Development Environment
+**Recommended:** Use VS Code Tasks (`Ctrl+Shift+P` → `Tasks: Run Task` → `start-dev`)
+- Runs both backend (`py manage.py runserver`) and frontend (`npm run dev`) in parallel
+- Configuration in `.vscode/tasks.json`
+- Alternative: PowerShell script `start_dev.ps1`
+
+### Database Setup & Seeding
+```bash
+py manage.py migrate                 # Apply schema changes
+py manage.py seed_data              # CRITICAL: Populate test data
+py manage.py set_password <user>    # Admin password reset tool
+```
+
+The `seed_data` command is essential - creates users, deal stages, task types, and sample CRM data required for UI components to function.
+
+## Project-Specific Patterns
+
+### API Architecture
+- **ViewSets:** All CRM entities use `ModelViewSet` pattern in `main/api_views.py`
+- **Permissions:** Role-based access (Sales Reps see only their data, Sales Managers see all)
+- **Activity Logging:** Automatic logging in `perform_create`/`perform_update` methods
+- **Custom Fields:** Dynamic field system via `CustomField`/`CustomFieldValue` models
+
+### Frontend Conventions
+- **API Client:** Centralized in `frontend/src/api.js` with token interceptors
+- **Auth Flow:** Token stored in localStorage, automatic 401 redirect to login
+- **URL Structure:** RESTful - `/api/{resource}/` for CRUD operations
+
+### Model Relationships
+```python
+# Key CRM entities with ownership patterns
+Account → Contact (FK) → Deal (FK) → Interaction (FK)
+CustomUser → Account.owner (Sales territory assignment)
+```
+
+### UI/UX Standards
+- **Zebra Striping:** Use `.striped-table` class on all tables/lists
+- **Compact Design:** Minimal padding/margins for horizontal space optimization
+- **Navigation:** Fixed structure - Dashboard, Resources, Contacts, Deals, Tasks, Orders, Warehouse, Staff
+
+## Essential File Locations
+
+- **API Routes:** `main/api_urls.py` - DRF router configuration
+- **Authentication:** `main/api_auth_views.py` - Custom token-based auth
+- **Models:** `main/models.py` - CRM entities + CustomUser
+- **Frontend API:** `frontend/src/api.js` - Axios client with auth interceptors
+- **Main Layout:** `frontend/src/App.jsx` - Navigation and routing
+- **Knowledge Base:** `static/kb/*.md` - Markdown docs served via API
+
+## Configuration Notes
+
+- **Dynamic Configuration:** Task Types and Templates are database-driven, not hardcoded
+- **Admin Panel:** All CRM models registered for debugging/data access
+- **Knowledge Base:** Markdown files in `static/kb/` served via dedicated API endpoints
+- **User Roles:** Group-based permissions (`Sales Rep`, `Sales Manager`)
 
 
-	The software, named Converge is a CRM/Business Management tool. 
-	Another branch of the software is Converge Chat, which focuses on communication and collaboration features. 
-	The software will be built using Django and React. 
-	The workflow will be that the backend will be built with Django and the frontend with React. 
-	The backend will provide RESTful APIs for the frontend to consume. 
-	The project will be structured to separate concerns between the backend and frontend, ensuring maintainability and scalability. The software will include features such as user authentication, contact management, task management, and communication tools. The project will follow best practices for both Django and React development, including the use of virtual environments, modular code structure, and responsive design principles. 
-	The goal is to create a robust, fully customizable and user-friendly application that meets the needs of businesses effectively for the following (but not limited to): managing their operations, accounting (in and out), staff (with payroll),  technicians(with payroll) and communications via instant messages and message boards, work order generation and mangement with invoicing. 
-	The users of the software are small to medium-sized businesses looking for an integrated solution to manage their customer relationships and business operations efficiently. 
-	They require a user-friendly interface, seamless communication tools, and robust management features to streamline their workflows and enhance productivity. 
-	The software should cater to various industries, providing customizable options to fit specific business needs while ensuring scalability for future growth.
-	The software will be thoughtfully designed with a modern and intuitive user interface, ensuring ease of use and accessibility for all users and on all devices and platforms.
-	Navigating the software should be straightforward, with a clear layout and logical flow between different sections. The user experience will be prioritized to minimize the learning curve and maximize efficiency.
-	The navigation will be visible from all pages in the software.
-	nav bar menu items: Dashboard (home), Resources, Contacts, Deals, Tasks, Orders, Warehouse, Staff. 
-	Feature navigation will be added as the features are built out.
+## Recent Changes & Evolution
 
+- **Model Renaming (2025-09-28):** Core "Task" model renamed to "Project" for better business alignment
+- **Authentication Stabilized (2025-09-27):** Custom token system implemented after removing `dj-rest-auth` conflicts
+- **Dynamic Configuration:** Task Types and Templates are now database-driven with full CRUD APIs
+- **Navigation Restructure:** Main nav aligned to core business functions (Dashboard, Resources, Contacts, Deals, Tasks, Orders, Warehouse, Staff)
 
-	## Key Features & Conventions (from Changelog)
-	- **Authentication:** The project uses a custom, token-based authentication system. The primary login logic is handled in `main/api_auth_views.py`.
-	- **User Management:** A `set_password` Django management command exists for administrators to reset user passwords.
-	- **Database Seeding:** A management command `py manage.py seed_data` is available to populate the database with test data. This is crucial for development and testing.
-	- **Dynamic Task Types:** Task Types are not hardcoded. They are managed by administrators via a full CRUD API at `/api/task-types/` and a UI at `/tasks/types`.
-	- **Task Templates:** A full CRUD system for managing Task Templates (including nested default work order items) is available for superusers. The API is at `/api/task-templates/`.
-	- **Knowledge Base:** The knowledge base, including the `changelog.md`, is comprised of Markdown files located in the `static/kb/` directory. They are served to the frontend via an API.
-	- **UI Conventions:**
-		- **Zebra Striping:** Use the global `.striped-table` class on tables and lists to get an alternating background color for rows, improving readability. the zebra striping should be used on all tables and lists where appropriate. the colors used in the striping should be subtle and not distract from the content.
-		- **Compact UI:** The UI has undergone a "deflation" pass to make it better optimized for horizontal space. Strive to maintain this by being mindful of padding and margins.
-	- **Admin Panel:** Most core CRM models are registered in the Django admin panel for easy data access and debugging.
+## Development Environment Setup
 
+1. **Backend:** Activate virtual environment with `.\venv\Scripts\Activate.ps1`, then `py manage.py runserver`
+2. **Frontend:** `cd frontend && npm run dev`
+3. **Combined:** Use VS Code Task `start-dev` for parallel startup
 
-	Verify that README.md and the copilot-instructions.md file in the .github directory exists and contains current project information.
-	Clean up the copilot-instructions.md file in the .github directory by removing all HTML comments.
-	Update the copilot-instructions.md file with any changes made during project setup.
-	Update changelog.md in the knowledge base with a summary of changes made during project setup.
+## Custom Field System Implementation
 
-	## Additional Instructions
+### Backend Architecture
+- **Models:** `CustomField` + `CustomFieldValue` using Django's ContentTypes framework
+- **Generic Relations:** Fields can attach to any model (Contact, Account, etc.)
+- **Type System:** Support for text, number, date, boolean field types
+- **Storage:** Separate columns (`value_text`, `value_number`, `value_date`, `value_boolean`)
+
+```python
+# Example: Adding custom fields to a Contact
+CustomField.objects.create(
+    name="LinkedIn Profile", 
+    field_type="text", 
+    content_type=ContentType.objects.get_for_model(Contact)
+)
+```
+
+### Frontend Integration
+- **Serializers:** `ContactWithCustomFieldsSerializer` includes custom field values
+- **API Endpoints:** `/api/custom-fields/` and `/api/custom-field-values/`
+- **Dynamic Forms:** Custom field inputs rendered based on field type
+
+## API Endpoint Patterns
+
+### REST Convention
+```
+GET    /api/{resource}/          # List with pagination, filtering
+POST   /api/{resource}/          # Create new record
+GET    /api/{resource}/{id}/     # Retrieve specific record
+PUT    /api/{resource}/{id}/     # Update entire record
+PATCH  /api/{resource}/{id}/     # Partial update
+DELETE /api/{resource}/{id}/     # Delete record
+```
+
+### Role-Based Data Access
+```python
+def get_queryset(self):
+    user = self.request.user
+    if user.groups.filter(name='Sales Manager').exists():
+        return Account.objects.all()  # Managers see all
+    else:
+        return Account.objects.filter(owner=user)  # Reps see only theirs
+```
+
+### Activity Logging Pattern
+```python
+def perform_create(self, serializer):
+    serializer.save(owner=self.request.user)
+    ActivityLog.objects.create(
+        user=self.request.user,
+        action='create',
+        content_object=serializer.instance,
+        description=f'Created {serializer.instance}'
+    )
+```
+
+## Frontend Component Organization
+
+### Structure
+```
+frontend/src/
+├── components/         # UI components
+│   ├── charts/         # Reusable chart components
+│   ├── *.jsx          # Page-level components
+│   └── *.css          # Component-specific styles
+├── contexts/          # React Context providers
+│   └── AuthContext.jsx
+├── hooks/             # Custom React hooks
+│   └── useAuth.js
+├── api.js             # Centralized API client
+└── App.jsx            # Main router and layout
+```
+
+### Import Patterns
+- **API Client:** `import api from '../api'` or `import { get, post } from '../api'`
+- **Auth Context:** `import AuthContext from '../contexts/AuthContext'`
+- **Hooks:** `import useAuth from '../hooks/useAuth'`
+
+### Component Conventions  
+- **Loading States:** All data-fetching components implement loading indicators
+- **Error Handling:** Consistent error display patterns
+- **Permission Checks:** Components check user roles/groups for feature access
+
+## Database Model Relationships
+
+### Core CRM Hierarchy
+```python
+CustomUser (owner field on all CRM entities)
+├── Account (1:N with Contact, Deal)
+│   ├── Contact (1:N with Interaction, Deal.primary_contact)
+│   └── Deal (1:1 with Quote, 1:N with Invoice)
+│       ├── Quote (1:N with QuoteItem)
+│       └── Invoice (1:N with InvoiceItem)
+└── Project (formerly Task - renamed 2025-09-28)
+```
+
+### Custom Fields Architecture  
+```python
+CustomField (defines field schema)
+├── content_type (links to any model via ContentTypes)
+└── CustomFieldValue (stores actual values)
+    ├── Generic FK to any model instance
+    └── Type-specific value columns (value_text, value_number, etc.)
+```
+
+### Activity Logging
+```python
+ActivityLog (tracks all CRM actions)
+├── Generic FK to any model instance  
+├── user (who performed the action)
+└── action type (create, update, delete)
+```
+
+## Development Debugging Workflows
+
+### Backend Debugging
+- **Django Admin:** All CRM models registered - access at `/admin/`
+- **API Testing:** Use `/api/` for browsable DRF interface
+- **Database Inspection:** SQLite browser or Django shell (`py manage.py shell`)
+- **Logging:** Activity logs stored in database via custom `DatabaseLogHandler`
+
+### Frontend Debugging  
+- **Network Tab:** Monitor API calls in browser DevTools
+- **React DevTools:** Inspect component state and context
+- **Console Errors:** Check for 401/403 auth issues, API response errors
+- **Token Issues:** Check localStorage for `authToken`, verify in Network tab headers
+
+### Common Issues & Solutions
+- **"Invalid Credentials":** User may not exist - use `py manage.py createsuperuser`
+- **403 Forbidden:** Check user groups (`Sales Rep` vs `Sales Manager`)
+- **Custom Fields Not Showing:** Verify `ContentType` matches target model
+- **Data Not Loading:** Check `seed_data` command was run after migrations
+
+## Additional Instructions
+
+file:./feature-map.instructions.md
 file:./a11y.instructions.md
 file:./ai-prompt-engineering-safety-best-practices.instructions.md
-<!-- file:./angular.instructions.md -->
-<!-- file:./aspnet-rest-apis.instructions.md -->
-<!-- file:./azure-devops-pipelines.instructions.md -->
-<!-- file:./azure-functions-typescript.instructions.md -->
-<!-- file:./azure-logic-apps-power-automate.instructions.md -->
-<!-- file:./azure-verified-modules-terraform.instructions.md -->
-<!-- file:./bicep-code-best-practices.instructions.md -->
-<!-- file:./blazor.instructions.md -->
-<!-- file:./clojure-memory.instructions.md -->
-<!-- file:./cmake-vcpkg.instructions.md -->
-<!-- file:./coldfusion-cfc.instructions.md -->
-<!-- file:./coldfusion-cfm.instructions.md -->
-<!-- file:./collections.instructions.md -->
 file:./containerization-docker-best-practices.instructions.md
 file:./conventional-commit.prompt.md
-<!-- file:./convert-jpa-to-spring-data-cosmos.instructions.md -->
 file:./copilot-thought-logging.instructions.md
-<!-- file:./csharp-ja.instructions.md -->
-<!-- file:./csharp-ko.instructions.md -->
-<!-- file:./csharp.instructions.md -->
-<!-- file:./dart-n-flutter.instructions.md -->
-<!-- file:./declarative-agents-microsoft365.instructions.md -->
-<!-- file:./devbox-image-definition.instructions.md -->
 file:./devops-core-principles.instructions.md
-<!-- file:./dotnet-architecture-good-practices.instructions.md -->
-<!-- file:./dotnet-framework.instructions.md -->
-<!-- file:./dotnet-maui.instructions.md -->
-<!-- file:./dotnet-wpf.instructions.md -->
-<!-- file:./genaiscript.instructions.md -->
-<!-- file:./generate-modern-terraform-code-for-azure.instructions.md -->
 file:./gilfoyle-code-review.instructions.md
 file:./github-actions-ci-cd-best-practices.instructions.md
-<!-- file:./go.instructions.md -->
-<!-- file:./java-11-to-java-17-upgrade.instructions.md -->
-<!-- file:./java-17-to-java-21-upgrade.instructions.md -->
-<!-- file:./java-21-to-java-25-upgrade.instructions.md -->
-<!-- file:./java.instructions.md -->
-<!-- file:./joyride-user-project.instructions.md -->
-<!-- file:./joyride-workspace-automation.instructions.md -->
 file:./kubernetes-deployment-best-practices.instructions.md
 file:./localization.instructions.md
 file:./markdown.instructions.md
 file:./memory-bank.instructions.md
-<!-- file:./ms-sql-dba.instructions.md -->
-<!-- file:./nestjs.instructions.md -->
-<!-- file:./nextjs-tailwind.instructions.md -->
-<!-- file:./nextjs.instructions.md -->
-<!-- file:./nodejs-javascript-vitest.instructions.md -->
 file:./object-calisthenics.instructions.md
-<!-- file:./oqtane.instructions.md -->
 file:./performance-optimization.instructions.md
 file:./playwright-python.instructions.md
 file:./playwright-typescript.instructions.md
-<!-- file:./power-apps-canvas-yaml.instructions.md -->
-<!-- file:./power-apps-code-apps.instructions.md -->
-<!-- file:./power-platform-connector.instructions.md -->
 file:./powershell-pester-5.instructions.md
 file:./powershell.instructions.md
 file:./python.instructions.md
-<!-- file:./quarkus-mcp-server-sse.instructions.md -->
-<!-- file:./quarkus.instructions.md -->
 file:./reactjs.instructions.md
-<!-- file:./ruby-on-rails.instructions.md -->
-<!-- file:./rust.instructions.md -->
 file:./security-and-owasp.instructions.md
 file:./self-explanatory-code-commenting.instructions.md
 file:./spec-driven-workflow-v1.instructions.md
-<!-- file:./springboot.instructions.md -->
-<!-- file:./sql-sp-generation.instructions.md -->
 file:./taming-copilot.instructions.md
-<!-- file:./tanstack-start-shadcn-tailwind.instructions.md -->
 file:./task-implementation.instructions.md
 file:./tasksync.instructions.md
 file:./terraform-azure.instructions.md
 file:./terraform.instructions.md
-<!-- file:./vuejs3.instructions.md -->

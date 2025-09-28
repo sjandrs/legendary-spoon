@@ -5,9 +5,10 @@ from .api_auth_views import LoginView, LogoutView, UserDetailView
 # Create a router and register our viewsets with it.
 router = DefaultRouter()
 router.register(r'posts', api_views.PostViewSet, basename='post')
+router.register(r'tags', api_views.TagViewSet, basename='tag')
 router.register(r'accounts', api_views.AccountViewSet, basename='account')
 router.register(r'contacts', api_views.ContactViewSet, basename='contact')
-router.register(r'tasks', api_views.TaskViewSet, basename='task')
+router.register(r'projects', api_views.ProjectViewSet, basename='project')
 router.register(r'deals', api_views.DealViewSet, basename='deal')
 router.register(r'deal-stages', api_views.DealStageViewSet, basename='dealstage')
 router.register(r'interactions', api_views.InteractionViewSet, basename='interaction')
@@ -18,9 +19,9 @@ router.register(r'invoice-items', api_views.InvoiceItemViewSet, basename='invoic
 router.register(r'custom-fields', api_views.CustomFieldViewSet, basename='customfield')
 router.register(r'custom-field-values', api_views.CustomFieldValueViewSet, basename='customfieldvalue')
 router.register(r'activity-logs', api_views.ActivityLogViewSet, basename='activitylog')
-router.register(r'task-templates', api_views.TaskTemplateViewSet, basename='tasktemplate')
+router.register(r'project-templates', api_views.ProjectTemplateViewSet, basename='projecttemplate')
 router.register(r'default-work-order-items', api_views.DefaultWorkOrderItemViewSet, basename='defaultworkorderitem')
-router.register(r'task-types', api_views.TaskTypeViewSet, basename='tasktype')
+router.register(r'project-types', api_views.ProjectTypeViewSet, basename='projecttype')
 
 # The API URLs are now determined automatically by the router.
 urlpatterns = [

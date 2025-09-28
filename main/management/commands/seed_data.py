@@ -1,7 +1,7 @@
 from django.core.management.base import BaseCommand
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
-from main.models import Account, Contact, Deal, Task, DealStage, CustomUser
+from main.models import Account, Contact, Deal, Project, DealStage, CustomUser
 from faker import Faker
 import random
 
@@ -15,7 +15,7 @@ class Command(BaseCommand):
         User = get_user_model()
 
         # Clear existing data to avoid duplicates
-        Task.objects.all().delete()
+        Project.objects.all().delete()
         Deal.objects.all().delete()
         Contact.objects.all().delete()
         Account.objects.all().delete()
@@ -137,7 +137,7 @@ class Command(BaseCommand):
             contact_name = f"{contact.first_name} {contact.last_name}"
             title = task_title_template.format(contact=contact_name, deal=deal.title if deal else "N/A", account=account.name)
 
-            Task.objects.create(
+            Project.objects.create(
                 title=title,
                 description=fake.text(max_nb_chars=150),
                 due_date=fake.future_date(end_date="+30d"),

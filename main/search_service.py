@@ -1,6 +1,6 @@
 from django.db.models import Q
 from django.contrib.contenttypes.models import ContentType
-from .models import Account, Contact, Task, Deal, Quote, Invoice, ActivityLog
+from .models import Account, Contact, Project, Deal, Quote, Invoice, ActivityLog
 from .search_models import GlobalSearchIndex, SavedSearch
 import re
 from typing import List, Dict, Any, Optional, Tuple
@@ -12,7 +12,7 @@ class SearchService:
     SEARCHABLE_MODELS = {
         'accounts': Account,
         'contacts': Contact,
-        'tasks': Task,
+        'tasks': Project,
         'deals': Deal,
         'quotes': Quote,
         'invoices': Invoice,
@@ -218,7 +218,7 @@ class SearchService:
         search_fields_map = {
             'Account': ['name', 'website', 'description', 'phone', 'email'],
             'Contact': ['first_name', 'last_name', 'email', 'phone', 'title', 'company'],
-            'Task': ['title', 'description'],
+            'Project': ['title', 'description'],
             'Deal': ['name', 'description'],
             'Quote': ['quote_number', 'notes'],
             'Invoice': ['invoice_number', 'notes'],

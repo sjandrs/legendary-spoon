@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { get } from '../api';
+import api from '../api';
 import InteractionHistory from './InteractionHistory';
+import TagManager from './TagManager';
+import './ContactDetail.css';
 
 const ContactDetail = () => {
     const { id } = useParams();
@@ -14,11 +16,16 @@ const ContactDetail = () => {
         const fetchContactDetails = async () => {
             try {
                 setLoading(true);
-                const contactResponse = await get(`/api/contacts/${id}/`);
+                // Use the serializer that includes custom fields and tags
+                const contactResponse = await api.get(`/api/contacts/${id}/`);
                 setContact(contactResponse.data);
 
-                const interactionsResponse = await get(`/api/interactions/?contact=${id}`);
-                const interactionData = Array.isArray(interactionsResponse.data.results) ? interactionsResponse.data.results : [];
+                // Fetch interactions separately
+                const interactionsResponse = await api.get(`/api/interactions/?contact=${id}`);
+                // The response might be paginated, so check for a 'results' property
+                const interactionData = Array.isArray(interactionsResponse.data.results) 
+                    ? interactionsResponse.data.results 
+                    : (Array.isArray(interactionsResponse.data) ? interactionsResponse.data : []);
                 setInteractions(interactionData);
                 
                 setError(null);
@@ -33,6 +40,10 @@ const ContactDetail = () => {
         fetchContactDetails();
     }, [id]);
 
+    const handleTagsUpdate = (updatedTags) => {
+        setContact(prevContact => ({ ...prevContact, tags: updatedTags }));
+    };
+
     if (loading) {
         return <div>Loading...</div>;
     }
@@ -46,29 +57,46 @@ const ContactDetail = () => {
     }
 
     return (
-        <div>
-            <h2>{contact.first_name} {contact.last_name}</h2>
-            <p><strong>Email:</strong> {contact.email}</p>
-            <p><strong>Phone:</strong> {contact.phone_number}</p>
-            <p><strong>Title:</strong> {contact.title}</p>
-            {contact.account && <p><strong>Account:</strong> {contact.account.name}</p>}
-
-            {contact.custom_fields && contact.custom_fields.length > 0 && (
-                <div>
-                    <h4>Custom Fields</h4>
-                    {contact.custom_fields.map(field => (
-                        <p key={field.id}><strong>{field.field_name}:</strong> {field.value}</p>
-                    ))}
+        <div className="contact-detail-container">
+            <div className="contact-header">
+                <h2>{contact.first_name} {contact.last_name}</h2>
+                <div className="contact-actions">
+                    <Link to={`/contacts/${id}/edit`} className="btn btn-secondary">Edit</Link>
+                    <Link to="/tasks/new" state={{ contact: { id: contact.id, name: `${contact.first_name} ${contact.last_name}` } }} className="btn btn-primary">
+                        Create Task
+                    </Link>
                 </div>
-            )}
+            </div>
             
-            <hr />
+            <div className="contact-body">
+                <div className="contact-info">
+                    <p><strong>Email:</strong> {contact.email || 'N/A'}</p>
+                    <p><strong>Phone:</strong> {contact.phone_number || 'N/A'}</p>
+                    <p><strong>Title:</strong> {contact.title || 'N/A'}</p>
+                    {contact.account && <p><strong>Account:</strong> <Link to={`/accounts/${contact.account.id}`}>{contact.account.name}</Link></p>}
+                    {contact.owner && <p><strong>Owner:</strong> {contact.owner.username}</p>}
 
-            <Link to="/tasks/new" state={{ contact: { id: contact.id, name: `${contact.first_name} ${contact.last_name}` } }}>
-                Create Task
-            </Link>
+                    {contact.custom_fields && contact.custom_fields.length > 0 && (
+                        <div className="custom-fields-section">
+                            <h4>Custom Fields</h4>
+                            {contact.custom_fields.map(field => (
+                                <p key={field.id}><strong>{field.field_name}:</strong> {String(field.value)}</p>
+                            ))}
+                        </div>
+                    )}
+                </div>
 
-            <InteractionHistory interactions={interactions} />
+                <div className="contact-main-content">
+                    <TagManager 
+                        associatedTags={contact.tags || []}
+                        onTagsUpdate={handleTagsUpdate}
+                        entityId={id}
+                        entityType="contacts"
+                    />
+                    <hr />
+                    <InteractionHistory interactions={interactions} contactId={id} />
+                </div>
+            </div>
         </div>
     );
 };

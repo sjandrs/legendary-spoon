@@ -1,0 +1,53 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "start-backend",
+			"type": "shell",
+			"command": ".\\venv\\Scripts\\Activate.ps1; python manage.py runserver",
+			"problemMatcher": [],
+			"presentation": {
+				"group": "dev",
+				"panel": "new",
+				"reveal": "always"
+			},
+			"detail": "Starts the Django backend server."
+		},
+		{
+			"label": "start-frontend",
+			"type": "shell",
+			"command": "npm run dev",
+			"options": {
+				"cwd": "${workspaceFolder}/frontend"
+			},
+			"isBackground": true,
+			"problemMatcher": {
+				"owner": "vite",
+				"pattern": {
+					"regexp": ".*"
+				},
+				"background": {
+					"activeOnStart": true,
+					"beginsPattern": ".*VITE.*",
+					"endsPattern": ".*ready in.*"
+				}
+			},
+			"presentation": {
+				"group": "dev",
+				"panel": "new",
+				"reveal": "always"
+			},
+			"detail": "Starts the Vite frontend development server."
+		},
+		{
+			"label": "start-dev",
+			"dependsOn": [
+				"start-backend",
+				"start-frontend"
+			],
+			"dependsOrder": "parallel",
+			"problemMatcher": [],
+			"detail": "Starts both the backend and frontend development servers."
+		}
+	]
+}

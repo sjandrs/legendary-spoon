@@ -1,8 +1,8 @@
 from rest_framework import serializers
 from .models import (
-    Post, Category, Tag, CustomUser, Account, Contact, Task, Deal, DealStage, 
+    Post, Category, Tag, CustomUser, Account, Contact, Project, Deal, DealStage, 
     Interaction, Quote, QuoteItem, Invoice, InvoiceItem, CustomField, CustomFieldValue,
-    ActivityLog, TaskTemplate, DefaultWorkOrderItem, TaskType
+    ActivityLog, ProjectTemplate, DefaultWorkOrderItem, ProjectType
 )
 from .search_models import SavedSearch, GlobalSearchIndex, BulkOperation
 from django.contrib.contenttypes.models import ContentType
@@ -37,27 +37,45 @@ class UserSerializer(serializers.ModelSerializer):
         model = CustomUser
         fields = ['id', 'username', 'email', 'first_name', 'last_name', 'is_staff', 'is_superuser']
 
+class TagSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Tag
+        fields = ['id', 'name', 'slug']
+
 class AccountSerializer(serializers.ModelSerializer):
     owner = UserSerializer(read_only=True)
     account_name = serializers.CharField(source='name', read_only=True)
+    tags = TagSerializer(many=True, read_only=True)
+    tag_ids = serializers.PrimaryKeyRelatedField(
+        many=True, queryset=Tag.objects.all(), source='tags', write_only=True, required=False
+    )
 
     class Meta:
         model = Account
         fields = [
             'id', 'name', 'industry', 'website', 'phone_number', 'address', 
-            'notes', 'owner', 'created_at', 'updated_at', 'account_name'
+            'notes', 'owner', 'created_at', 'updated_at', 'account_name', 'tags', 'tag_ids'
         ]
 
 class ContactSerializer(serializers.ModelSerializer):
     owner = UserSerializer(read_only=True)
     account = AccountSerializer(read_only=True)
-    email = serializers.EmailField(required=False, allow_blank=True)
+    account_id = serializers.PrimaryKeyRelatedField(
+        queryset=Account.objects.all(), source='account', write_only=True, required=False, allow_null=True
+    )
+    email = serializers.EmailField()
+    tags = TagSerializer(many=True, read_only=True)
+    tag_ids = serializers.PrimaryKeyRelatedField(
+        many=True, queryset=Tag.objects.all(), source='tags', write_only=True, required=False
+    )
+
+    # Email uniqueness validation removed to allow multiple contacts with the same email.
 
     class Meta:
         model = Contact
         fields = [
-            'id', 'account', 'first_name', 'last_name', 'email', 'phone_number', 
-            'title', 'owner', 'created_at', 'updated_at'
+            'id', 'account', 'account_id', 'first_name', 'last_name', 'email', 'phone_number', 
+            'title', 'owner', 'created_at', 'updated_at', 'tags', 'tag_ids'
         ]
 
 class LoginSerializer(serializers.Serializer):
@@ -91,16 +109,17 @@ class LoginSerializer(serializers.Serializer):
         return attrs
 
 
-class TaskSerializer(serializers.ModelSerializer):
+class ProjectSerializer(serializers.ModelSerializer):
     assigned_to = UserSerializer(read_only=True)
     created_by = UserSerializer(read_only=True)
     is_overdue = serializers.ReadOnlyField()
     assigned_to_id = serializers.PrimaryKeyRelatedField(
         queryset=CustomUser.objects.all(), source='assigned_to', write_only=True
     )
+    due_date = serializers.DateField()
 
     class Meta:
-        model = Task
+        model = Project
         fields = '__all__'
         extra_kwargs = {
             'assigned_to': {'read_only': True},
@@ -114,9 +133,9 @@ class ActivityLogSerializer(serializers.ModelSerializer):
         model = ActivityLog
         fields = '__all__'
 
-class TaskTypeSerializer(serializers.ModelSerializer):
+class ProjectTypeSerializer(serializers.ModelSerializer):
     class Meta:
-        model = TaskType
+        model = ProjectType
         fields = ['id', 'name', 'is_active']
 
 class DealStageSerializer(serializers.ModelSerializer):
@@ -287,22 +306,21 @@ class DefaultWorkOrderItemSerializer(serializers.ModelSerializer):
         model = DefaultWorkOrderItem
         fields = ['id', 'item_type', 'description', 'quantity', 'unit_price', 'serial_number']
 
-class TaskTemplateSerializer(serializers.ModelSerializer):
+class ProjectTemplateSerializer(serializers.ModelSerializer):
     default_items = DefaultWorkOrderItemSerializer(many=True, required=False)
     created_by = UserSerializer(read_only=True)
 
     class Meta:
-        model = TaskTemplate
+        model = ProjectTemplate
         fields = [
             'id', 'name', 'description', 'default_title', 'default_description',
-            'default_task_type', 'default_priority', 'created_by', 'created_at', 
+            'default_project_type', 'default_priority', 'created_by', 'created_at', 
             'updated_at', 'default_items'
         ]
         read_only_fields = ['created_by', 'created_at', 'updated_at']
-
     def create(self, validated_data):
         items_data = validated_data.pop('default_items', [])
-        template = TaskTemplate.objects.create(**validated_data)
+        template = ProjectTemplate.objects.create(**validated_data)
         for item_data in items_data:
             DefaultWorkOrderItem.objects.create(template=template, **item_data)
         return template
@@ -310,15 +328,14 @@ class TaskTemplateSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         items_data = validated_data.pop('default_items', None)
         
-        # Update the TaskTemplate instance fields
+        # Update the ProjectTemplate instance fields
         instance.name = validated_data.get('name', instance.name)
         instance.description = validated_data.get('description', instance.description)
         instance.default_title = validated_data.get('default_title', instance.default_title)
         instance.default_description = validated_data.get('default_description', instance.default_description)
         instance.default_task_type = validated_data.get('default_task_type', instance.default_task_type)
-        instance.default_priority = validated_data.get('default_priority', instance.default_priority)
+        instance.default_project_type = validated_data.get('default_project_type', instance.default_project_type)
         instance.save()
-
         if items_data is not None:
             # Delete items that are not in the new list
             item_ids_to_keep = [item.get('id') for item in items_data if item.get('id')]
