@@ -27,7 +27,7 @@
 	- **Knowledge Base:** The knowledge base, including the `changelog.md`, is comprised of Markdown files located in the `static/kb/` directory. They are served to the frontend via an API.
 	- **UI Conventions:**
 		- **Zebra Striping:** Use the global `.striped-table` class on tables and lists to get an alternating background color for rows, improving readability. the zebra striping should be used on all tables and lists where appropriate. the colors used in the striping should be subtle and not distract from the content.
-		- **Compact UI:** The UI has undergone a "deflation" pass to make it more compact for desktop use. Strive to maintain this by being mindful of padding and margins.
+		- **Compact UI:** The UI has undergone a "deflation" pass to make it better optimized for horizontal space. Strive to maintain this by being mindful of padding and margins.
 	- **Admin Panel:** Most core CRM models are registered in the Django admin panel for easy data access and debugging.
 
 
