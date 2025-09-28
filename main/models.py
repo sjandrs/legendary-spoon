@@ -157,6 +157,8 @@ class Project(models.Model):
     description = models.TextField(blank=True)
     project_type = models.ForeignKey(ProjectType, on_delete=models.SET_NULL, null=True, blank=True)
     priority = models.CharField(max_length=10, choices=PRIORITY_CHOICES, default='medium')
+    # due_date uses DateField (not DateTimeField) to store only the date, not the time, for project deadlines.
+    # This is intentional to simplify deadline logic and UI; if time precision is needed, consider switching to DateTimeField.
     due_date = models.DateField()
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
     completed = models.BooleanField(default=False)
@@ -175,7 +177,7 @@ class Project(models.Model):
     @property
     def is_overdue(self):
         from django.utils import timezone
-        return not self.completed and self.due_date < timezone.now()
+        return not self.completed and self.due_date < timezone.now().date()
 
 class ActivityLog(models.Model):
     ACTION_CHOICES = [

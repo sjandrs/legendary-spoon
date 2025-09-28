@@ -12,7 +12,7 @@ class SearchService:
     SEARCHABLE_MODELS = {
         'accounts': Account,
         'contacts': Contact,
-        'tasks': Project,
+        'projects': Project,
         'deals': Deal,
         'quotes': Quote,
         'invoices': Invoice,
@@ -185,7 +185,7 @@ class SearchService:
         elif hasattr(model, 'user'):
             queryset = queryset.filter(user=self.user)
         elif hasattr(model, 'assigned_to'):
-            # For tasks, show tasks assigned to or created by the user
+            # For projects, show projects assigned to or created by the user
             queryset = queryset.filter(Q(assigned_to=self.user) | Q(created_by=self.user))
         
         return queryset

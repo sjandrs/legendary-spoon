@@ -15,7 +15,7 @@ const TaskAdministration = () => {
     const fetchTemplates = async () => {
         try {
             setIsLoading(true);
-            const response = await apiClient.get('/api/task-templates/');
+            const response = await apiClient.get('/api/project-templates/');
             setTemplates(response.data.results || response.data);
             setError(null);
         } catch (err) {
@@ -28,7 +28,7 @@ const TaskAdministration = () => {
 
     const handleSaveTemplate = async (templateData) => {
         const isNew = !templateData.id;
-        const url = isNew ? '/api/task-templates/' : `/api/task-templates/${templateData.id}/`;
+        const url = isNew ? '/api/project-templates/' : `/api/project-templates/${templateData.id}/`;
         const method = isNew ? 'post' : 'put';
 
         try {
@@ -44,7 +44,7 @@ const TaskAdministration = () => {
     const handleDeleteTemplate = async (templateId) => {
         if (window.confirm('Are you sure you want to delete this template?')) {
             try {
-                await apiClient.delete(`/api/task-templates/${templateId}/`);
+                await apiClient.delete(`/api/project-templates/${templateId}/`);
                 fetchTemplates();
             } catch (err) {
                 setError('Failed to delete template.');
@@ -111,7 +111,7 @@ const TemplateForm = ({ template, onSave, onCancel }) => {
     useEffect(() => {
         const fetchTaskTypes = async () => {
             try {
-                const response = await apiClient.get('/api/task-types/');
+                const response = await apiClient.get('/api/project-types/');
                 const activeTypes = response.data.results 
                     ? response.data.results.filter(t => t.is_active) 
                     : response.data.filter(t => t.is_active);

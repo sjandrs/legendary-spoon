@@ -135,13 +135,21 @@ class ContactViewSet(viewsets.ModelViewSet):
         )
 
 class ProjectViewSet(viewsets.ModelViewSet):
-    queryset = Project.objects.all()
     serializer_class = ProjectSerializer
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
-    filterset_fields = ['status', 'priority', 'task_type', 'assigned_to', 'deal', 'account', 'contact']
+    filterset_fields = ['status', 'priority', 'project_type', 'assigned_to', 'deal', 'account', 'contact']
     search_fields = ['title', 'description']
     ordering_fields = ['due_date', 'created_at', 'priority']
     ordering = ['due_date']
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.groups.filter(name='Sales Manager').exists():
+            # Sales managers can see all projects
+            return Project.objects.all()
+        else:
+            # Sales reps can only see their own projects (assigned_to or created_by)
+            return Project.objects.filter(Q(assigned_to=user) | Q(created_by=user)).distinct()
     
     def perform_create(self, serializer):
         # Set created_by to current user and save
@@ -192,14 +200,14 @@ class ProjectViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['get'])
     def my_projects(self, request):
         """Get projects assigned to the current user"""
-        projects = self.queryset.filter(assigned_to=request.user)
+        projects = self.get_queryset().filter(assigned_to=request.user)
         serializer = self.get_serializer(projects, many=True)
         return Response(serializer.data)
     
     @action(detail=False, methods=['get'])
     def overdue(self, request):
         """Get overdue projects"""
-        projects = [project for project in self.queryset.all() if project.is_overdue]
+        projects = [project for project in self.get_queryset().all() if project.is_overdue]
         serializer = self.get_serializer(projects, many=True)
         return Response(serializer.data)
     
@@ -208,7 +216,7 @@ class ProjectViewSet(viewsets.ModelViewSet):
         """Get projects due in the next 7 days"""
         from datetime import date, timedelta
         upcoming_date = date.today() + timedelta(days=7)
-        projects = self.queryset.filter(
+        projects = self.get_queryset().filter(
             due_date__lte=upcoming_date,
             due_date__gte=date.today(),
             status__in=['pending', 'in_progress']
@@ -560,7 +568,7 @@ class ProjectTemplateViewSet(viewsets.ModelViewSet):
         new_project = Project.objects.create(
             title=template.default_title,
             description=template.default_description,
-            task_type=template.default_task_type,
+            project_type=template.default_project_type,
             priority=template.default_priority,
             due_date=request.data.get('due_date'),
             contact=contact,
@@ -579,7 +587,7 @@ class DefaultWorkOrderItemViewSet(viewsets.ModelViewSet):
     serializer_class = DefaultWorkOrderItemSerializer
     permission_classes = [viewsets.ModelViewSet.permission_classes[0]] # IsAuthenticatedOrReadOnly
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
-    filterset_fields = ['task_template__name', 'description', 'owner__username']
+    filterset_fields = ['project_template__name', 'description', 'owner__username']
     search_fields = ['description']
     ordering_fields = ['created_at', 'updated_at', 'description']
     ordering = ['-created_at']
@@ -678,7 +686,7 @@ class GlobalSearchView(APIView):
                 'type': 'project',
                 'id': task.id,
                 'title': task.title,
-                'url': f"/api/projects/{task.id}/",
+                'url': f"/api/projects/{task.id}/",  # Ensure this matches your router's registered endpoint for ProjectViewSet
                 'snippet': task.description[:75] + '...' if task.description else ''
             })
 

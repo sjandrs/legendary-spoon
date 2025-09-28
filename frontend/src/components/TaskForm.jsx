@@ -31,7 +31,7 @@ const TaskForm = () => {
             try {
                 const [usersResponse, taskTypesResponse] = await Promise.all([
                     api.get('/api/user-roles/'),
-                    api.get('/api/task-types/')
+                    api.get('/api/project-types/')
                 ]);
 
                 const userList = Array.isArray(usersResponse.data.users) ? usersResponse.data.users : [];
@@ -74,7 +74,7 @@ const TaskForm = () => {
             return;
         }
 
-        const taskData = {
+        const projectData = {
             title,
             description,
             due_date: dueDate,
@@ -86,7 +86,7 @@ const TaskForm = () => {
         };
 
         try {
-            await api.post('/api/tasks/', taskData);
+            await api.post('/api/projects/', projectData);
             setSuccess('Task created successfully! Redirecting...');
             setTitle('');
             setDescription('');

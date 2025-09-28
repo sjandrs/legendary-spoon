@@ -62,7 +62,11 @@ const ContactDetail = () => {
                 <h2>{contact.first_name} {contact.last_name}</h2>
                 <div className="contact-actions">
                     <Link to={`/contacts/${id}/edit`} className="btn btn-secondary">Edit</Link>
-                    <Link to="/tasks/new" state={{ contact: { id: contact.id, name: `${contact.first_name} ${contact.last_name}` } }} className="btn btn-primary">
+                    <Link
+                        to="/tasks/new"
+                        state={{ contact: contact }} // Pass the full contact object, or adjust as needed for TaskForm
+                        className="btn btn-primary"
+                    >
                         Create Task
                     </Link>
                 </div>
