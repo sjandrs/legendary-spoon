@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Feature Test Page</title>
+    <style>
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: #f4f6fa; }
+        .container { max-width: 800px; margin: 40px auto; background: #fff; border-radius: 12px; box-shadow: 0 4px 24px rgba(44,62,80,0.08); padding: 32px 40px; }
+        h1 { text-align: center; }
+        section { margin-bottom: 40px; }
+        label { font-weight: bold; }
+        .result { margin-top: 10px; color: #2c3e50; }
+        hr { margin: 32px 0; }
+    </style>
+    <script src="https://cdn.ckeditor.com/4.21.0/standard/ckeditor.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Feature Test Page</h1>
+        <section>
+            <h2>1. AJAX Hello Test</h2>
+            <button onclick="fetchHello()">Say Hello (AJAX)</button>
+            <div id="ajax-message" class="result"></div>
+        </section>
+        <hr>
+        <section>
+            <h2>2. AJAX Save Data Test</h2>
+            <button onclick="saveDataAJAX()">Save Data (AJAX POST)</button>
+            <div id="ajax-save-message" class="result"></div>
+        </section>
+        <hr>
+        <section>
+            <h2>3. AJAX List Test</h2>
+            <button onclick="fetchListAJAX()">Fetch List (AJAX GET)</button>
+            <div id="ajax-list" class="result"></div>
+        </section>
+        <hr>
+        <section>
+            <h2>4. AJAX HTML Fragment Test</h2>
+            <button onclick="fetchHtmlFragmentAJAX()">Fetch HTML Fragment (AJAX GET)</button>
+            <div id="ajax-html-fragment" class="result"></div>
+        </section>
+        <hr>
+        <section>
+            <h2>5. Rich Text Editor Test</h2>
+            <form id="editor-form" method="post">
+                <textarea name="content" id="editor"></textarea>
+                <button type="submit" style="margin-top:16px;">Submit</button>
+            </form>
+            <div id="editor-result" class="result"></div>
+        </section>
+        <a href="/">Back to Home</a>
+    </div>
+    <script src="/static/ajax_example.js"></script>
+    <script>
+        CKEDITOR.replace('editor');
+        document.getElementById('editor-form').onsubmit = function(e) {
+            e.preventDefault();
+            var content = CKEDITOR.instances.editor.getData();
+            fetch('/editor/', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: 'content=' + encodeURIComponent(content)
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('editor-result').innerHTML = '<strong>Submitted Content:</strong><br>' + data.content;
+            });
+        };
+    </script>
+</body>
+</html>

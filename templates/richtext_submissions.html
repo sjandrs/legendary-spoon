@@ -1,0 +1,33 @@
+{% extends "admin/base_site.html" %}
+{% block content %}
+<h1>Rich Text Submissions</h1>
+<table style="width:100%;border-collapse:collapse;">
+    <tr>
+        <th>User</th>
+        <th>Created</th>
+        <th>Approved</th>
+        <th>Content</th>
+    <th>Notes</th>
+    <th>Rejection Reason</th>
+    <th>Actions</th>
+    </tr>
+    {% for obj in submissions %}
+    <tr style="border-bottom:1px solid #ccc;">
+        <td>{{ obj.user }}</td>
+        <td>{{ obj.created_at }}</td>
+        <td>{% if obj.approved is None %}Pending{% elif obj.approved %}Approved{% else %}Rejected{% endif %}</td>
+        <td><div style="max-width:400px;overflow:auto;">{{ obj.content|safe }}</div></td>
+        <td>{{ obj.moderation_notes }}</td>
+        <td>{{ obj.rejection_reason }}</td>
+        <td>
+            {% if obj.approved != True %}
+            <a href="{% url 'moderate_richtext' obj.pk 'approve' %}">Approve</a>
+            {% endif %}
+            {% if obj.approved != False %}
+            <a href="{% url 'moderate_richtext' obj.pk 'reject' %}">Reject</a>
+            {% endif %}
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+{% endblock %}

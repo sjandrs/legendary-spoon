@@ -1,0 +1,19 @@
+{% extends "admin/base_site.html" %}
+{% block content %}
+<h1>Moderate Submission</h1>
+<p><strong>User:</strong> {{ obj.user }}</p>
+<p><strong>Created:</strong> {{ obj.created_at }}</p>
+<p><strong>Content:</strong></p>
+<div style="background:#f4f6fa;padding:12px;border-radius:8px;max-width:600px;">{{ obj.content|safe }}</div>
+<form method="post">
+    {% csrf_token %}
+    <label for="moderation_notes">Moderation Notes:</label><br>
+    <textarea name="moderation_notes" id="moderation_notes" rows="3" style="width:100%;">{{ obj.moderation_notes }}</textarea><br><br>
+    {% if action == 'reject' %}
+    <label for="rejection_reason">Rejection Reason:</label><br>
+    <input type="text" name="rejection_reason" id="rejection_reason" value="{{ obj.rejection_reason }}" style="width:100%;"><br><br>
+    {% endif %}
+    <button type="submit">Confirm {{ action|title }}</button>
+    <a href="{% url 'richtext_submissions' %}" style="margin-left:16px;">Cancel</a>
+</form>
+{% endblock %}

@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+{% load i18n static %}
+
+{% block title %}{{ title }} | {% trans 'Django site admin' %}{% endblock %}
+
+{% block custom-styles %}
+    <style>
+        body {
+            background-color: #f4f6fa;
+        }
+        .module {
+            background: #fff;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+            padding: 1rem;
+        }
+        .model-list {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .model-list th, .model-list td {
+            padding: 0.75rem;
+            border-bottom: 1px solid #dee2e6;
+            text-align: left;
+        }
+        .model-list th {
+            background-color: #e9ecef;
+        }
+        .model-list a {
+            color: #007bff;
+            text-decoration: none;
+        }
+        .model-list a:hover {
+            text-decoration: underline;
+        }
+        .addlink, .changelink, .viewlink {
+            background-color: #007bff;
+            color: #fff !important;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            text-decoration: none !important;
+            font-size: 0.875rem;
+        }
+        .addlink:hover, .changelink:hover, .viewlink:hover {
+            background-color: #0056b3;
+            text-decoration: none !important;
+        }
+        .messagelist {
+            list-style: none;
+            padding: 0;
+            margin-bottom: 1rem;
+        }
+        .messagelist li {
+            padding: 0.75rem;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            margin-bottom: 0.5rem;
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        .messagelist li.info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+        }
+        .messagelist li.success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .messagelist li.warning {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+
+    </style>
+    {% endblock custom-styles %}
+    {% block content %}
+<div id="content" class="{% block coltype %}colM{% endblock %}">
+    {% block pretitle %}{% endblock %}
+    {% block content_title %}{% if title %}<h1>{{ title }}</h1>{% endif %}{% endblock %}
+    {% block content_subtitle %}{% if subtitle %}<h2>{{ subtitle }}</h2>{% endif %}{% endblock %}
+    {% block object-tools %}{% endblock %}
+    {% block messages %}
+        {% if messages %}
+        <ul class="messagelist">{% for message in messages %}
+          <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message|capfirst }}</li>
+        {% endfor %}</ul>
+        {% endif %}
+    {% endblock messages %}
+    <!-- Content -->
+    <div id="content-main">
+        {% if app_list %}
+            {% for app in app_list %}
+                <div class="app-{{ app.app_label }} module">
+                <table class ="model-list">
+                <caption>
+                    <a href="{{ app.app_url }}" class="section" title="{% blocktrans with name=app.name %}Models in the {{ name }} application{% endblocktrans %}">{{ app.name }}</a>
+                </caption>
+                {% for model in app.models %}
+                    <tr class="model-{{ model.object_name|lower }}">
+                    {% if model.admin_url %}
+                        <th scope="row"><a href="{{ model.admin_url }}">{{ model.name }}</a></th>
+                    {% else %}
+                        <th scope="row">{{ model.name }}</th>
+                    {% endif %}
+
+                    {% if model.add_url %}
+                        <td><a href="{{ model.add_url }}" class="addlink">{% trans 'Add' %}</a></td>
+                    {% else %}
+                        <td>&nbsp;</td>
+                    {% endif %}
+
+                    {% if model.admin_url and show_changelinks %}
+                        {% if model.view_only %}
+                            <td><a href="{{ model.admin_url }}" class="viewlink">{% trans 'View' %}</a></td>
+                        {% else %}
+                            <td><a href="{{ model.admin_url }}" class="changelink">{% trans 'Change' %}</a></td>
+                        {% endif %}
+                    {% elif show_changelinks %}
+                        <td>&nbsp;</td>
+                    {% endif %}
+                    </tr>
+                {% endfor %}
+                </table>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p>{% trans "You don't have permission to view or edit anything." %}</p>
+        {% endif %}
+    </div>
+    {% block sidebar %}{% endblock %}
+    <br class="clear">
+</div>
+{% endblock %}

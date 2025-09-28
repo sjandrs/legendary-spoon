@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block title %}Staff Dashboard - Converge{% endblock %}
+
+{% block custom-styles %}<style>
+    .dashboard-container {
+        background: #fff;
+        padding: 2rem;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0,0,0,.05);
+    }
+    .dashboard-container h2 {
+        margin-top: 0;
+    }
+    .user-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 1.5rem;
+    }
+    .user-table th, .user-table td {
+        padding: 0.75rem;
+        border-bottom: 1px solid #dee2e6;
+        text-align: left;
+    }
+    .user-table th {
+        background-color: #f8f9fa;
+    }
+</style>{% endblock %}
+
+{% block content %}
+
+<div class="dashboard-container">
+    <h2>Staff Dashboard</h2>
+    <p>This page is only visible to staff users.</p>
+
+    <h3>Registered Users</h3>
+    <table class="user-table">
+        <thead>
+            <tr>
+                <th>Username</th>
+                <th>Email</th>
+                <th>Date Joined</th>
+                <th>Staff Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for u in users %}
+            <tr>
+                <td>{{ u.username }}</td>
+                <td>{{ u.email }}</td>
+                <td>{{ u.date_joined|date:"Y-m-d" }}</td>
+                <td>{{ u.is_staff|yesno:"Yes,No" }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
+

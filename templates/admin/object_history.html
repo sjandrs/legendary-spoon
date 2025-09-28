@@ -1,0 +1,97 @@
+{% extends "admin/base_site.html" %}
+{% load i18n tz %}
+
+{% block content %}
+<div style="margin-bottom: 1rem;">
+    <a href="javascript:history.back()" class="button">{% trans "Back" %}</a>
+</div>
+
+{# Filter Form #}
+<div class="module" id="changelist-filter">
+    <h2>{% trans 'Filter' %}</h2>
+    <form method="get" action="">
+        <div style="display: flex; gap: 1rem; align-items: flex-end; flex-wrap: wrap;">
+            <div>
+                <label for="user_id">{% trans 'User' %}</label>
+                <select name="user_id" id="user_id">
+                    <option value="">{% trans 'All' %}</option>
+                    {% for user in users %}
+                        <option value="{{ user.id }}" {% if current_filters.user_id == user.id|stringformat:"s" %}selected{% endif %}>
+                            {{ user.get_username }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <label for="action_flag">{% trans 'Action' %}</label>
+                <select name="action_flag" id="action_flag">
+                    <option value="">{% trans 'All' %}</option>
+                    {% for flag in action_flags %}
+                        <option value="{{ flag.value }}" {% if current_filters.action_flag == flag.value|stringformat:"s" %}selected{% endif %}>
+                            {{ flag.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <label for="start_date">{% trans 'Start Date' %}</label>
+                <input type="date" name="start_date" id="start_date" value="{{ current_filters.start_date|default:'' }}" class="vDateField">
+            </div>
+            <div>
+                <label for="end_date">{% trans 'End Date' %}</label>
+                <input type="date" name="end_date" id="end_date" value="{{ current_filters.end_date|default:'' }}" class="vDateField">
+            </div>
+            <div style="margin-top: 1.5rem;">
+                <button type="submit" class="button">{% trans 'Filter' %}</button>
+                <a href="?" class="button">{% trans 'Clear' %}</a>
+            </div>
+        </div>
+    </form>
+</div>
+
+
+<div id="content-main">
+    <div class="module">
+        {% if action_list %}
+            <table id="change-history">
+                <thead>
+                <tr>
+                    <th scope="col">{% trans 'Date/time' %}</th>
+                    <th scope="col">{% trans 'User' %}</th>
+                    <th scope="col">{% trans 'Action' %}</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for action in action_list %}
+                <tr>
+                    <th scope="row">{{ action.action_time|localtime|date:"DATETIME_FORMAT" }}</th>
+                    <td>{{ action.user.get_username }}</td>
+                    <td>{{ action.get_change_message }}</td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>{% trans "No history entries found for the selected filters." %}</p>
+        {% endif %}
+    </div>
+    
+    <div class="pagination">
+        <span class="step-links">
+            {% if action_list.has_previous %}
+                <a href="?{{ query_params.urlencode }}&amp;page=1">&laquo; {% trans 'first' %}</a>
+                <a href="?{{ query_params.urlencode }}&amp;page={{ action_list.previous_page_number }}">{% trans 'previous' %}</a>
+            {% endif %}
+
+            <span class="current">
+                {% blocktrans with page_number=action_list.number total_pages=action_list.paginator.num_pages %}Page {{ page_number }} of {{ total_pages }}.{% endblocktrans %}
+            </span>
+
+            {% if action_list.has_next %}
+                <a href="?{{ query_params.urlencode }}&amp;page={{ action_list.next_page_number }}">{% trans 'next' %}</a>
+                <a href="?{{ query_params.urlencode }}&amp;page={{ action_list.paginator.num_pages }}">{% trans 'last' %} &raquo;</a>
+            {% endif %}
+        </span>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Rich Text Editor Demo</title>
+    <script src="https://cdn.ckeditor.com/4.25.1-lts/standard/ckeditor.js"></script>
+    <style>
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: #f4f6fa; }
+        .container { max-width: 700px; margin: 40px auto; background: #fff; border-radius: 12px; box-shadow: 0 4px 24px rgba(44,62,80,0.08); padding: 32px 40px; }
+        h1 { text-align: center; }
+        .result { margin-top: 24px; background: #e0e7ef; padding: 16px; border-radius: 8px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Rich Text Editor Demo</h1>
+        <form id="editor-form" method="post">
+            {% csrf_token %}
+            <textarea name="content" id="editor"></textarea>
+            <button type="submit" style="margin-top:16px;">Submit</button>
+        </form>
+        <div id="result" class="result" style="display:none;"></div>
+        <a href="/">Back to Home</a>
+    </div>
+    <script>
+        CKEDITOR.replace('editor');
+        document.getElementById('editor-form').onsubmit = function(e) {
+            e.preventDefault();
+            var content = CKEDITOR.instances.editor.getData();
+            fetch('', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: 'content=' + encodeURIComponent(content)
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('result').style.display = 'block';
+                document.getElementById('result').innerHTML = '<strong>Submitted Content:</strong><br>' + data.content;
+            });
+        };
+    </script>
+</body>
+</html>

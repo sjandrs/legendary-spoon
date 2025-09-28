@@ -1,0 +1,45 @@
+.kb-container {
+  max-width: 800px;
+  margin: 20px auto;
+  padding: 20px;
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+
+.kb-container h1 {
+  border-bottom: 2px solid #eee;
+  padding-bottom: 10px;
+  margin-bottom: 20px;
+}
+
+.article-list {
+  list-style: none;
+  padding: 0;
+}
+
+.article-item {
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.article-item:last-child {
+  border-bottom: none;
+}
+
+.article-link {
+  display: block;
+  padding: 15px 10px;
+  text-decoration: none;
+  color: #0366d6;
+  font-size: 1.1rem;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.article-link:hover {
+  background-color: #f6f8fa;
+}
+
+.error-message {
+  color: #d9534f;
+}
