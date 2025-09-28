@@ -19,7 +19,7 @@ from django.conf import settings
 from .models import (
     Post, CustomUser, Account, Contact, Task, Deal, DealStage, Interaction, Quote,
     Invoice, CustomField, CustomFieldValue, ActivityLog, TaskTemplate,
-    DefaultWorkOrderItem, TaskType, QuoteItem, InvoiceItem
+    DefaultWorkOrderItem, TaskType, QuoteItem, InvoiceItem, Interaction
 )
 from .serializers import (
     PostSerializer, UserSerializer, AccountSerializer, ContactSerializer, TaskSerializer,
@@ -323,6 +323,7 @@ class CustomFieldValueViewSet(viewsets.ModelViewSet):
     queryset = CustomFieldValue.objects.all()
     serializer_class = CustomFieldValueSerializer
 
+
 class DashboardStatsView(APIView):
     """
     A view to provide statistics for the main dashboard.
@@ -330,21 +331,19 @@ class DashboardStatsView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, *args, **kwargs):
-        # Dummy data for now - we will replace this with real queries
-        deals_by_stage = [
-            {'stage__name': 'Prospecting', 'count': 10},
-            {'stage__name': 'Qualification', 'count': 5},
-            {'stage__name': 'Proposal', 'count': 3},
-            {'stage__name': 'Closed Won', 'count': 8},
-            {'stage__name': 'Closed Lost', 'count': 4},
-        ]
+        # Data for Deals by Stage Chart
+        deals_by_stage = list(Deal.objects.values('stage__name').annotate(count=Count('id')).order_by('stage__name'))
 
-        sales_performance = [
-            # This might be monthly sales, for example
-            {'month': 'January', 'total_value': 50000},
-            {'month': 'February', 'total_value': 75000},
-            {'month': 'March', 'total_value': 62000},
-        ]
+        # Data for Sales Performance Doughnut Chart - More explicit queries
+        won_count = Deal.objects.filter(status='won').count()
+        lost_count = Deal.objects.filter(status='lost').count()
+        in_progress_count = Deal.objects.filter(status='in_progress').count()
+
+        status_counts = {
+            'won': won_count,
+            'lost': lost_count,
+            'in_progress': in_progress_count,
+        }
 
         # Fetch recent interactions
         recent_activities = Interaction.objects.select_related('contact').order_by('-interaction_date')[:5]
@@ -352,7 +351,7 @@ class DashboardStatsView(APIView):
 
         data = {
             'deals_by_stage': deals_by_stage,
-            'sales_performance': sales_performance,
+            'sales_performance': status_counts,
             'recent_activities': recent_activities_data,
         }
         return Response(data)

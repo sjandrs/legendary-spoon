@@ -35,6 +35,18 @@
 	The navigation will be visible from all pages in the software.
 	nav bar menu items: Dashboard (home), Resources, Contacts, Deals, Tasks, Orders, Warehouse, Staff. feature navigation will be added as the features are built out.
 
+	## Key Features & Conventions (from Changelog)
+	- **Authentication:** The project uses a custom, token-based authentication system. The primary login logic is handled in `main/api_auth_views.py`.
+	- **User Management:** A `set_password` Django management command exists for administrators to reset user passwords.
+	- **Database Seeding:** A management command `py manage.py seed_data` is available to populate the database with test data. This is crucial for development and testing.
+	- **Dynamic Task Types:** Task Types are not hardcoded. They are managed by administrators via a full CRUD API at `/api/task-types/` and a UI at `/tasks/types`.
+	- **Task Templates:** A full CRUD system for managing Task Templates (including nested default work order items) is available for superusers. The API is at `/api/task-templates/`.
+	- **Knowledge Base:** The knowledge base, including the `changelog.md`, is comprised of Markdown files located in the `static/kb/` directory. They are served to the frontend via an API.
+	- **UI Conventions:**
+		- **Zebra Striping:** Use the global `.striped-table` class on tables and lists to get an alternating background color for rows, improving readability.
+		- **Compact UI:** The UI has undergone a "deflation" pass to make it more compact for desktop use. Strive to maintain this by being mindful of padding and margins.
+	- **Admin Panel:** Most core CRM models are registered in the Django admin panel for easy data access and debugging.
+
 	
 
 - [ ] Install Required Extensions
@@ -52,7 +64,7 @@
 	
 	Verify that all previous steps have been completed.
 	Check https://code.visualstudio.com/docs/debugtest/tasks to determine if the project needs a task. If so, use the create_and_run_task to create and launch a task based on package.json, README.md, and project structure.
-	Skip this step otherwise.
+	<!-- Skip this step otherwise. -->
 	 
 
 - [ ] Launch the Project
@@ -66,6 +78,9 @@
 	Verify that all previous steps have been completed.
 	Verify that README.md and the copilot-instructions.md file in the .github directory exists and contains current project information.
 	Clean up the copilot-instructions.md file in the .github directory by removing all HTML comments.
+	Update the copilot-instructions.md file with any changes made during project setup.
+	Update changelog.md in the knowledge base with a summary of changes made during project setup.
+	
 	 
 
 
@@ -88,6 +103,7 @@ DEVELOPMENT RULES:
 - Use VS Code API tool only for VS Code extension projects.
 - Once the project is created, it is already opened in Visual Studio Code—do not suggest commands to open this project in Visual Studio again.
 - If the project setup information has additional rules, follow them strictly.
+- To populate the database with sample data, run the command 'py manage.py seed_data'. This is useful for testing and development.
 -once changes are made to the code, restart the frontend and backend servers to apply the changes.
 
 FOLDER CREATION RULES:

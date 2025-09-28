@@ -16,6 +16,10 @@ urlpatterns = [
     path('kb/', api_views.KnowledgeBaseView.as_view(), name='kb-list'),
     path('kb/<str:file_name>/', api_views.MarkdownFileView.as_view(), name='kb-file'),
     
+    # Search
+    path('search/', search_views.SearchAPIView.as_view(), name='api_search'),
+    path('search/filters/', search_views.SearchFiltersAPIView.as_view(), name='api_search_filters'),
+
     # Auth
     path('auth/login/', LoginView.as_view(), name='api_login'),
     path('auth/logout/', LogoutView.as_view(), name='api_logout'),
