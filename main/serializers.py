@@ -6,7 +6,6 @@ from .models import (
     LedgerAccount, JournalEntry, WorkOrder, LineItem, Payment
 )
 from .search_models import SavedSearch, GlobalSearchIndex, BulkOperation
-from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth import get_user_model, authenticate
 from django.utils.translation import gettext_lazy as _
 
@@ -213,9 +212,16 @@ class ContactWithCustomFieldsSerializer(ContactSerializer):
         fields = list(ContactSerializer.Meta.fields) + ['custom_fields']
 
     def get_custom_fields(self, obj):
-        # This assumes you might want to filter CustomFields to only those for Contacts
-        content_type = ContentType.objects.get_for_model(obj)
-        values = CustomFieldValue.objects.filter(content_type=content_type, object_id=obj.id)
+        # Use prefetched custom field values if available to avoid N+1 queries
+        values = getattr(obj, 'prefetched_custom_field_values', None)
+        if values is None:
+            content_type = ContentType.objects.get_for_model(obj)
+            values = CustomFieldValue.objects.filter(content_type=content_type, object_id=obj.id)
+        else:
+            values = [v for v in values if v.object_id == obj.id]
+        return CustomFieldValueSerializer(values, many=True).data
+            content_type = ContentType.objects.get_for_model(obj)
+            values = CustomFieldValue.objects.filter(content_type=content_type, object_id=obj.id)
         return CustomFieldValueSerializer(values, many=True).data
 
 class AccountWithCustomFieldsSerializer(AccountSerializer):
@@ -225,8 +231,10 @@ class AccountWithCustomFieldsSerializer(AccountSerializer):
         fields = list(AccountSerializer.Meta.fields) + ['custom_fields']
 
     def get_custom_fields(self, obj):
-        content_type = ContentType.objects.get_for_model(obj)
-        values = CustomFieldValue.objects.filter(content_type=content_type, object_id=obj.id)
+        values = getattr(obj, 'custom_field_values', None)
+        if values is None:
+            content_type = ContentType.objects.get_for_model(obj)
+            values = CustomFieldValue.objects.filter(content_type=content_type, object_id=obj.id)
         return CustomFieldValueSerializer(values, many=True).data
 
 
@@ -366,12 +374,23 @@ class LedgerAccountSerializer(serializers.ModelSerializer):
         fields = ['id', 'name', 'code', 'account_type']
 
 class JournalEntrySerializer(serializers.ModelSerializer):
-    debit_account = serializers.StringRelatedField()
-    credit_account = serializers.StringRelatedField()
+    debit_account = serializers.StringRelatedField(read_only=True)
+    credit_account = serializers.StringRelatedField(read_only=True)
+    debit_account_id = serializers.PrimaryKeyRelatedField(
+        queryset=LedgerAccount.objects.all(), source='debit_account', write_only=True, required=False
+    )
+    credit_account_id = serializers.PrimaryKeyRelatedField(
+        queryset=LedgerAccount.objects.all(), source='credit_account', write_only=True, required=False
+    )
+
     class Meta:
         model = JournalEntry
-        fields = ['id', 'date', 'description', 'debit_account', 'credit_account', 'amount', 'created_at']
-
+        fields = [
+            'id', 'date', 'description',
+            'debit_account', 'debit_account_id',
+            'credit_account', 'credit_account_id',
+            'amount', 'created_at'
+        ]
 class LineItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = LineItem
@@ -382,8 +401,6 @@ class WorkOrderSerializer(serializers.ModelSerializer):
     class Meta:
         model = WorkOrder
         fields = ['id', 'project', 'description', 'created_at', 'updated_at', 'status', 'line_items']
-
-from django.contrib.contenttypes.models import ContentType
 
 class PaymentSerializer(serializers.ModelSerializer):
     # Use content_type and object_id for generic relation (Invoice, WorkOrderInvoice, etc.)

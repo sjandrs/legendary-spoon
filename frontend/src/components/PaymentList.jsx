@@ -30,7 +30,7 @@ const PaymentList = () => {
         {payments.map(payment => (
           <tr key={payment.id}>
             <td>{payment.id}</td>
-            <td>{payment.invoice}</td>
+            <td>{payment.related_object}</td>
             <td>{payment.amount}</td>
             <td>{payment.payment_date}</td>
             <td>{payment.method}</td>
