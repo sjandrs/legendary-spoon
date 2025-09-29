@@ -22,6 +22,11 @@ router.register(r'activity-logs', api_views.ActivityLogViewSet, basename='activi
 router.register(r'project-templates', api_views.ProjectTemplateViewSet, basename='projecttemplate')
 router.register(r'default-work-order-items', api_views.DefaultWorkOrderItemViewSet, basename='defaultworkorderitem')
 router.register(r'project-types', api_views.ProjectTypeViewSet, basename='projecttype')
+router.register(r'ledger-accounts', api_views.LedgerAccountViewSet, basename='ledgeraccount')
+router.register(r'journal-entries', api_views.JournalEntryViewSet, basename='journalentry')
+router.register(r'work-orders', api_views.WorkOrderViewSet, basename='workorder')
+router.register(r'line-items', api_views.LineItemViewSet, basename='lineitem')
+router.register(r'payments', api_views.PaymentViewSet, basename='payment')
 
 # The API URLs are now determined automatically by the router.
 urlpatterns = [

@@ -19,7 +19,8 @@ from django.conf import settings
 from .models import (
     Post, CustomUser, Account, Contact, Project, Deal, DealStage, Interaction, Quote,
     Invoice, CustomField, CustomFieldValue, ActivityLog, ProjectTemplate,
-    DefaultWorkOrderItem, ProjectType, QuoteItem, InvoiceItem, Interaction, Tag
+    DefaultWorkOrderItem, ProjectType, QuoteItem, InvoiceItem, Interaction, Tag,
+    LedgerAccount, JournalEntry, WorkOrder, LineItem, Payment
 )
 from .serializers import (
     PostSerializer, UserSerializer, AccountSerializer, ContactSerializer, ProjectSerializer,
@@ -29,7 +30,8 @@ from .serializers import (
     CustomUserSerializer, SavedSearchSerializer, GlobalSearchIndexSerializer,
     BulkOperationSerializer, SearchResultSerializer, ProjectTemplateSerializer,
     DefaultWorkOrderItemSerializer, ProjectTypeSerializer, QuoteItemSerializer, InvoiceItemSerializer,
-    TagSerializer
+    TagSerializer,
+    LedgerAccountSerializer, JournalEntrySerializer, WorkOrderSerializer, LineItemSerializer, PaymentSerializer
 )
 
 logger = logging.getLogger(__name__)
@@ -732,3 +734,28 @@ class GlobalSearchView(APIView):
 
         # Limit total results to 20 for performance
         return Response(results[:20])
+
+class LedgerAccountViewSet(viewsets.ModelViewSet):
+    queryset = LedgerAccount.objects.all()
+    serializer_class = LedgerAccountSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+class JournalEntryViewSet(viewsets.ModelViewSet):
+    queryset = JournalEntry.objects.all()
+    serializer_class = JournalEntrySerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+class WorkOrderViewSet(viewsets.ModelViewSet):
+    queryset = WorkOrder.objects.all()
+    serializer_class = WorkOrderSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+class LineItemViewSet(viewsets.ModelViewSet):
+    queryset = LineItem.objects.all()
+    serializer_class = LineItemSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+class PaymentViewSet(viewsets.ModelViewSet):
+    queryset = Payment.objects.all()
+    serializer_class = PaymentSerializer
+    permission_classes = [permissions.IsAuthenticated]

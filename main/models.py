@@ -260,7 +260,9 @@ class Quote(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"Quote for {self.deal.name}"
+        # Defensive: fallback if deal or title is missing
+        deal_title = getattr(self.deal, "title", None)
+        return f"Quote for {deal_title or '[No Deal Title]'}"
 
 class QuoteItem(models.Model):
     quote = models.ForeignKey(Quote, on_delete=models.CASCADE, related_name='items')
@@ -279,7 +281,8 @@ class Invoice(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"Invoice for {self.deal.name}"
+        deal_title = self.deal.title if self.deal and hasattr(self.deal, 'title') else "Unknown Deal"
+        return f"Invoice for {deal_title}"
 
 class InvoiceItem(models.Model):
     invoice = models.ForeignKey(Invoice, on_delete=models.CASCADE, related_name='items')
@@ -394,3 +397,80 @@ class LogEntry(models.Model):
 
     class Meta:
         ordering = ['-timestamp']
+
+
+class LedgerAccount(models.Model):
+    ACCOUNT_TYPE_CHOICES = [
+        ('asset', 'Asset'),
+        ('liability', 'Liability'),
+        ('equity', 'Equity'),
+        ('revenue', 'Revenue'),
+        ('expense', 'Expense'),
+    ]
+    name = models.CharField(max_length=100)
+    code = models.CharField(max_length=20, unique=True)
+    account_type = models.CharField(max_length=20, choices=ACCOUNT_TYPE_CHOICES)
+
+    def __str__(self):
+        return f"{self.code} - {self.name} ({self.account_type})"
+
+class JournalEntry(models.Model):
+    date = models.DateField()
+    description = models.CharField(max_length=255)
+    debit_account = models.ForeignKey('LedgerAccount', on_delete=models.CASCADE, related_name='debits')
+    credit_account = models.ForeignKey('LedgerAccount', on_delete=models.CASCADE, related_name='credits')
+    amount = models.DecimalField(max_digits=12, decimal_places=2)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.date}: {self.description} - {self.amount}"
+
+class WorkOrder(models.Model):
+    project = models.ForeignKey('Project', on_delete=models.CASCADE, related_name='work_orders')
+    description = models.CharField(max_length=255)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    status = models.CharField(max_length=50, default='open')
+
+    def __str__(self):
+        return f"WorkOrder #{self.id} for {self.project}"
+
+class LineItem(models.Model):
+    work_order = models.ForeignKey('WorkOrder', on_delete=models.CASCADE, related_name='line_items')
+    description = models.CharField(max_length=255)
+    quantity = models.DecimalField(max_digits=10, decimal_places=2, default=1)
+    unit_price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    total = models.DecimalField(max_digits=12, decimal_places=2, default=0.00)
+
+    def save(self, *args, **kwargs):
+        self.total = self.quantity * self.unit_price
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.description} ({self.quantity} x {self.unit_price})"
+
+
+class WorkOrderInvoice(models.Model):
+    work_order = models.ForeignKey('WorkOrder', on_delete=models.CASCADE, related_name='invoices')
+    issued_date = models.DateField()
+    due_date = models.DateField()
+    total_amount = models.DecimalField(max_digits=12, decimal_places=2)
+    is_paid = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Invoice #{self.id} for WorkOrder #{self.work_order.id}"
+
+class Payment(models.Model):
+    amount = models.DecimalField(max_digits=12, decimal_places=2)
+    payment_date = models.DateField()
+    method = models.CharField(max_length=50)
+    received_by = models.ForeignKey('CustomUser', on_delete=models.SET_NULL, null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    # Generic relation to support payments for multiple invoice types
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+    object_id = models.PositiveIntegerField()
+    content_object = GenericForeignKey('content_type', 'object_id')
+
+    def __str__(self):
+        return f"Payment of {self.amount} for {self.content_object}"

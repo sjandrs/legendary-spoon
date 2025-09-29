@@ -34,4 +34,30 @@ export const createTask = (task) => apiClient.post('/api/tasks/', task);
 export const getActivityLogs = (url) => apiClient.get(url);
 export const { get, post, put, delete: del } = apiClient;
 
+// --- Accounting API ---
+export const getLedgerAccounts = () => apiClient.get('/api/ledger-accounts/');
+export const createLedgerAccount = (data) => apiClient.post('/api/ledger-accounts/', data);
+export const updateLedgerAccount = (id, data) => apiClient.put(`/api/ledger-accounts/${id}/`, data);
+export const deleteLedgerAccount = (id) => apiClient.delete(`/api/ledger-accounts/${id}/`);
+
+export const getJournalEntries = () => apiClient.get('/api/journal-entries/');
+export const createJournalEntry = (data) => apiClient.post('/api/journal-entries/', data);
+export const updateJournalEntry = (id, data) => apiClient.put(`/api/journal-entries/${id}/`, data);
+export const deleteJournalEntry = (id) => apiClient.delete(`/api/journal-entries/${id}/`);
+
+export const getWorkOrders = () => apiClient.get('/api/work-orders/');
+export const createWorkOrder = (data) => apiClient.post('/api/work-orders/', data);
+export const updateWorkOrder = (id, data) => apiClient.put(`/api/work-orders/${id}/`, data);
+export const deleteWorkOrder = (id) => apiClient.delete(`/api/work-orders/${id}/`);
+
+export const getLineItems = () => apiClient.get('/api/line-items/');
+export const createLineItem = (data) => apiClient.post('/api/line-items/', data);
+export const updateLineItem = (id, data) => apiClient.put(`/api/line-items/${id}/`, data);
+export const deleteLineItem = (id) => apiClient.delete(`/api/line-items/${id}/`);
+
+export const getPayments = () => apiClient.get('/api/payments/');
+export const createPayment = (data) => apiClient.post('/api/payments/', data);
+export const updatePayment = (id, data) => apiClient.put(`/api/payments/${id}/`, data);
+export const deletePayment = (id) => apiClient.delete(`/api/payments/${id}/`);
+
 export default apiClient;

@@ -30,6 +30,16 @@ import Orders from './components/Orders';
 import Warehouse from './components/Warehouse';
 import './App.css';
 import AuthContext from './contexts/AuthContext';
+import LedgerAccountList from './components/LedgerAccountList';
+import LedgerAccountForm from './components/LedgerAccountForm';
+import JournalEntryList from './components/JournalEntryList';
+import JournalEntryForm from './components/JournalEntryForm';
+import WorkOrderList from './components/WorkOrderList';
+import WorkOrderForm from './components/WorkOrderForm';
+import LineItemList from './components/LineItemList';
+import LineItemForm from './components/LineItemForm';
+import PaymentList from './components/PaymentList';
+import PaymentForm from './components/PaymentForm';
 
 // This component contains the main application layout with navigation
 const MainLayout = () => {
@@ -82,19 +92,18 @@ const MainLayout = () => {
             <li><Link to="/orders">Orders</Link></li>
             <li><Link to="/warehouse">Warehouse</Link></li>
             <li><Link to="/staff">Staff</Link></li>
-            <li 
-              className="dropdown-menu"
-              onMouseEnter={() => setLegacyMenuOpen(true)}
-              onMouseLeave={() => setLegacyMenuOpen(false)}
+            <li className="dropdown-menu"
+                onMouseEnter={() => setLegacyMenuOpen(true)}
+                onMouseLeave={() => setLegacyMenuOpen(false)}
             >
-              <button className="dropdown-button">Legacy</button>
+              <button className="dropdown-button">Accounting</button>
               {legacyMenuOpen && (
                 <div className="dropdown-menu-content">
-                  <Link to="/posts">Posts</Link>
-                  <Link to="/search">Search</Link>
-                  <Link to="/settings/custom-fields">Custom Fields</Link>
-                  <Link to="/settings/user-roles">User Roles</Link>
-                  <Link to="/chat">Chat</Link>
+                  <Link to="/ledger-accounts">Ledger Accounts</Link>
+                  <Link to="/journal-entries">Journal Entries</Link>
+                  <Link to="/work-orders/list">Work Orders</Link>
+                  <Link to="/line-items">Line Items</Link>
+                  <Link to="/payments">Payments</Link>
                 </div>
               )}
             </li>
@@ -153,6 +162,18 @@ function App() {
           <Route path="/settings/user-roles" element={<UserRoleManagement />} />
           <Route path="/kb" element={<KnowledgeBase />} />
           <Route path="/kb/:fileName" element={<MarkdownViewer />} />
+
+          {/* Accounting Feature Routes */}
+          <Route path="/ledger-accounts" element={<LedgerAccountList />} />
+          <Route path="/ledger-accounts/new" element={<LedgerAccountForm />} />
+          <Route path="/journal-entries" element={<JournalEntryList />} />
+          <Route path="/journal-entries/new" element={<JournalEntryForm />} />
+          <Route path="/work-orders/list" element={<WorkOrderList />} />
+          <Route path="/work-orders/new" element={<WorkOrderForm />} />
+          <Route path="/line-items" element={<LineItemList />} />
+          <Route path="/line-items/new" element={<LineItemForm />} />
+          <Route path="/payments" element={<PaymentList />} />
+          <Route path="/payments/new" element={<PaymentForm />} />
         </Route>
       </Route>
 

@@ -2,7 +2,8 @@ from rest_framework import serializers
 from .models import (
     Post, Category, Tag, CustomUser, Account, Contact, Project, Deal, DealStage, 
     Interaction, Quote, QuoteItem, Invoice, InvoiceItem, CustomField, CustomFieldValue,
-    ActivityLog, ProjectTemplate, DefaultWorkOrderItem, ProjectType
+    ActivityLog, ProjectTemplate, DefaultWorkOrderItem, ProjectType,
+    LedgerAccount, JournalEntry, WorkOrder, LineItem, Payment
 )
 from .search_models import SavedSearch, GlobalSearchIndex, BulkOperation
 from django.contrib.contenttypes.models import ContentType
@@ -358,3 +359,57 @@ class ProjectTemplateSerializer(serializers.ModelSerializer):
                     DefaultWorkOrderItem.objects.create(template=instance, **item_data)
         
         return instance
+
+class LedgerAccountSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = LedgerAccount
+        fields = ['id', 'name', 'code', 'account_type']
+
+class JournalEntrySerializer(serializers.ModelSerializer):
+    debit_account = serializers.StringRelatedField()
+    credit_account = serializers.StringRelatedField()
+    class Meta:
+        model = JournalEntry
+        fields = ['id', 'date', 'description', 'debit_account', 'credit_account', 'amount', 'created_at']
+
+class LineItemSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = LineItem
+        fields = ['id', 'work_order', 'description', 'quantity', 'unit_price', 'total']
+
+class WorkOrderSerializer(serializers.ModelSerializer):
+    line_items = LineItemSerializer(many=True, read_only=True)
+    class Meta:
+        model = WorkOrder
+        fields = ['id', 'project', 'description', 'created_at', 'updated_at', 'status', 'line_items']
+
+from django.contrib.contenttypes.models import ContentType
+
+class PaymentSerializer(serializers.ModelSerializer):
+    # Use content_type and object_id for generic relation (Invoice, WorkOrderInvoice, etc.)
+    content_type = serializers.PrimaryKeyRelatedField(
+        queryset=ContentType.objects.all(), write_only=True
+    )
+    object_id = serializers.IntegerField(write_only=True)
+    related_object = serializers.SerializerMethodField(read_only=True)
+
+    class Meta:
+        model = Payment
+        fields = [
+            'id', 'content_type', 'object_id', 'related_object',
+            'amount', 'payment_date', 'method', 'received_by', 'created_at'
+        ]
+
+    def get_related_object(self, obj):
+        # Optionally return a string representation of the related object
+        return str(obj.content_object) if obj.content_object else None
+
+    def create(self, validated_data):
+        content_type = validated_data.pop('content_type')
+        object_id = validated_data.pop('object_id')
+        payment = Payment.objects.create(
+            content_type=content_type,
+            object_id=object_id,
+            **validated_data
+        )
+        return payment

@@ -226,14 +226,63 @@ class QuoteAdmin(HistoryPaginationMixin, admin.ModelAdmin):
 class QuoteItemAdmin(HistoryPaginationMixin, admin.ModelAdmin):
     list_display = ('quote', 'description', 'quantity', 'unit_price')
 
+
+# Remove old Invoice/InvoiceItem admin and register new accounting models
+from .models import LedgerAccount, JournalEntry, WorkOrder, LineItem, Payment, InvoiceItem
+
+
+# CRM Invoice admin (old model)
 @admin.register(Invoice)
 class InvoiceAdmin(HistoryPaginationMixin, admin.ModelAdmin):
-    list_display = ('deal', 'due_date', 'paid')
-    list_filter = ('paid',)
+    list_display = ('deal', 'due_date', 'paid', 'created_at', 'updated_at')
+    list_filter = ('paid', 'due_date', 'created_at')
 
 @admin.register(InvoiceItem)
 class InvoiceItemAdmin(HistoryPaginationMixin, admin.ModelAdmin):
     list_display = ('invoice', 'description', 'quantity', 'unit_price')
+    list_filter = ('invoice',)
+    search_fields = ('description',)
+
+# Accounting WorkOrderInvoice admin (new model)
+from .models import WorkOrderInvoice
+@admin.register(WorkOrderInvoice)
+class WorkOrderInvoiceAdmin(HistoryPaginationMixin, admin.ModelAdmin):
+    list_display = ('work_order', 'issued_date', 'due_date', 'total_amount', 'is_paid', 'created_at')
+    list_filter = ('is_paid', 'issued_date', 'due_date', 'created_at')
+
+@admin.register(LedgerAccount)
+class LedgerAccountAdmin(HistoryPaginationMixin, admin.ModelAdmin):
+    list_display = ('name', 'code', 'account_type')
+    list_filter = ('account_type',)
+    search_fields = ('name', 'code')
+
+@admin.register(JournalEntry)
+class JournalEntryAdmin(HistoryPaginationMixin, admin.ModelAdmin):
+    list_display = ('date', 'description', 'debit_account', 'credit_account', 'amount', 'created_at')
+    list_filter = ('date', 'debit_account', 'credit_account')
+    search_fields = ('description',)
+
+@admin.register(WorkOrder)
+class WorkOrderAdmin(HistoryPaginationMixin, admin.ModelAdmin):
+    list_display = ('project', 'description', 'status', 'created_at', 'updated_at')
+    list_filter = ('status', 'created_at')
+    search_fields = ('description',)
+
+@admin.register(LineItem)
+class LineItemAdmin(HistoryPaginationMixin, admin.ModelAdmin):
+    list_display = ('work_order', 'description', 'quantity', 'unit_price', 'total')
+    list_filter = ('work_order',)
+    search_fields = ('description',)
+
+@admin.register(Payment)
+class PaymentAdmin(HistoryPaginationMixin, admin.ModelAdmin):
+    list_display = ('invoice_object_display', 'amount', 'payment_date', 'method', 'received_by', 'created_at')
+    list_filter = ('payment_date', 'method', 'received_by')
+    search_fields = ('method',)
+
+    def invoice_object_display(self, obj):
+        return str(obj.content_object) if obj.content_object else "-"  # Defensive: handle missing related object
+    invoice_object_display.short_description = "Invoice/Reference"
 
 @admin.register(CustomField)
 class CustomFieldAdmin(HistoryPaginationMixin, admin.ModelAdmin):
