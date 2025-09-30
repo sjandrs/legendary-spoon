@@ -10,17 +10,20 @@ from reportlab.lib.pagesizes import letter
 from reportlab.lib.units import inch
 from rest_framework.views import APIView
 from django.db.models import Count, Sum, Q, F
+from django.db import models
 from django.contrib.auth.models import Group
 from rest_framework.permissions import IsAuthenticated
 import os
 import logging
 from django.conf import settings
+from django.utils import timezone
 
 from .models import (
     Post, CustomUser, Account, Contact, Project, Deal, DealStage, Interaction, Quote,
     Invoice, CustomField, CustomFieldValue, ActivityLog, ProjectTemplate,
     DefaultWorkOrderItem, ProjectType, QuoteItem, InvoiceItem, Interaction, Tag,
-    LedgerAccount, JournalEntry, WorkOrder, LineItem, Payment
+    LedgerAccount, JournalEntry, WorkOrder, LineItem, Payment, Expense, Budget, WorkOrderInvoice, TimeEntry,
+    Warehouse, WarehouseItem
 )
 from .serializers import (
     PostSerializer, UserSerializer, AccountSerializer, ContactSerializer, ProjectSerializer,
@@ -31,7 +34,9 @@ from .serializers import (
     BulkOperationSerializer, SearchResultSerializer, ProjectTemplateSerializer,
     DefaultWorkOrderItemSerializer, ProjectTypeSerializer, QuoteItemSerializer, InvoiceItemSerializer,
     TagSerializer,
-    LedgerAccountSerializer, JournalEntrySerializer, WorkOrderSerializer, LineItemSerializer, PaymentSerializer
+    LedgerAccountSerializer, JournalEntrySerializer, WorkOrderSerializer, LineItemSerializer, PaymentSerializer,
+    ExpenseSerializer, BudgetSerializer, WorkOrderInvoiceSerializer, TimeEntrySerializer,
+    WarehouseSerializer, WarehouseItemSerializer
 )
 
 logger = logging.getLogger(__name__)
@@ -759,3 +764,448 @@ class PaymentViewSet(viewsets.ModelViewSet):
     queryset = Payment.objects.all()
     serializer_class = PaymentSerializer
     permission_classes = [permissions.IsAuthenticated]
+
+# Financial Reports API Views
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from django.http import Http404
+from .reports import FinancialReports
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def balance_sheet_report(request):
+    """
+    Get balance sheet report
+    Query parameters:
+    - as_of_date: Date in YYYY-MM-DD format (optional, defaults to today)
+    """
+    as_of_date_str = request.query_params.get('as_of_date')
+    as_of_date = None
+    if as_of_date_str:
+        try:
+            from datetime import datetime
+            as_of_date = datetime.strptime(as_of_date_str, '%Y-%m-%d').date()
+        except ValueError:
+            return Response({'error': 'Invalid date format. Use YYYY-MM-DD'}, status=400)
+
+    report_data = FinancialReports.get_balance_sheet(as_of_date)
+    return Response(report_data)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def profit_loss_report(request):
+    """
+    Get profit and loss report
+    Query parameters:
+    - start_date: Start date in YYYY-MM-DD format (optional, defaults to start of current month)
+    - end_date: End date in YYYY-MM-DD format (optional, defaults to today)
+    """
+    start_date_str = request.query_params.get('start_date')
+    end_date_str = request.query_params.get('end_date')
+
+    start_date = None
+    end_date = None
+
+    if start_date_str:
+        try:
+            from datetime import datetime
+            start_date = datetime.strptime(start_date_str, '%Y-%m-%d').date()
+        except ValueError:
+            return Response({'error': 'Invalid start_date format. Use YYYY-MM-DD'}, status=400)
+
+    if end_date_str:
+        try:
+            from datetime import datetime
+            end_date = datetime.strptime(end_date_str, '%Y-%m-%d').date()
+        except ValueError:
+            return Response({'error': 'Invalid end_date format. Use YYYY-MM-DD'}, status=400)
+
+    report_data = FinancialReports.get_profit_loss(start_date, end_date)
+    return Response(report_data)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def cash_flow_report(request):
+    """
+    Get cash flow report
+    Query parameters:
+    - start_date: Start date in YYYY-MM-DD format (optional, defaults to start of current month)
+    - end_date: End date in YYYY-MM-DD format (optional, defaults to today)
+    """
+    start_date_str = request.query_params.get('start_date')
+    end_date_str = request.query_params.get('end_date')
+
+    start_date = None
+    end_date = None
+
+    if start_date_str:
+        try:
+            from datetime import datetime
+            start_date = datetime.strptime(start_date_str, '%Y-%m-%d').date()
+        except ValueError:
+            return Response({'error': 'Invalid start_date format. Use YYYY-MM-DD'}, status=400)
+
+    if end_date_str:
+        try:
+            from datetime import datetime
+            end_date = datetime.strptime(end_date_str, '%Y-%m-%d').date()
+        except ValueError:
+            return Response({'error': 'Invalid end_date format. Use YYYY-MM-DD'}, status=400)
+
+    report_data = FinancialReports.get_cash_flow(start_date, end_date)
+    return Response(report_data)
+
+# Expense and Budget API Views
+class ExpenseViewSet(viewsets.ModelViewSet):
+    serializer_class = ExpenseSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.groups.filter(name='Sales Manager').exists():
+            return Expense.objects.all()
+        else:
+            return Expense.objects.filter(submitted_by=user)
+
+    def perform_create(self, serializer):
+        serializer.save(submitted_by=self.request.user)
+
+class BudgetViewSet(viewsets.ModelViewSet):
+    queryset = Budget.objects.all()
+    serializer_class = BudgetSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def perform_create(self, serializer):
+        serializer.save(created_by=self.request.user)
+
+# Time Tracking API Views
+class TimeEntryViewSet(viewsets.ModelViewSet):
+    serializer_class = TimeEntrySerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        # Users can see time entries for projects they own or are assigned to
+        return TimeEntry.objects.filter(
+            Q(project__owner=user) |
+            Q(project__assigned_to=user) |
+            Q(user=user)
+        ).distinct()
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
+# Warehouse API Views
+class WarehouseViewSet(viewsets.ModelViewSet):
+    queryset = Warehouse.objects.all()
+    serializer_class = WarehouseSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+class WarehouseItemViewSet(viewsets.ModelViewSet):
+    serializer_class = WarehouseItemSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return WarehouseItem.objects.all()
+
+    def perform_create(self, serializer):
+        serializer.save()
+
+# Invoice Generation API Views
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def generate_workorder_invoice(request, workorder_id):
+    """
+    Generate an invoice for a specific work order
+    """
+    try:
+        workorder = WorkOrder.objects.get(id=workorder_id)
+    except WorkOrder.DoesNotExist:
+        return Response({'error': 'WorkOrder not found'}, status=404)
+
+    payment_terms = request.data.get('payment_terms', 'net_30')
+
+    # Check if invoice already exists
+    if workorder.invoices.exists():
+        return Response({'error': 'Invoice already exists for this WorkOrder'}, status=400)
+
+    try:
+        invoice = workorder.generate_invoice(payment_terms)
+        serializer = WorkOrderInvoiceSerializer(invoice)
+        return Response(serializer.data, status=201)
+    except Exception as e:
+        return Response({'error': str(e)}, status=400)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def overdue_invoices(request):
+    """
+    Get all overdue invoices
+    """
+    overdue_invoices = WorkOrderInvoice.objects.filter(is_paid=False, due_date__lt=timezone.now().date())
+    serializer = WorkOrderInvoiceSerializer(overdue_invoices, many=True)
+    return Response(serializer.data)
+
+# Tax Report API View
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def tax_report(request):
+    """
+    Generate tax report data for a specific year
+    """
+    year = request.query_params.get('year', timezone.now().year)
+    try:
+        year = int(year)
+    except ValueError:
+        return Response({'error': 'Invalid year format'}, status=400)
+
+    # Calculate date range for the tax year
+    start_date = timezone.datetime(year, 1, 1).date()
+    end_date = timezone.datetime(year, 12, 31).date()
+
+    # Get contractor payments (from invoices paid to contractors)
+    contractor_payments = WorkOrderInvoice.objects.filter(
+        work_order__assigned_to__isnull=False,  # Has an assigned contractor
+        is_paid=True,
+        paid_date__range=(start_date, end_date)
+    ).values(
+        'work_order__assigned_to__first_name',
+        'work_order__assigned_to__last_name',
+        'work_order__assigned_to'
+    ).annotate(
+        total_payments=Sum('total_amount')
+    ).order_by('-total_payments')
+
+    # Format contractor data
+    contractors = []
+    for payment in contractor_payments:
+        user = CustomUser.objects.get(id=payment['work_order__assigned_to'])
+        contractors.append({
+            'id': user.id,
+            'name': f"{user.first_name} {user.last_name}",
+            'tax_id': getattr(user, 'tax_id', None),
+            'total_payments': payment['total_payments']
+        })
+
+    # Calculate sales tax using configurable rate from settings (default to 8.5% if not set)
+    sales_tax_rate = getattr(settings, 'SALES_TAX_RATE', 0.085)
+    total_sales = Invoice.objects.filter(
+        created_at__date__range=(start_date, end_date)
+    ).aggregate(total=Sum('total_amount'))['total'] or 0
+
+    tax_collected = total_sales * sales_tax_rate
+
+    # Get expenses by category
+    expenses_by_category = Expense.objects.filter(
+        date__range=(start_date, end_date),
+        approved=True
+    ).values('category').annotate(
+        total=Sum('amount')
+    ).order_by('-total')
+
+    # Calculate totals
+    total_expenses = sum(cat['total'] for cat in expenses_by_category)
+    total_revenue = Invoice.objects.filter(
+        created_at__date__range=(start_date, end_date)
+    ).aggregate(total=Sum('total_amount'))['total'] or 0
+
+    net_income = total_revenue - total_expenses
+    # Use configurable tax rate from settings or default to 25%
+    tax_rate = getattr(settings, 'TAX_RATE', 0.25)
+    estimated_tax = max(0, net_income * tax_rate)
+
+    tax_data = {
+        'year': year,
+        'contractorPayments': contractors,
+        'salesTax': {
+            'total_sales': total_sales,
+            'tax_collected': tax_collected,
+            'tax_rate': sales_tax_rate
+        },
+        'expensesByCategory': list(expenses_by_category),
+        'totalExpenses': total_expenses,
+        'totalRevenue': total_revenue,
+        'netIncome': net_income,
+        'estimatedTax': estimated_tax
+    }
+
+    return Response(tax_data)
+
+# Analytics API Views
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def dashboard_analytics(request):
+    """
+    Provide cross-module analytics for dashboard.
+    Implements REQ-205: cross-module analytics.
+    """
+    # Date range - last 30 days by default
+    end_date = timezone.now().date()
+    start_date = end_date - timezone.timedelta(days=30)
+
+    # Sales Analytics
+    total_deals = Deal.objects.filter(created_at__date__range=(start_date, end_date)).count()
+    won_deals = Deal.objects.filter(status='won', created_at__date__range=(start_date, end_date)).count()
+    total_deal_value = Deal.objects.filter(status='won', created_at__date__range=(start_date, end_date)).aggregate(
+        total=Sum('value'))['total'] or 0
+
+    # Project Analytics
+    total_projects = Project.objects.filter(created_at__date__range=(start_date, end_date)).count()
+    completed_projects = Project.objects.filter(status='completed', created_at__date__range=(start_date, end_date)).count()
+    overdue_projects = Project.objects.filter(
+        status__in=['pending', 'in_progress'],
+        due_date__lt=timezone.now().date()
+    ).count()
+
+    # Financial Analytics
+    total_revenue = Invoice.objects.filter(created_at__date__range=(start_date, end_date)).aggregate(
+        total=Sum('total_amount'))['total'] or 0
+    total_expenses = Expense.objects.filter(
+        date__range=(start_date, end_date),
+        approved=True
+    ).aggregate(total=Sum('amount'))['total'] or 0
+
+    # Customer Lifetime Value (CLV) - simplified calculation
+    customers = Account.objects.annotate(
+        total_value=Sum('deals__value', filter=Q(deals__status='won'))
+    ).filter(total_value__gt=0).order_by('-total_value')[:10]
+
+    clv_data = [{
+        'account': account.name,
+        'total_value': account.total_value,
+        'deal_count': account.deals.filter(status='won').count()
+    } for account in customers]
+
+    # Project Profitability
+    projects_with_costs = Project.objects.filter(
+        created_at__date__range=(start_date, end_date)
+    ).annotate(
+        revenue=Sum('work_orders__invoices__total_amount'),
+        costs=Sum('work_orders__line_items__total')
+    ).filter(revenue__isnull=False)
+
+    project_profitability = []
+    for project in projects_with_costs:
+        revenue = project.revenue or 0
+        costs = project.costs or 0
+        profit = revenue - costs
+        margin = (profit / revenue * 100) if revenue > 0 else 0
+
+        project_profitability.append({
+            'project': project.title,
+            'revenue': revenue,
+            'costs': costs,
+            'profit': profit,
+            'margin': round(margin, 2)
+        })
+
+    # Time tracking analytics
+    total_hours_logged = TimeEntry.objects.filter(
+        date__range=(start_date, end_date)
+    ).aggregate(total=Sum('hours'))['total'] or 0
+
+    billable_hours = TimeEntry.objects.filter(
+        date__range=(start_date, end_date),
+        billable=True
+    ).aggregate(total=Sum('hours'))['total'] or 0
+
+    # Inventory analytics (if warehouse exists)
+    low_stock_items = []
+    try:
+        from .models import WarehouseItem
+        low_stock_items = list(WarehouseItem.objects.filter(
+            quantity__lte=F('minimum_stock')
+        ).values('name', 'quantity', 'minimum_stock', 'warehouse__name'))
+    except:
+        pass  # Warehouse models might not be available yet
+
+    analytics_data = {
+        'period': {
+            'start_date': start_date,
+            'end_date': end_date
+        },
+        'sales': {
+            'total_deals': total_deals,
+            'won_deals': won_deals,
+            'win_rate': round((won_deals / total_deals * 100) if total_deals > 0 else 0, 2),
+            'total_value': total_deal_value
+        },
+        'projects': {
+            'total_projects': total_projects,
+            'completed_projects': completed_projects,
+            'completion_rate': round((completed_projects / total_projects * 100) if total_projects > 0 else 0, 2),
+            'overdue_projects': overdue_projects
+        },
+        'financial': {
+            'total_revenue': total_revenue,
+            'total_expenses': total_expenses,
+            'net_income': total_revenue - total_expenses,
+            'profit_margin': round(((total_revenue - total_expenses) / total_revenue * 100) if total_revenue > 0 else 0, 2)
+        },
+        'time_tracking': {
+            'total_hours': float(total_hours_logged),
+            'billable_hours': float(billable_hours),
+            'billable_percentage': round((billable_hours / total_hours_logged * 100) if total_hours_logged > 0 else 0, 2)
+        },
+        'customer_lifetime_value': clv_data,
+        'project_profitability': project_profitability,
+        'inventory': {
+            'low_stock_items': low_stock_items,
+            'low_stock_count': len(low_stock_items)
+        }
+    }
+
+    return Response(analytics_data)
+
+# Email Communication API Views
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def send_invoice_email(request, invoice_id):
+    """
+    Send invoice email to customer.
+    Implements REQ-204: customer communication automation.
+    """
+    try:
+        invoice = WorkOrderInvoice.objects.get(id=invoice_id)
+    except WorkOrderInvoice.DoesNotExist:
+        return Response({'error': 'Invoice not found'}, status=404)
+
+    # Check permissions - only project owner or assigned user can send emails
+    user = request.user
+    if not (invoice.work_order.project.owner == user or invoice.work_order.project.assigned_to == user):
+        return Response({'error': 'Permission denied'}, status=403)
+
+    success = invoice.send_invoice_email()
+    if success:
+        return Response({'message': 'Invoice email sent successfully'})
+    else:
+        return Response({'error': 'Failed to send email'}, status=500)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def send_overdue_reminders(request):
+    """
+    Send overdue payment reminders to all customers with overdue invoices.
+    Implements REQ-204: customer communication automation.
+    """
+    overdue_invoices = WorkOrderInvoice.objects.filter(is_paid=False, due_date__lt=timezone.now().date())
+
+    sent_count = 0
+    failed_count = 0
+
+    for invoice in overdue_invoices:
+        # Check if user has permission to send reminders for this invoice
+        user = request.user
+        if invoice.work_order.project.owner == user or invoice.work_order.project.assigned_to == user:
+            success = invoice.send_overdue_reminder()
+            if success:
+                sent_count += 1
+            else:
+                failed_count += 1
+
+    return Response({
+        'message': f'Sent {sent_count} reminders, {failed_count} failed',
+        'sent': sent_count,
+        'failed': failed_count
+    })

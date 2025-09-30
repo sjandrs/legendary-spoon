@@ -40,6 +40,14 @@ import LineItemList from './components/LineItemList';
 import LineItemForm from './components/LineItemForm';
 import PaymentList from './components/PaymentList';
 import PaymentForm from './components/PaymentForm';
+import Reports from './components/Reports';
+import ExpenseList from './components/ExpenseList';
+import ExpenseForm from './components/ExpenseForm';
+import BudgetList from './components/BudgetList';
+import BudgetForm from './components/BudgetForm';
+import TaxReport from './components/TaxReport';
+import TimeTracking from './components/TimeTracking';
+import EmailCommunication from './components/EmailCommunication';
 
 // This component contains the main application layout with navigation
 const MainLayout = () => {
@@ -84,6 +92,7 @@ const MainLayout = () => {
               {tasksMenuOpen && (
                 <div className="dropdown-menu-content">
                   <Link to="/tasks">Task Dashboard</Link>
+                  <Link to="/time-tracking">Time Tracking</Link>
                   <Link to="/tasks/admin">Task Templates</Link>
                   <Link to="/tasks/types" element={<TaskTypeSettings />}>Manage Types</Link>
                 </div>
@@ -99,11 +108,16 @@ const MainLayout = () => {
               <button className="dropdown-button">Accounting</button>
               {legacyMenuOpen && (
                 <div className="dropdown-menu-content">
+                  <Link to="/reports">Financial Reports</Link>
+                  <Link to="/email-communication">Email Communication</Link>
                   <Link to="/ledger-accounts">Ledger Accounts</Link>
                   <Link to="/journal-entries">Journal Entries</Link>
                   <Link to="/work-orders/list">Work Orders</Link>
                   <Link to="/line-items">Line Items</Link>
                   <Link to="/payments">Payments</Link>
+                  <Link to="/expenses">Expenses</Link>
+                  <Link to="/budgets">Budgets</Link>
+                  <Link to="/tax-report">Tax Reports</Link>
                 </div>
               )}
             </li>
@@ -139,6 +153,7 @@ function App() {
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/search" element={<SearchPage />} />
           <Route path="/tasks" element={<TaskDashboard />} />
+          <Route path="/time-tracking" element={<TimeTracking />} />
           <Route path="/tasks/new" element={<TaskForm />} />
           <Route path="/tasks/admin" element={<TaskAdministration />} />
           <Route path="/tasks/types" element={<TaskTypeSettings />} />
@@ -174,6 +189,15 @@ function App() {
           <Route path="/line-items/new" element={<LineItemForm />} />
           <Route path="/payments" element={<PaymentList />} />
           <Route path="/payments/new" element={<PaymentForm />} />
+          <Route path="/reports" element={<Reports />} />
+          <Route path="/email-communication" element={<EmailCommunication />} />
+          <Route path="/expenses" element={<ExpenseList />} />
+          <Route path="/expenses/new" element={<ExpenseForm />} />
+          <Route path="/expenses/:id/edit" element={<ExpenseForm />} />
+          <Route path="/budgets" element={<BudgetList />} />
+          <Route path="/budgets/new" element={<BudgetForm />} />
+          <Route path="/budgets/:id/edit" element={<BudgetForm />} />
+          <Route path="/tax-report" element={<TaxReport />} />
         </Route>
       </Route>
 

@@ -432,6 +432,75 @@ class WorkOrder(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     status = models.CharField(max_length=50, default='open')
 
+    def generate_invoice(self, payment_terms='net_30'):
+        """
+        Generate an invoice for this work order
+        Returns the created WorkOrderInvoice instance
+        """
+        from django.utils import timezone
+        from datetime import timedelta
+
+        issued_date = timezone.now().date()
+
+        # Calculate due date based on payment terms
+        if payment_terms == 'net_15':
+            due_date = issued_date + timedelta(days=15)
+        elif payment_terms == 'net_30':
+            due_date = issued_date + timedelta(days=30)
+        elif payment_terms == 'net_60':
+            due_date = issued_date + timedelta(days=60)
+        else:  # due_on_receipt
+            due_date = issued_date
+
+        # Calculate total from line items
+        total_amount = sum(line_item.total for line_item in self.line_items.all())
+
+        invoice = WorkOrderInvoice.objects.create(
+            work_order=self,
+            issued_date=issued_date,
+            due_date=due_date,
+            payment_terms=payment_terms,
+            total_amount=total_amount
+        )
+
+        return invoice
+
+    def adjust_inventory(self):
+        """
+        Adjust warehouse inventory when work order is completed.
+        Implements REQ-203: inventory integration.
+        """
+        for line_item in self.line_items.all():
+            if line_item.warehouse_item:
+                # Decrease inventory for parts/equipment used
+                if line_item.warehouse_item.item_type in ['part', 'equipment', 'consumable']:
+                    line_item.warehouse_item.quantity -= line_item.quantity
+                    line_item.warehouse_item.save()
+
+                    # Log the inventory adjustment
+                    ActivityLog.objects.create(
+                        user=self.project.assigned_to,
+                        action='update',
+                        content_object=line_item.warehouse_item,
+                        description=f'Inventory adjusted for WorkOrder #{self.id}: -{line_item.quantity} {line_item.warehouse_item.name}'
+                    )
+
+    def complete_work_order(self):
+        """
+        Mark work order as completed and adjust inventory.
+        """
+        self.status = 'completed'
+        self.save()
+        self.adjust_inventory()
+
+        # Log completion
+        ActivityLog.objects.create(
+            user=self.project.assigned_to,
+            action='complete',
+            content_object=self,
+            description=f'WorkOrder #{self.id} completed and inventory adjusted'
+        )
+
     def __str__(self):
         return f"WorkOrder #{self.id} for {self.project}"
 
@@ -441,6 +510,7 @@ class LineItem(models.Model):
     quantity = models.DecimalField(max_digits=10, decimal_places=2, default=1)
     unit_price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     total = models.DecimalField(max_digits=12, decimal_places=2, default=0.00)
+    warehouse_item = models.ForeignKey('WarehouseItem', on_delete=models.SET_NULL, null=True, blank=True, related_name='line_items')
 
     def save(self, *args, **kwargs):
         self.total = self.quantity * self.unit_price
@@ -451,15 +521,155 @@ class LineItem(models.Model):
 
 
 class WorkOrderInvoice(models.Model):
+    PAYMENT_TERMS_CHOICES = [
+        ('net_15', 'Net 15 days'),
+        ('net_30', 'Net 30 days'),
+        ('net_60', 'Net 60 days'),
+        ('due_on_receipt', 'Due on Receipt'),
+    ]
+
     work_order = models.ForeignKey('WorkOrder', on_delete=models.CASCADE, related_name='invoices')
     issued_date = models.DateField()
     due_date = models.DateField()
+    payment_terms = models.CharField(max_length=20, choices=PAYMENT_TERMS_CHOICES, default='net_30')
     total_amount = models.DecimalField(max_digits=12, decimal_places=2)
     is_paid = models.BooleanField(default=False)
+    paid_date = models.DateField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
-    def __str__(self):
-        return f"Invoice #{self.id} for WorkOrder #{self.work_order.id}"
+    def calculate_total(self):
+        """Calculate total from work order line items"""
+        return sum(line_item.total for line_item in self.work_order.line_items.all())
+
+    def save(self, *args, **kwargs):
+        if not self.total_amount:
+            self.total_amount = self.calculate_total()
+        super().save(*args, **kwargs)
+
+    def is_overdue(self):
+        """Check if invoice is overdue"""
+        from django.utils import timezone
+        return not self.is_paid and timezone.now().date() > self.due_date
+
+    def days_overdue(self):
+        """Return number of days overdue"""
+        from django.utils import timezone
+        if not self.is_overdue():
+            return 0
+        return (timezone.now().date() - self.due_date).days
+
+    def send_invoice_email(self):
+        """
+        Send invoice email to customer.
+        Implements part of REQ-204: customer communication automation.
+        """
+        from django.core.mail import send_mail
+        from django.conf import settings
+
+        subject = f'Invoice #{self.id} from {settings.COMPANY_NAME or "Converge"}'
+        message = f"""
+Dear {self.work_order.project.contact.first_name},
+
+Please find attached invoice #{self.id} for your recent work order.
+
+Invoice Details:
+- Invoice #: {self.id}
+- Work Order: {self.work_order.description}
+- Total Amount: ${self.total_amount}
+- Due Date: {self.due_date}
+- Payment Terms: {self.get_payment_terms_display()}
+
+Thank you for your business!
+
+Best regards,
+{settings.COMPANY_NAME or "Converge"} Team
+        """
+
+        try:
+            send_mail(
+                subject=subject,
+                message=message,
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=[self.work_order.project.contact.email],
+                fail_silently=False,
+            )
+
+            # Log the email sending
+            ActivityLog.objects.create(
+                user=self.work_order.project.assigned_to,
+                action='email_sent',
+                content_object=self,
+                description=f'Invoice email sent to {self.work_order.project.contact.email}'
+            )
+
+            return True
+        except Exception as e:
+            # Log the failure
+            ActivityLog.objects.create(
+                user=self.work_order.project.assigned_to,
+                action='email_sent',
+                content_object=self,
+                description=f'Failed to send invoice email: {str(e)}'
+            )
+            return False
+
+    def send_overdue_reminder(self):
+        """
+        Send overdue payment reminder email.
+        Implements part of REQ-204: customer communication automation.
+        """
+        from django.core.mail import send_mail
+        from django.conf import settings
+
+        days_overdue = self.days_overdue()
+        subject = f'OVERDUE: Payment Reminder for Invoice #{self.id}'
+
+        message = f"""
+Dear {self.work_order.project.contact.first_name},
+
+This is a reminder that payment for Invoice #{self.id} is {days_overdue} days overdue.
+
+Invoice Details:
+- Invoice #: {self.id}
+- Work Order: {self.work_order.description}
+- Total Amount: ${self.total_amount}
+- Due Date: {self.due_date}
+- Days Overdue: {days_overdue}
+
+Please remit payment at your earliest convenience to avoid additional late fees.
+
+Thank you for your prompt attention to this matter.
+
+Best regards,
+{settings.COMPANY_NAME or "Converge"} Team
+        """
+
+        try:
+            send_mail(
+                subject=subject,
+                message=message,
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=[self.work_order.project.contact.email],
+                fail_silently=False,
+            )
+
+            # Log the reminder
+            ActivityLog.objects.create(
+                user=self.work_order.project.assigned_to,
+                action='email_sent',
+                content_object=self,
+                description=f'Overdue reminder sent to {self.work_order.project.contact.email} ({days_overdue} days overdue)'
+            )
+
+            return True
+        except Exception as e:
+            ActivityLog.objects.create(
+                user=self.work_order.project.assigned_to,
+                action='email_sent',
+                content_object=self,
+                description=f'Failed to send overdue reminder: {str(e)}'
+            )
+            return False
 
 class Payment(models.Model):
     amount = models.DecimalField(max_digits=12, decimal_places=2)
@@ -474,3 +684,145 @@ class Payment(models.Model):
 
     def __str__(self):
         return f"Payment of {self.amount} for {self.content_object}"
+
+class Expense(models.Model):
+    EXPENSE_CATEGORIES = [
+        ('office_supplies', 'Office Supplies'),
+        ('travel', 'Travel'),
+        ('meals', 'Meals & Entertainment'),
+        ('utilities', 'Utilities'),
+        ('rent', 'Rent'),
+        ('marketing', 'Marketing'),
+        ('software', 'Software & Subscriptions'),
+        ('equipment', 'Equipment'),
+        ('professional_services', 'Professional Services'),
+        ('other', 'Other'),
+    ]
+
+    date = models.DateField()
+    amount = models.DecimalField(max_digits=12, decimal_places=2)
+    category = models.CharField(max_length=30, choices=EXPENSE_CATEGORIES)
+    description = models.CharField(max_length=255)
+    vendor = models.CharField(max_length=100, blank=True)
+    receipt = models.FileField(upload_to='receipts/', null=True, blank=True)
+    submitted_by = models.ForeignKey('CustomUser', on_delete=models.CASCADE, related_name='expenses')
+    approved = models.BooleanField(default=False)
+    approved_by = models.ForeignKey('CustomUser', on_delete=models.SET_NULL, null=True, blank=True, related_name='approved_expenses')
+    approved_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.category}: {self.description} - ${self.amount}"
+
+class Budget(models.Model):
+    BUDGET_TYPES = [
+        ('monthly', 'Monthly'),
+        ('quarterly', 'Quarterly'),
+        ('annual', 'Annual'),
+    ]
+
+    name = models.CharField(max_length=100)
+    budget_type = models.CharField(max_length=20, choices=BUDGET_TYPES, default='monthly')
+    year = models.PositiveIntegerField()
+    month = models.PositiveIntegerField(null=True, blank=True)  # For monthly budgets
+    quarter = models.PositiveIntegerField(null=True, blank=True)  # For quarterly budgets
+    categories = models.JSONField(default=dict)  # {'category': amount, ...}
+    created_by = models.ForeignKey('CustomUser', on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def get_variance(self, category, actual_amount):
+        """Calculate budget variance for a category"""
+        budgeted = self.categories.get(category, 0)
+        return budgeted - actual_amount
+
+    def __str__(self):
+        period = f"{self.year}"
+        if self.month:
+            period += f"-{self.month:02d}"
+        elif self.quarter:
+            period += f" Q{self.quarter}"
+        return f"{self.name} ({period})"
+
+class TimeEntry(models.Model):
+    """
+    Model for tracking billable time on projects.
+    Implements REQ-202: project billing with time tracking.
+    """
+    project = models.ForeignKey('Project', on_delete=models.CASCADE, related_name='time_entries')
+    user = models.ForeignKey('CustomUser', on_delete=models.CASCADE, related_name='time_entries')
+    date = models.DateField()
+    hours = models.DecimalField(max_digits=5, decimal_places=2, help_text="Hours worked (e.g., 2.5)")
+    description = models.CharField(max_length=255)
+    billable = models.BooleanField(default=True)
+    hourly_rate = models.DecimalField(max_digits=8, decimal_places=2, null=True, blank=True)
+    billed = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-date', '-created_at']
+        unique_together = ('project', 'user', 'date', 'description')  # Prevent duplicate entries
+
+    def __str__(self):
+        return f"{self.user.get_full_name()} - {self.hours}h on {self.project.title} ({self.date})"
+
+    @property
+    def total_amount(self):
+        """Calculate total amount for this time entry"""
+        if not self.hourly_rate:
+            return 0
+        return self.hours * self.hourly_rate
+
+class Warehouse(models.Model):
+    """
+    Model for warehouse locations.
+    Implements part of REQ-203: inventory integration.
+    """
+    name = models.CharField(max_length=100, unique=True)
+    location = models.CharField(max_length=255, blank=True)
+    manager = models.ForeignKey('CustomUser', on_delete=models.SET_NULL, null=True, blank=True, related_name='warehouses')
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.name
+
+class WarehouseItem(models.Model):
+    """
+    Model for items stored in warehouse.
+    Implements inventory tracking for REQ-203.
+    """
+    ITEM_TYPES = [
+        ('part', 'Part'),
+        ('equipment', 'Equipment'),
+        ('consumable', 'Consumable'),
+        ('finished_good', 'Finished Good'),
+    ]
+
+    warehouse = models.ForeignKey('Warehouse', on_delete=models.CASCADE, related_name='items')
+    name = models.CharField(max_length=255)
+    description = models.TextField(blank=True)
+    item_type = models.CharField(max_length=20, choices=ITEM_TYPES)
+    sku = models.CharField(max_length=100, unique=True)
+    quantity = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    unit_cost = models.DecimalField(max_digits=8, decimal_places=2, default=0.00)
+    minimum_stock = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    serial_number = models.CharField(max_length=255, blank=True)
+    location_in_warehouse = models.CharField(max_length=100, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ('warehouse', 'sku')
+
+    def __str__(self):
+        return f"{self.name} ({self.sku}) - {self.quantity} units"
+
+    @property
+    def is_low_stock(self):
+        """Check if item is below minimum stock level"""
+        return self.quantity <= self.minimum_stock
+
+    @property
+    def total_value(self):
+        """Calculate total value of inventory"""
+        return self.quantity * self.unit_cost

@@ -27,6 +27,11 @@ router.register(r'journal-entries', api_views.JournalEntryViewSet, basename='jou
 router.register(r'work-orders', api_views.WorkOrderViewSet, basename='workorder')
 router.register(r'line-items', api_views.LineItemViewSet, basename='lineitem')
 router.register(r'payments', api_views.PaymentViewSet, basename='payment')
+router.register(r'expenses', api_views.ExpenseViewSet, basename='expense')
+router.register(r'budgets', api_views.BudgetViewSet, basename='budget')
+router.register(r'time-entries', api_views.TimeEntryViewSet, basename='timeentry')
+router.register(r'warehouses', api_views.WarehouseViewSet, basename='warehouse')
+router.register(r'warehouse-items', api_views.WarehouseItemViewSet, basename='warehouseitem')
 
 # The API URLs are now determined automatically by the router.
 urlpatterns = [
@@ -48,4 +53,23 @@ urlpatterns = [
 
     # User Roles
     path('user-roles/', api_views.UserRoleManagementView.as_view(), name='user-roles'),
+
+    # Financial Reports
+    path('reports/balance-sheet/', api_views.balance_sheet_report, name='balance-sheet'),
+    path('reports/pnl/', api_views.profit_loss_report, name='profit-loss'),
+    path('reports/cash-flow/', api_views.cash_flow_report, name='cash-flow'),
+
+    # Invoice Management
+    path('workorders/<int:workorder_id>/generate-invoice/', api_views.generate_workorder_invoice, name='generate-workorder-invoice'),
+    path('invoices/overdue/', api_views.overdue_invoices, name='overdue-invoices'),
+
+    # Tax Reporting
+    path('tax-report/', api_views.tax_report, name='tax-report'),
+
+    # Email Communication
+    path('invoices/<int:invoice_id>/send-email/', api_views.send_invoice_email, name='send-invoice-email'),
+    path('invoices/send-overdue-reminders/', api_views.send_overdue_reminders, name='send-overdue-reminders'),
+
+    # Analytics
+    path('analytics/dashboard/', api_views.dashboard_analytics, name='dashboard-analytics'),
 ]

@@ -1,0 +1,258 @@
+.email-communication {
+  padding: 20px;
+}
+
+.email-header {
+  margin-bottom: 30px;
+}
+
+.email-header h1 {
+  margin: 0 0 10px 0;
+  color: #333;
+}
+
+.email-header p {
+  color: #666;
+  margin: 0;
+}
+
+.communication-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+  margin-bottom: 30px;
+}
+
+.summary-card {
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 20px;
+  text-align: center;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.summary-card h3 {
+  margin: 0 0 10px 0;
+  color: #666;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.summary-value {
+  font-size: 32px;
+  font-weight: bold;
+  color: #333;
+  margin: 0 0 5px 0;
+}
+
+.summary-value.warning {
+  color: #dc3545;
+}
+
+.summary-label {
+  color: #888;
+  font-size: 12px;
+  margin: 0;
+}
+
+.bulk-actions {
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 30px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.bulk-actions h2 {
+  margin-top: 0;
+  color: #333;
+}
+
+.action-buttons {
+  margin-bottom: 20px;
+}
+
+.email-results {
+  background: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+  padding: 15px;
+}
+
+.email-results h3 {
+  margin-top: 0;
+  color: #495057;
+}
+
+.overdue-invoices {
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 30px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.overdue-invoices h2 {
+  margin-top: 0;
+  color: #333;
+}
+
+.no-overdue {
+  text-align: center;
+  padding: 40px;
+  color: #28a745;
+}
+
+.no-overdue p {
+  font-size: 18px;
+  margin: 0;
+}
+
+.striped-table {
+  overflow-x: auto;
+}
+
+.striped-table table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.striped-table th,
+.striped-table td {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+}
+
+.striped-table th {
+  background-color: #f8f9fa;
+  font-weight: 600;
+  color: #333;
+}
+
+.striped-table tbody tr:nth-child(even) {
+  background-color: #f8f9fa;
+}
+
+.striped-table tbody tr:hover {
+  background-color: #e9ecef;
+}
+
+.days-overdue {
+  font-weight: 500;
+}
+
+.days-overdue.mild {
+  color: #ffc107;
+}
+
+.days-overdue.warning {
+  color: #fd7e14;
+}
+
+.days-overdue.critical {
+  color: #dc3545;
+}
+
+.email-templates {
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.email-templates h2 {
+  margin-top: 0;
+  color: #333;
+}
+
+.template-info {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.template-card {
+  border: 1px solid #eee;
+  border-radius: 6px;
+  padding: 20px;
+  background: #f8f9fa;
+}
+
+.template-card h3 {
+  margin-top: 0;
+  color: #495057;
+}
+
+.template-card p {
+  color: #6c757d;
+  margin-bottom: 15px;
+}
+
+.template-card ul {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.template-card li {
+  margin-bottom: 5px;
+  color: #495057;
+}
+
+.btn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  text-decoration: none;
+  display: inline-block;
+  transition: background-color 0.2s;
+}
+
+.btn-primary {
+  background-color: #007bff;
+  color: white;
+}
+
+.btn-primary:hover {
+  background-color: #0056b3;
+}
+
+.btn-primary:disabled {
+  background-color: #6c757d;
+  cursor: not-allowed;
+}
+
+.btn-small {
+  padding: 4px 8px;
+  font-size: 12px;
+}
+
+.error {
+  color: #dc3545;
+  background-color: #f8d7da;
+  border: 1px solid #f5c6cb;
+  padding: 12px;
+  border-radius: 4px;
+  margin-bottom: 20px;
+}
+
+@media (max-width: 768px) {
+  .email-communication {
+    padding: 10px;
+  }
+
+  .template-info {
+    grid-template-columns: 1fr;
+  }
+
+  .communication-summary {
+    grid-template-columns: 1fr;
+  }
+}

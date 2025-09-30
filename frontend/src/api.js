@@ -60,4 +60,45 @@ export const createPayment = (data) => apiClient.post('/api/payments/', data);
 export const updatePayment = (id, data) => apiClient.put(`/api/payments/${id}/`, data);
 export const deletePayment = (id) => apiClient.delete(`/api/payments/${id}/`);
 
+// --- Phase 2 Features ---
+// Time Tracking
+export const getTimeEntries = () => apiClient.get('/api/time-entries/');
+export const createTimeEntry = (data) => apiClient.post('/api/time-entries/', data);
+export const updateTimeEntry = (id, data) => apiClient.put(`/api/time-entries/${id}/`, data);
+export const deleteTimeEntry = (id) => apiClient.delete(`/api/time-entries/${id}/`);
+
+// Projects (for time tracking)
+export const getProjects = () => apiClient.get('/api/tasks/');
+
+// Warehouse Management
+export const getWarehouses = () => apiClient.get('/api/warehouses/');
+export const createWarehouse = (data) => apiClient.post('/api/warehouses/', data);
+export const updateWarehouse = (id, data) => apiClient.put(`/api/warehouses/${id}/`, data);
+export const deleteWarehouse = (id) => apiClient.delete(`/api/warehouses/${id}/`);
+
+// Analytics
+export const getAnalyticsData = () => apiClient.get('/api/analytics-data/');
+export const getDashboardData = () => apiClient.get('/api/dashboard-data/');
+
+// Email Communication
+export const sendEmail = (data) => apiClient.post('/api/send-email/', data);
+
+// Warehouse Items
+export const getWarehouseItems = () => apiClient.get('/api/warehouse-items/');
+export const createWarehouseItem = (data) => apiClient.post('/api/warehouse-items/', data);
+export const updateWarehouseItem = (id, data) => apiClient.put(`/api/warehouse-items/${id}/`, data);
+export const deleteWarehouseItem = (id) => apiClient.delete(`/api/warehouse-items/${id}/`);
+
+// Invoice Generation
+export const generateWorkOrderInvoice = (workOrderId, data) => apiClient.post(`/api/workorders/${workOrderId}/generate-invoice/`, data);
+export const getOverdueInvoices = () => apiClient.get('/api/invoices/overdue/');
+
+// Enhanced Email Communication
+export const sendInvoiceEmail = (invoiceId) => apiClient.post(`/api/invoices/${invoiceId}/send-email/`);
+export const sendOverdueReminders = () => apiClient.post('/api/invoices/send-overdue-reminders/');
+
+// Enhanced Analytics
+export const getDashboardAnalytics = () => apiClient.get('/api/analytics/dashboard/');
+export const getTaxReport = (year) => apiClient.get('/api/tax-report/', { params: { year } });
+
 export default apiClient;

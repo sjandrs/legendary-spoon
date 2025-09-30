@@ -3,11 +3,13 @@ from .models import (
     Post, Category, Tag, CustomUser, Account, Contact, Project, Deal, DealStage, 
     Interaction, Quote, QuoteItem, Invoice, InvoiceItem, CustomField, CustomFieldValue,
     ActivityLog, ProjectTemplate, DefaultWorkOrderItem, ProjectType,
-    LedgerAccount, JournalEntry, WorkOrder, LineItem, Payment
+    LedgerAccount, JournalEntry, WorkOrder, LineItem, Payment, Expense, Budget, WorkOrderInvoice, TimeEntry,
+    Warehouse, WarehouseItem
 )
 from .search_models import SavedSearch, GlobalSearchIndex, BulkOperation
 from django.contrib.auth import get_user_model, authenticate
 from django.utils.translation import gettext_lazy as _
+from django.contrib.contenttypes.models import ContentType
 
 class PostSerializer(serializers.ModelSerializer):
     author = serializers.ReadOnlyField(source='author.username')
@@ -220,8 +222,10 @@ class ContactWithCustomFieldsSerializer(ContactSerializer):
         else:
             values = [v for v in values if v.object_id == obj.id]
         return CustomFieldValueSerializer(values, many=True).data
-            content_type = ContentType.objects.get_for_model(obj)
-            values = CustomFieldValue.objects.filter(content_type=content_type, object_id=obj.id)
+
+    def get_custom_fields(self, obj):
+        content_type = ContentType.objects.get_for_model(obj)
+        values = CustomFieldValue.objects.filter(content_type=content_type, object_id=obj.id)
         return CustomFieldValueSerializer(values, many=True).data
 
 class AccountWithCustomFieldsSerializer(AccountSerializer):
@@ -430,3 +434,114 @@ class PaymentSerializer(serializers.ModelSerializer):
             **validated_data
         )
         return payment
+
+class WorkOrderInvoiceSerializer(serializers.ModelSerializer):
+    work_order_description = serializers.CharField(source='work_order.description', read_only=True)
+    is_overdue = serializers.SerializerMethodField()
+    days_overdue = serializers.SerializerMethodField()
+
+    class Meta:
+        model = WorkOrderInvoice
+        fields = [
+            'id', 'work_order', 'work_order_description', 'issued_date', 'due_date',
+            'payment_terms', 'total_amount', 'is_paid', 'paid_date', 'is_overdue',
+            'days_overdue', 'created_at'
+        ]
+        read_only_fields = ['total_amount']
+
+    def get_is_overdue(self, obj):
+        return obj.is_overdue()
+
+    def get_days_overdue(self, obj):
+        return obj.days_overdue()
+
+class ExpenseSerializer(serializers.ModelSerializer):
+    submitted_by_name = serializers.CharField(source='submitted_by.get_full_name', read_only=True)
+    approved_by_name = serializers.CharField(source='approved_by.get_full_name', read_only=True)
+    receipt_url = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Expense
+        fields = [
+            'id', 'date', 'amount', 'category', 'description', 'vendor',
+            'receipt', 'receipt_url', 'submitted_by', 'submitted_by_name',
+            'approved', 'approved_by', 'approved_by_name', 'approved_at',
+            'created_at'
+        ]
+        read_only_fields = ['submitted_by', 'approved_by', 'approved_at']
+
+    def get_receipt_url(self, obj):
+        if obj.receipt:
+            return obj.receipt.url
+        return None
+
+    def create(self, validated_data):
+        validated_data['submitted_by'] = self.context['request'].user
+        return super().create(validated_data)
+
+class BudgetSerializer(serializers.ModelSerializer):
+    created_by_name = serializers.CharField(source='created_by.get_full_name', read_only=True)
+
+    class Meta:
+        model = Budget
+        fields = [
+            'id', 'name', 'budget_type', 'year', 'month', 'quarter',
+            'categories', 'created_by', 'created_by_name', 'created_at'
+        ]
+        read_only_fields = ['created_by']
+
+    def create(self, validated_data):
+        validated_data['created_by'] = self.context['request'].user
+        return super().create(validated_data)
+
+class TimeEntrySerializer(serializers.ModelSerializer):
+    user_name = serializers.CharField(source='user.get_full_name', read_only=True)
+    project_title = serializers.CharField(source='project.title', read_only=True)
+    total_amount = serializers.ReadOnlyField()
+
+    class Meta:
+        model = TimeEntry
+        fields = [
+            'id', 'project', 'project_title', 'user', 'user_name', 'date',
+            'hours', 'description', 'billable', 'hourly_rate', 'total_amount',
+            'billed', 'created_at'
+        ]
+        read_only_fields = ['user', 'total_amount']
+
+    def create(self, validated_data):
+        validated_data['user'] = self.context['request'].user
+        return super().create(validated_data)
+
+class WarehouseSerializer(serializers.ModelSerializer):
+    manager_name = serializers.CharField(source='manager.get_full_name', read_only=True)
+    item_count = serializers.SerializerMethodField()
+    total_value = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Warehouse
+        fields = [
+            'id', 'name', 'location', 'manager', 'manager_name',
+            'is_active', 'created_at', 'item_count', 'total_value'
+        ]
+        read_only_fields = ['created_at']
+
+    def get_item_count(self, obj):
+        return obj.items.count()
+
+    def get_total_value(self, obj):
+        return sum(item.total_value for item in obj.items.all())
+
+class WarehouseItemSerializer(serializers.ModelSerializer):
+    warehouse_name = serializers.CharField(source='warehouse.name', read_only=True)
+    is_low_stock = serializers.ReadOnlyField()
+    total_value = serializers.ReadOnlyField()
+
+    class Meta:
+        model = WarehouseItem
+        fields = [
+            'id', 'warehouse', 'warehouse_name', 'name', 'description',
+            'item_type', 'sku', 'quantity', 'unit_cost', 'minimum_stock',
+            'serial_number', 'location_in_warehouse', 'is_low_stock',
+            'total_value', 'created_at', 'updated_at'
+        ]
+        read_only_fields = ['created_at', 'updated_at']

@@ -180,3 +180,208 @@ main {
 .post-list h2 {
   margin-top: 0;
 }
+
+/* Reports Styles */
+.reports-page {
+  padding: 20px;
+}
+
+.reports-page h2 {
+  color: var(--text-color);
+  margin-bottom: 20px;
+}
+
+.date-filters {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 20px;
+  align-items: end;
+  flex-wrap: wrap;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.filter-group label {
+  font-weight: 500;
+  color: var(--text-color);
+}
+
+.filter-group input {
+  padding: 8px;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.date-filters button {
+  padding: 8px 16px;
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.date-filters button:hover:not(:disabled) {
+  background-color: #0056b3;
+}
+
+.date-filters button:disabled {
+  background-color: var(--secondary-color);
+  cursor: not-allowed;
+}
+
+.report-tabs {
+  display: flex;
+  margin-bottom: 20px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.report-tabs button {
+  padding: 10px 20px;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--secondary-color);
+  transition: all 0.2s ease;
+}
+
+.report-tabs button.active {
+  color: var(--primary-color);
+  border-bottom-color: var(--primary-color);
+}
+
+.report-tabs button:hover {
+  color: var(--primary-color);
+}
+
+.report-content {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.report-section h3 {
+  color: var(--text-color);
+  margin-bottom: 20px;
+  border-bottom: 2px solid var(--primary-color);
+  padding-bottom: 10px;
+}
+
+.report-section h4 {
+  color: var(--text-color);
+  margin: 20px 0 10px 0;
+}
+
+.balance-sheet-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+}
+
+.assets-section,
+.liabilities-equity-section {
+  display: flex;
+  flex-direction: column;
+}
+
+.liabilities-equity-section {
+  grid-template-columns: 1fr;
+  gap: 20px;
+}
+
+.pnl-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+}
+
+.net-profit-section {
+  margin-top: 30px;
+  padding: 20px;
+  background-color: var(--light-gray);
+  border-radius: 8px;
+  text-align: center;
+}
+
+.net-profit-section h4 {
+  margin: 0;
+  font-size: 24px;
+}
+
+.positive {
+  color: #28a745;
+}
+
+.negative {
+  color: #dc3545;
+}
+
+.striped-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 20px;
+}
+
+.striped-table td {
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.striped-table tr:nth-child(even) {
+  background-color: var(--light-gray);
+}
+
+.striped-table .total-row {
+  background-color: #e9ecef !important;
+  font-weight: bold;
+}
+
+.striped-table .total-row td {
+  border-top: 2px solid var(--border-color);
+}
+
+.text-right {
+  text-align: right;
+}
+
+.error-message {
+  background-color: #f8d7da;
+  color: #721c24;
+  padding: 12px;
+  border-radius: 4px;
+  margin-bottom: 20px;
+  border: 1px solid #f5c6cb;
+}
+
+/* Responsive adjustments for reports */
+@media (max-width: 768px) {
+  .balance-sheet-grid,
+  .pnl-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .date-filters {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .report-tabs {
+    flex-wrap: wrap;
+  }
+
+  .report-tabs button {
+    flex: 1;
+    min-width: 120px;
+  }
+}
