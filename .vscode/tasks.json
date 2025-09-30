@@ -40,14 +40,140 @@
 			"detail": "Starts the Vite frontend development server."
 		},
 		{
-			"label": "start-dev",
+			"label": "run-tests",
+			"type": "shell",
+			"command": ".\\venv\\Scripts\\Activate.ps1; python manage.py test",
+			"group": {
+				"kind": "test",
+				"isDefault": true
+			},
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": false,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": false
+			},
+			"detail": "Runs all Django backend tests."
+		},
+		{
+			"label": "run-tests-backend",
+			"type": "shell",
+			"command": ".\\venv\\Scripts\\Activate.ps1; python manage.py test main.tests",
+			"group": "test",
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": false,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": false
+			},
+			"detail": "Runs Django backend tests for the main app."
+		},
+		{
+			"label": "run-tests-coverage",
+			"type": "shell",
+			"command": ".\\venv\\Scripts\\Activate.ps1; python -m coverage run manage.py test && python -m coverage report",
+			"group": "test",
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": false,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": false
+			},
+			"detail": "Runs Django tests with coverage reporting."
+		},
+		{
+			"label": "run-tests-frontend",
+			"type": "shell",
+			"command": "npm test",
+			"options": {
+				"cwd": "${workspaceFolder}/frontend"
+			},
+			"group": "test",
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": false,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": false
+			},
+			"detail": "Runs React frontend tests."
+		},
+		{
+			"label": "run-tests-all",
 			"dependsOn": [
-				"start-backend",
-				"start-frontend"
+				"run-tests-backend",
+				"run-tests-frontend"
 			],
-			"dependsOrder": "parallel",
-			"problemMatcher": [],
-			"detail": "Starts both the backend and frontend development servers."
+			"dependsOrder": "sequence",
+			"group": "test",
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": false,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": false
+			},
+			"detail": "Runs all backend and frontend tests."
+		},
+		{
+			"label": "run-lint-backend",
+			"type": "shell",
+			"command": ".\\venv\\Scripts\\Activate.ps1; python -m flake8 main web --max-line-length=100",
+			"group": "test",
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": false,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": false
+			},
+			"detail": "Runs Python linting on backend code."
+		},
+		{
+			"label": "run-lint-frontend",
+			"type": "shell",
+			"command": "npm run lint",
+			"options": {
+				"cwd": "${workspaceFolder}/frontend"
+			},
+			"group": "test",
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": false,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": false
+			},
+			"detail": "Runs ESLint on frontend code."
+		},
+		{
+			"label": "run-quality-check",
+			"dependsOn": [
+				"run-tests-backend",
+				"run-lint-backend",
+				"run-lint-frontend"
+			],
+			"dependsOrder": "sequence",
+			"group": "test",
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": false,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": false
+			},
+			"detail": "Runs comprehensive quality checks: tests and linting."
 		}
 	]
 }
