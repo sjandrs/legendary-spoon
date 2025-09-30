@@ -53,7 +53,8 @@ INSTALLED_APPS = [
     "django_mailbox",
     "corsheaders",
 ]
-# ...existing code...
+
+AUTH_USER_MODEL = "main.CustomUser"
 SITE_ID = 1
 
 MIDDLEWARE = [

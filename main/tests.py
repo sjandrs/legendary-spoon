@@ -11,6 +11,7 @@ from .models import (
     Account,
     Budget,
     Contact,
+    CustomUser,
     Deal,
     DealStage,
     Expense,
@@ -73,7 +74,7 @@ class Phase1AccountingTests(TestCase):
     """Test Phase 1 Accounting Expansion features"""
 
     def setUp(self):
-        self.user = get_user_model().objects.create_user(
+        self.user = CustomUser.objects.create_user(
             username="sales_manager", password="testpass"
         )
         # Add to Sales Manager group
@@ -188,7 +189,7 @@ class Phase1AccountingTests(TestCase):
             credit_account=liability_account,
             amount=500.00,
         )
-        balance_sheet = reports.balance_sheet()
+        balance_sheet = reports.get_balance_sheet()
         self.assertIsInstance(balance_sheet, dict)
         # Check for expected keys in the balance sheet
         self.assertIn("assets", balance_sheet)
@@ -226,7 +227,7 @@ class Phase2WorkflowTests(TestCase):
     """Test Phase 2 Workflow Automation features"""
 
     def setUp(self):
-        self.user = get_user_model().objects.create_user(
+        self.user = CustomUser.objects.create_user(
             username="sales_rep", password="testpass"
         )
 
@@ -413,7 +414,7 @@ class WorkflowAutomationTests(TestCase):
     """Test automatic workflow triggers"""
 
     def setUp(self):
-        self.user = get_user_model().objects.create_user(
+        self.user = CustomUser.objects.create_user(
             username="sales_user", password="testpass"
         )
 
