@@ -245,3 +245,4 @@ file:./task-implementation.instructions.md
 file:./tasksync.instructions.md
 file:./terraform-azure.instructions.md
 file:./terraform.instructions.md
+file:../spec/spec-design-accounting-expansion.md
