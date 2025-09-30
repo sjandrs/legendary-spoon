@@ -50,6 +50,10 @@ router.register(r"warehouses", api_views.WarehouseViewSet, basename="warehouse")
 router.register(
     r"warehouse-items", api_views.WarehouseItemViewSet, basename="warehouseitem"
 )
+# Phase 3: Analytics APIs
+router.register(
+    r"analytics-snapshots", api_views.AnalyticsSnapshotViewSet, basename="analyticssnapshot"
+)
 
 # The API URLs are now determined automatically by the router.
 urlpatterns = [
@@ -107,5 +111,26 @@ urlpatterns = [
         "analytics/dashboard/",
         api_views.dashboard_analytics,
         name="dashboard-analytics",
+    ),
+    # Phase 3: Advanced Analytics
+    path(
+        "analytics/dashboard-v2/",
+        api_views.analytics_dashboard,
+        name="analytics-dashboard-v2",
+    ),
+    path(
+        "analytics/clv/<int:contact_id>/",
+        api_views.calculate_clv,
+        name="calculate-clv",
+    ),
+    path(
+        "analytics/predict/<int:deal_id>/",
+        api_views.predict_deal_outcome,
+        name="predict-deal-outcome",
+    ),
+    path(
+        "analytics/forecast/",
+        api_views.generate_revenue_forecast,
+        name="generate-revenue-forecast",
     ),
 ]

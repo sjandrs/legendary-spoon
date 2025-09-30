@@ -101,4 +101,10 @@ export const sendOverdueReminders = () => apiClient.post('/api/invoices/send-ove
 export const getDashboardAnalytics = () => apiClient.get('/api/analytics/dashboard/');
 export const getTaxReport = (year) => apiClient.get('/api/tax-report/', { params: { year } });
 
+// --- Phase 3: Advanced Analytics & AI ---
+export const getAdvancedAnalyticsDashboard = () => apiClient.get('/api/analytics/dashboard-v2/');
+export const calculateCustomerLifetimeValue = (contactId) => apiClient.post(`/api/analytics/clv/${contactId}/`);
+export const predictDealOutcome = (dealId) => apiClient.post(`/api/analytics/predict/${dealId}/`);
+export const generateRevenueForecast = (data) => apiClient.post('/api/analytics/forecast/', data);
+
 export default apiClient;

@@ -6,12 +6,15 @@ from rest_framework import serializers
 from .models import (
     Account,
     ActivityLog,
+    AnalyticsSnapshot,
     Budget,
     Contact,
     CustomField,
     CustomFieldValue,
     CustomUser,
+    CustomerLifetimeValue,
     Deal,
+    DealPrediction,
     DealStage,
     DefaultWorkOrderItem,
     Expense,
@@ -28,6 +31,7 @@ from .models import (
     ProjectType,
     Quote,
     QuoteItem,
+    RevenueForecast,
     Tag,
     TimeEntry,
     Warehouse,
@@ -857,3 +861,107 @@ class WarehouseItemSerializer(serializers.ModelSerializer):
             "updated_at",
         ]
         read_only_fields = ["created_at", "updated_at"]
+
+
+# Phase 3: Advanced Analytics Serializers
+class AnalyticsSnapshotSerializer(serializers.ModelSerializer):
+    """Serializer for analytics snapshots"""
+
+    class Meta:
+        model = AnalyticsSnapshot
+        fields = [
+            "id",
+            "date",
+            "total_revenue",
+            "total_deals",
+            "won_deals",
+            "lost_deals",
+            "active_projects",
+            "completed_projects",
+            "total_contacts",
+            "total_accounts",
+            "inventory_value",
+            "outstanding_invoices",
+            "overdue_invoices",
+            "created_at",
+        ]
+        read_only_fields = ["created_at"]
+
+
+class DealPredictionSerializer(serializers.ModelSerializer):
+    """Serializer for deal outcome predictions"""
+
+    deal_title = serializers.CharField(source="deal.title", read_only=True)
+    deal_value = serializers.DecimalField(source="deal.value", max_digits=10, decimal_places=2, read_only=True)
+    confidence_percentage = serializers.SerializerMethodField()
+
+    class Meta:
+        model = DealPrediction
+        fields = [
+            "id",
+            "deal",
+            "deal_title",
+            "deal_value",
+            "predicted_outcome",
+            "confidence_score",
+            "confidence_percentage",
+            "predicted_close_date",
+            "factors",
+            "model_version",
+            "created_at",
+            "updated_at",
+        ]
+        read_only_fields = ["created_at", "updated_at"]
+
+    def get_confidence_percentage(self, obj):
+        return f"{obj.confidence_score * 100:.1f}%"
+
+
+class CustomerLifetimeValueSerializer(serializers.ModelSerializer):
+    """Serializer for customer lifetime value data"""
+
+    contact_name = serializers.SerializerMethodField()
+    contact_email = serializers.CharField(source="contact.email", read_only=True)
+
+    class Meta:
+        model = CustomerLifetimeValue
+        fields = [
+            "id",
+            "contact",
+            "contact_name",
+            "contact_email",
+            "total_revenue",
+            "total_deals",
+            "average_deal_size",
+            "deal_win_rate",
+            "customer_since",
+            "last_activity",
+            "predicted_clv",
+            "clv_confidence",
+            "segments",
+            "created_at",
+            "updated_at",
+        ]
+        read_only_fields = ["created_at", "updated_at"]
+
+    def get_contact_name(self, obj):
+        return f"{obj.contact.first_name} {obj.contact.last_name}"
+
+
+class RevenueForecastSerializer(serializers.ModelSerializer):
+    """Serializer for revenue forecasting"""
+
+    class Meta:
+        model = RevenueForecast
+        fields = [
+            "id",
+            "forecast_date",
+            "forecast_period",
+            "predicted_revenue",
+            "confidence_interval_lower",
+            "confidence_interval_upper",
+            "forecast_method",
+            "factors",
+            "created_at",
+        ]
+        read_only_fields = ["created_at"]

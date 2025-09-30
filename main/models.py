@@ -1049,3 +1049,263 @@ class WarehouseItem(models.Model):
     def total_value(self):
         """Calculate total value of inventory"""
         return self.quantity * self.unit_cost
+
+
+# Phase 3: Advanced Analytics Models
+class AnalyticsSnapshot(models.Model):
+    """
+    Daily snapshots of key business metrics for historical trending.
+    Implements part of REQ-301: Advanced Analytics Dashboard.
+    """
+    date = models.DateField(unique=True)
+    total_revenue = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    total_deals = models.PositiveIntegerField(default=0)
+    won_deals = models.PositiveIntegerField(default=0)
+    lost_deals = models.PositiveIntegerField(default=0)
+    active_projects = models.PositiveIntegerField(default=0)
+    completed_projects = models.PositiveIntegerField(default=0)
+    total_contacts = models.PositiveIntegerField(default=0)
+    total_accounts = models.PositiveIntegerField(default=0)
+    inventory_value = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    outstanding_invoices = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    overdue_invoices = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-date"]
+
+    def __str__(self):
+        return f"Analytics Snapshot for {self.date}"
+
+    @classmethod
+    def create_daily_snapshot(cls):
+        """Create a daily snapshot of current business metrics (optimized for fewer DB hits)"""
+        from django.db.models import Sum, Count, Q, F
+        from django.utils import timezone
+
+        today = timezone.now().date()
+
+        # Revenue calculations
+        total_revenue = Payment.objects.filter(
+            payment_date__lte=today
+        ).aggregate(total=Sum('amount'))['total'] or 0
+
+        # Deal statistics (single query with annotation)
+        deal_stats = Deal.objects.aggregate(
+            total_deals=Count('id'),
+            won_deals=Count('id', filter=Q(status='won')),
+            lost_deals=Count('id', filter=Q(status='lost'))
+        )
+        total_deals = deal_stats['total_deals']
+        won_deals = deal_stats['won_deals']
+        lost_deals = deal_stats['lost_deals']
+
+        # Project statistics (single query with annotation)
+        project_stats = Project.objects.aggregate(
+            active_projects=Count('id', filter=Q(status='in_progress')),
+            completed_projects=Count('id', filter=Q(status='completed'))
+        )
+        active_projects = project_stats['active_projects']
+        completed_projects = project_stats['completed_projects']
+
+        # Contact and account counts (single query each)
+        total_contacts = Contact.objects.count()
+        total_accounts = Account.objects.count()
+
+        # Inventory value (single aggregate query)
+        inventory_value = WarehouseItem.objects.aggregate(
+            total=Sum(F('quantity') * F('unit_cost'))
+        )['total'] or 0
+
+        # Invoice statistics (single query with annotation)
+        invoice_stats = WorkOrderInvoice.objects.aggregate(
+            outstanding_invoices=Sum('total_amount', filter=Q(is_paid=False)),
+            overdue_invoices=Sum('total_amount', filter=Q(is_paid=False, due_date__lt=today))
+        )
+        outstanding_invoices = invoice_stats['outstanding_invoices'] or 0
+        overdue_invoices = invoice_stats['overdue_invoices'] or 0
+
+        # Create or update snapshot
+        snapshot, created = cls.objects.get_or_create(
+            date=today,
+            defaults={
+                'total_revenue': total_revenue,
+                'total_deals': total_deals,
+                'won_deals': won_deals,
+                'lost_deals': lost_deals,
+                'active_projects': active_projects,
+                'completed_projects': completed_projects,
+                'total_contacts': total_contacts,
+                'total_accounts': total_accounts,
+                'inventory_value': inventory_value,
+                'outstanding_invoices': outstanding_invoices,
+                'overdue_invoices': overdue_invoices,
+            }
+        )
+
+        if not created:
+            # Update existing snapshot
+            snapshot.total_revenue = total_revenue
+            snapshot.total_deals = total_deals
+            snapshot.won_deals = won_deals
+            snapshot.lost_deals = lost_deals
+            snapshot.active_projects = active_projects
+            snapshot.completed_projects = completed_projects
+            snapshot.total_contacts = total_contacts
+            snapshot.total_accounts = total_accounts
+            snapshot.inventory_value = inventory_value
+            snapshot.outstanding_invoices = outstanding_invoices
+            snapshot.overdue_invoices = overdue_invoices
+            snapshot.save()
+
+        return snapshot
+
+
+class DealPrediction(models.Model):
+    """
+    Machine learning predictions for deal outcomes.
+    Implements predictive analytics for REQ-301.
+    """
+    deal = models.OneToOneField(Deal, on_delete=models.CASCADE, related_name='prediction')
+    predicted_outcome = models.CharField(
+        max_length=20,
+        choices=[('won', 'Will Win'), ('lost', 'Will Lose'), ('pending', 'Still Pending')]
+    )
+    confidence_score = models.DecimalField(max_digits=3, decimal_places=2)  # 0.00 to 1.00
+    predicted_close_date = models.DateField(null=True, blank=True)
+    factors = models.JSONField(default=dict)  # Store prediction factors
+    model_version = models.CharField(max_length=50, default='v1.0')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"Prediction for {self.deal.title}: {self.predicted_outcome} ({self.confidence_score})"
+
+
+class CustomerLifetimeValue(models.Model):
+    """
+    Calculated customer lifetime value metrics.
+    Implements CLV calculations for REQ-301.
+    """
+    contact = models.OneToOneField(Contact, on_delete=models.CASCADE, related_name='clv')
+    total_revenue = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    total_deals = models.PositiveIntegerField(default=0)
+    average_deal_size = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    deal_win_rate = models.DecimalField(max_digits=3, decimal_places=2, default=0)  # 0.00 to 1.00
+    customer_since = models.DateField()
+    last_activity = models.DateField()
+    predicted_clv = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    clv_confidence = models.DecimalField(max_digits=3, decimal_places=2, default=0)
+    segments = models.JSONField(default=list)  # Customer segments
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"CLV for {self.contact}: ${self.predicted_clv}"
+
+    @classmethod
+    def calculate_for_contact(cls, contact):
+        """Calculate CLV for a specific contact"""
+        from django.db.models import Avg, Count, Sum
+        from django.utils import timezone
+
+        # Get deal statistics
+        deals = Deal.objects.filter(primary_contact=contact)
+        total_deals = deals.count()
+        won_deals = deals.filter(status='won')
+        total_revenue = won_deals.aggregate(total=Sum('value'))['total'] or 0
+        average_deal_size = won_deals.aggregate(avg=Avg('value'))['avg'] or 0
+        deal_win_rate = won_deals.count() / total_deals if total_deals > 0 else 0
+
+        # Calculate customer tenure
+        customer_since = contact.created_at.date()
+        last_activity = max(
+            contact.created_at.date(),
+            deals.order_by('-updated_at').first().updated_at.date() if deals.exists() else contact.created_at.date()
+        )
+
+        # Simple CLV prediction (can be enhanced with ML)
+        months_active = (timezone.now().date() - customer_since).days / 30
+        monthly_revenue = total_revenue / max(months_active, 1)
+        predicted_clv = monthly_revenue * 12 * 3  # 3-year prediction
+        clv_confidence = min(0.9, total_deals / 10)  # Confidence based on deal history
+
+        # Customer segments
+        segments = []
+        if total_revenue > 10000:
+            segments.append('high_value')
+        elif total_revenue > 5000:
+            segments.append('medium_value')
+        else:
+            segments.append('low_value')
+
+        if deal_win_rate > 0.7:
+            segments.append('high_conversion')
+        if months_active > 12:
+            segments.append('loyal')
+
+        # Create or update CLV record
+        clv, created = cls.objects.get_or_create(
+            contact=contact,
+            defaults={
+                'total_revenue': total_revenue,
+                'total_deals': total_deals,
+                'average_deal_size': average_deal_size,
+                'deal_win_rate': deal_win_rate,
+                'customer_since': customer_since,
+                'last_activity': last_activity,
+                'predicted_clv': predicted_clv,
+                'clv_confidence': clv_confidence,
+                'segments': segments,
+            }
+        )
+
+        if not created:
+            clv.total_revenue = total_revenue
+            clv.total_deals = total_deals
+            clv.average_deal_size = average_deal_size
+            clv.deal_win_rate = deal_win_rate
+            clv.customer_since = customer_since
+            clv.last_activity = last_activity
+            clv.predicted_clv = predicted_clv
+            clv.clv_confidence = clv_confidence
+            clv.segments = segments
+            clv.save()
+
+        return clv
+
+
+class RevenueForecast(models.Model):
+    """
+    Revenue forecasting models and predictions.
+    Implements revenue forecasting for REQ-301.
+    """
+    forecast_date = models.DateField()
+    forecast_period = models.CharField(
+        max_length=20,
+        choices=[
+            ('monthly', 'Monthly'),
+            ('quarterly', 'Quarterly'),
+            ('annual', 'Annual')
+        ]
+    )
+    predicted_revenue = models.DecimalField(max_digits=12, decimal_places=2)
+    confidence_interval_lower = models.DecimalField(max_digits=12, decimal_places=2)
+    confidence_interval_upper = models.DecimalField(max_digits=12, decimal_places=2)
+    forecast_method = models.CharField(
+        max_length=50,
+        choices=[
+            ('linear_regression', 'Linear Regression'),
+            ('moving_average', 'Moving Average'),
+            ('seasonal_arima', 'Seasonal ARIMA')
+        ]
+    )
+    factors = models.JSONField(default=dict)  # Forecast factors and assumptions
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('forecast_date', 'forecast_period', 'forecast_method')
+        ordering = ['-forecast_date']
+
+    def __str__(self):
+        return f"{self.forecast_period.title()} forecast for {self.forecast_date}: ${self.predicted_revenue}"

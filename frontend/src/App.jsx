@@ -48,6 +48,7 @@ import BudgetForm from './components/BudgetForm';
 import TaxReport from './components/TaxReport';
 import TimeTracking from './components/TimeTracking';
 import EmailCommunication from './components/EmailCommunication';
+import AnalyticsDashboard from './components/AnalyticsDashboard';
 
 // This component contains the main application layout with navigation
 const MainLayout = () => {
@@ -68,6 +69,7 @@ const MainLayout = () => {
         <ul>
           <div className="nav-links">
             <li><Link to="/dashboard">Dashboard</Link></li>
+            <li><Link to="/analytics">Analytics</Link></li>
             <li
               className="dropdown-menu"
               onMouseEnter={() => setResourcesMenuOpen(true)}
@@ -151,6 +153,7 @@ function App() {
       <Route element={<ProtectedRoute />}>
         <Route element={<MainLayout />}>
           <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/analytics" element={<AnalyticsDashboard />} />
           <Route path="/search" element={<SearchPage />} />
           <Route path="/tasks" element={<TaskDashboard />} />
           <Route path="/time-tracking" element={<TimeTracking />} />

@@ -5,7 +5,7 @@ import os
 from django.conf import settings
 from django.contrib.auth.models import Group
 from django.db import models
-from django.db.models import Count, F, Q, Sum
+from django.db.models import Avg, Count, F, Q, Sum
 from django.http import FileResponse
 from django.utils import timezone
 from django_filters.rest_framework import DjangoFilterBackend
@@ -21,12 +21,15 @@ from rest_framework.views import APIView
 from .models import (
     Account,
     ActivityLog,
+    AnalyticsSnapshot,
     Budget,
     Contact,
     CustomField,
     CustomFieldValue,
     CustomUser,
+    CustomerLifetimeValue,
     Deal,
+    DealPrediction,
     DealStage,
     DefaultWorkOrderItem,
     Expense,
@@ -43,6 +46,7 @@ from .models import (
     ProjectType,
     Quote,
     QuoteItem,
+    RevenueForecast,
     Tag,
     TimeEntry,
     Warehouse,
@@ -54,6 +58,7 @@ from .serializers import (
     AccountSerializer,
     AccountWithCustomFieldsSerializer,
     ActivityLogSerializer,
+    AnalyticsSnapshotSerializer,
     BudgetSerializer,
     BulkOperationSerializer,
     ContactSerializer,
@@ -61,6 +66,8 @@ from .serializers import (
     CustomFieldSerializer,
     CustomFieldValueSerializer,
     CustomUserSerializer,
+    CustomerLifetimeValueSerializer,
+    DealPredictionSerializer,
     DealSerializer,
     DealStageSerializer,
     DefaultWorkOrderItemSerializer,
@@ -79,6 +86,7 @@ from .serializers import (
     ProjectTypeSerializer,
     QuoteItemSerializer,
     QuoteSerializer,
+    RevenueForecastSerializer,
     SavedSearchSerializer,
     SearchResultSerializer,
     TagSerializer,
@@ -1323,8 +1331,9 @@ def dashboard_analytics(request):
 
     # Financial Analytics
     total_revenue = (
-        Invoice.objects.filter(
-            created_at__date__range=(start_date, end_date)
+        WorkOrderInvoice.objects.filter(
+            issued_date__range=(start_date, end_date),
+            is_paid=True
         ).aggregate(total=Sum("total_amount"))["total"]
         or 0
     )
@@ -1523,3 +1532,351 @@ def send_overdue_reminders(request):
             "failed": failed_count,
         }
     )
+
+
+# Phase 3: Advanced Analytics API Views
+class AnalyticsSnapshotViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    API endpoint for analytics snapshots.
+    Provides historical business metrics for trending analysis.
+    """
+    queryset = AnalyticsSnapshot.objects.all()
+    serializer_class = AnalyticsSnapshotSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    @action(detail=False, methods=["post"])
+    def create_snapshot(self, request):
+        """Create a new daily analytics snapshot"""
+        if not request.user.is_staff:
+            return Response(
+                {"error": "Permission denied"}, status=status.HTTP_403_FORBIDDEN
+            )
+
+        snapshot = AnalyticsSnapshot.create_daily_snapshot()
+        return Response({"message": "Snapshot created", "id": snapshot.id})
+
+    @action(detail=False, methods=["get"])
+    def latest(self, request):
+        """Get the latest analytics snapshot"""
+        snapshot = self.get_queryset().first()
+        if not snapshot:
+            return Response({"error": "No snapshots available"}, status=404)
+
+        # Convert to dict for response
+        data = {
+            "date": snapshot.date,
+            "total_revenue": float(snapshot.total_revenue),
+            "total_deals": snapshot.total_deals,
+            "won_deals": snapshot.won_deals,
+            "lost_deals": snapshot.lost_deals,
+            "active_projects": snapshot.active_projects,
+            "completed_projects": snapshot.completed_projects,
+            "total_contacts": snapshot.total_contacts,
+            "total_accounts": snapshot.total_accounts,
+            "inventory_value": float(snapshot.inventory_value),
+            "outstanding_invoices": float(snapshot.outstanding_invoices),
+            "overdue_invoices": float(snapshot.overdue_invoices),
+        }
+        return Response(data)
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def analytics_dashboard(request):
+    """
+    Advanced analytics dashboard with predictive insights.
+    Implements REQ-301: Advanced Analytics Dashboard.
+    """
+    # Get latest snapshot
+    latest_snapshot = AnalyticsSnapshot.objects.first()
+
+    # Calculate trends (comparing to 7 days ago)
+    week_ago = timezone.now().date() - timezone.timedelta(days=7)
+    week_ago_snapshot = AnalyticsSnapshot.objects.filter(date=week_ago).first()
+
+    # Predictive analytics - simple linear regression for revenue forecasting
+    start_date = timezone.now().date() - timezone.timedelta(days=30)
+    snapshots = AnalyticsSnapshot.objects.filter(date__gte=start_date).order_by('date')
+    revenue_trend = []
+    for snapshot in snapshots:
+        revenue_trend.append({
+            'date': snapshot.date,
+            'revenue': float(snapshot.total_revenue)
+        })
+
+    # Simple forecasting (next 7 days based on average growth)
+    if len(revenue_trend) >= 7:
+        recent_revenue = [r['revenue'] for r in revenue_trend[-7:]]
+        avg_daily_revenue = sum(recent_revenue) / len(recent_revenue)
+        forecasted_revenue = avg_daily_revenue * 7  # Next week forecast
+    else:
+        forecasted_revenue = 0
+
+    # Deal conversion predictions
+    total_deals = Deal.objects.count()
+    won_deals = Deal.objects.filter(status='won').count()
+    conversion_rate = (won_deals / total_deals * 100) if total_deals > 0 else 0
+
+    # Customer lifetime value insights
+    high_value_customers = CustomerLifetimeValue.objects.filter(
+        predicted_clv__gte=10000
+    ).order_by('-predicted_clv')[:5]
+
+    clv_data = [{
+        'contact_id': clv.contact.id,
+        'contact_name': f"{clv.contact.first_name} {clv.contact.last_name}",
+        'predicted_clv': float(clv.predicted_clv),
+        'segments': clv.segments
+    } for clv in high_value_customers]
+
+    # Deal predictions (placeholder - would use ML model)
+    DEAL_PREDICTION_LIMIT = 10  # Limit for performance, configurable constant
+    pending_deals = Deal.objects.filter(status='in_progress')
+    deal_predictions = []
+    for deal in pending_deals[:DEAL_PREDICTION_LIMIT]:
+        # Simple prediction based on deal age and value
+        deal_age_days = (timezone.now().date() - deal.created_at.date()).days
+        confidence = min(0.8, deal_age_days / 90)  # Higher confidence for older deals
+
+        deal_predictions.append({
+            'deal_id': deal.id,
+            'deal_title': deal.title,
+            'predicted_outcome': 'won' if confidence > 0.5 else 'pending',
+            'confidence': round(confidence, 2),
+            'estimated_close_days': max(0, 60 - deal_age_days)
+        })
+
+    # Revenue forecasting
+    revenue_forecast = RevenueForecast.objects.filter(
+        forecast_date__gte=timezone.now().date()
+    ).order_by('forecast_date')[:12]  # Next 12 months
+
+    forecast_data = [{
+        'date': f.forecast_date,
+        'period': f.forecast_period,
+        'predicted_revenue': float(f.predicted_revenue),
+        'confidence_lower': float(f.confidence_interval_lower),
+        'confidence_upper': float(f.confidence_interval_upper)
+    } for f in revenue_forecast]
+
+    dashboard_data = {
+        'current_metrics': {
+            'total_revenue': float(latest_snapshot.total_revenue) if latest_snapshot else 0,
+            'total_deals': latest_snapshot.total_deals if latest_snapshot else 0,
+            'won_deals': latest_snapshot.won_deals if latest_snapshot else 0,
+            'conversion_rate': round(conversion_rate, 2),
+            'active_projects': latest_snapshot.active_projects if latest_snapshot else 0,
+            'inventory_value': float(latest_snapshot.inventory_value) if latest_snapshot else 0,
+            'outstanding_invoices': float(latest_snapshot.outstanding_invoices) if latest_snapshot else 0,
+        },
+        'trends': {
+            'revenue_change_7d': calculate_percentage_change(
+                latest_snapshot.total_revenue if latest_snapshot else 0,
+                week_ago_snapshot.total_revenue if week_ago_snapshot else 0
+            ),
+            'deals_change_7d': calculate_percentage_change(
+                latest_snapshot.total_deals if latest_snapshot else 0,
+                week_ago_snapshot.total_deals if week_ago_snapshot else 0
+            ),
+        },
+        'predictions': {
+            'deal_predictions': deal_predictions,
+            'revenue_forecast_next_week': forecasted_revenue,
+            'forecast_data': forecast_data,
+        },
+        'insights': {
+            'customer_lifetime_value': clv_data,
+            'top_performing_segments': calculate_top_segments(),
+            'revenue_trend': revenue_trend[-14:],  # Last 2 weeks
+        }
+    }
+
+    return Response(dashboard_data)
+
+
+def calculate_percentage_change(current, previous):
+    """Calculate percentage change between two values"""
+    if previous == 0:
+        return 0 if current == 0 else 100
+    return round(((current - previous) / previous) * 100, 2)
+
+
+def calculate_top_segments():
+    """Calculate top performing customer segments"""
+    segments = CustomerLifetimeValue.objects.values('segments').annotate(
+        count=Count('id'),
+        avg_clv=Avg('predicted_clv')
+    ).order_by('-avg_clv')[:5]
+
+    return [{
+        'segment': ', '.join(seg['segments']),
+        'count': seg['count'],
+        'avg_clv': float(seg['avg_clv'])
+    } for seg in segments]
+
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def calculate_clv(request, contact_id):
+    """
+    Calculate and update Customer Lifetime Value for a specific contact.
+    """
+    try:
+        contact = Contact.objects.get(id=contact_id)
+    except Contact.DoesNotExist:
+        return Response({"error": "Contact not found"}, status=404)
+
+    clv = CustomerLifetimeValue.calculate_for_contact(contact)
+
+    return Response({
+        'contact_id': contact.id,
+        'predicted_clv': float(clv.predicted_clv),
+        'confidence': float(clv.clv_confidence),
+        'segments': clv.segments
+    })
+
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def predict_deal_outcome(request, deal_id):
+    """
+    Generate prediction for deal outcome using analytics.
+    """
+    try:
+        deal = Deal.objects.get(id=deal_id)
+    except Deal.DoesNotExist:
+        return Response({"error": "Deal not found"}, status=404)
+
+    # Simple prediction algorithm (would be replaced with ML model)
+    deal_age_days = (timezone.now().date() - deal.created_at.date()).days
+    deal_value_factor = min(1.0, deal.value / 50000)  # Normalize deal value
+
+    # Factors influencing win probability
+    factors = {
+        'deal_age': deal_age_days,
+        'deal_value': deal.value,
+        'has_primary_contact': 1 if deal.primary_contact else 0,
+        'contact_interactions': Interaction.objects.filter(contact=deal.primary_contact).count() if deal.primary_contact else 0,
+    }
+
+    # Simple scoring model
+    base_score = 0.3  # Base 30% win rate
+    age_bonus = min(0.4, deal_age_days / 180)  # Up to 40% bonus for 6-month old deals
+    value_bonus = deal_value_factor * 0.2  # Up to 20% bonus for large deals
+    contact_bonus = factors['has_primary_contact'] * 0.1  # 10% bonus for having contact
+    interaction_bonus = min(0.1, factors['contact_interactions'] / 10)  # Up to 10% for interactions
+
+    confidence_score = base_score + age_bonus + value_bonus + contact_bonus + interaction_bonus
+    confidence_score = min(0.95, max(0.05, confidence_score))  # Clamp between 5% and 95%
+
+    predicted_outcome = 'won' if confidence_score > 0.5 else 'pending'
+
+    # Create or update prediction
+    prediction, created = DealPrediction.objects.get_or_create(
+        deal=deal,
+        defaults={
+            'predicted_outcome': predicted_outcome,
+            'confidence_score': confidence_score,
+            'factors': factors,
+        }
+    )
+
+    if not created:
+        prediction.predicted_outcome = predicted_outcome
+        prediction.confidence_score = confidence_score
+        prediction.factors = factors
+        prediction.save()
+
+    return Response({
+        'deal_id': deal.id,
+        'predicted_outcome': predicted_outcome,
+        'confidence_score': round(confidence_score, 3),
+        'factors': factors,
+        'estimated_close_days': max(0, 90 - deal_age_days)  # Rough estimate
+    })
+
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def generate_revenue_forecast(request):
+    """
+    Generate revenue forecast using historical data.
+    """
+    if not request.user.is_staff:
+        return Response({"error": "Permission denied"}, status=403)
+
+    forecast_period = request.data.get('period', 'monthly')
+    periods_ahead = int(request.data.get('periods_ahead', 6))
+
+    # Get historical revenue data (last 12 months)
+    end_date = timezone.now().date()
+    if forecast_period == 'monthly':
+        start_date = end_date - timezone.timedelta(days=365)
+        snapshots = AnalyticsSnapshot.objects.filter(
+            date__range=(start_date, end_date)
+        ).order_by('date')
+    else:
+        # Quarterly or annual - simplified
+        snapshots = AnalyticsSnapshot.objects.filter(
+            date__gte=end_date - timezone.timedelta(days=730)
+        ).order_by('date')
+
+    if not snapshots.exists():
+        return Response({"error": "Insufficient historical data"}, status=400)
+
+    # Simple moving average forecasting
+    revenue_values = [float(s.total_revenue) for s in snapshots]
+
+    if len(revenue_values) < 3:
+        return Response({"error": "Need at least 3 months of data"}, status=400)
+
+    # Calculate growth rate from recent data
+    recent_avg = sum(revenue_values[-3:]) / 3
+    older_avg = sum(revenue_values[-6:-3]) / 3 if len(revenue_values) >= 6 else recent_avg
+
+    growth_rate = (recent_avg - older_avg) / older_avg if older_avg > 0 else 0
+
+    # Generate forecasts
+    forecasts_created = 0
+    current_date = end_date
+
+    for i in range(1, periods_ahead + 1):
+        if forecast_period == 'monthly':
+            forecast_date = current_date + timezone.timedelta(days=30 * i)
+        elif forecast_period == 'quarterly':
+            forecast_date = current_date + timezone.timedelta(days=90 * i)
+        else:  # annual
+            forecast_date = current_date + timezone.timedelta(days=365 * i)
+
+        # Apply growth rate with some dampening
+        predicted_revenue = recent_avg * (1 + growth_rate * 0.7) ** i
+
+        # Confidence intervals (simplified)
+        confidence_lower = predicted_revenue * 0.8
+        confidence_upper = predicted_revenue * 1.2
+
+        forecast, created = RevenueForecast.objects.get_or_create(
+            forecast_date=forecast_date,
+            forecast_period=forecast_period,
+            defaults={
+                'predicted_revenue': predicted_revenue,
+                'confidence_interval_lower': confidence_lower,
+                'confidence_interval_upper': confidence_upper,
+                'forecast_method': 'moving_average',
+                'factors': {
+                    'growth_rate': growth_rate,
+                    'recent_avg': recent_avg,
+                    'periods_analyzed': len(revenue_values)
+                }
+            }
+        )
+
+        if created:
+            forecasts_created += 1
+
+    return Response({
+        'message': f'Generated {forecasts_created} revenue forecasts',
+        'period': forecast_period,
+        'periods_ahead': periods_ahead,
+        'growth_rate': round(growth_rate, 4)
+    })
