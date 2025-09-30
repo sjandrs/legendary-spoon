@@ -37,25 +37,7 @@ class RichTextContent(models.Model):
 
 class CustomUser(AbstractUser):
     # Add custom fields here if needed
-    groups = models.ManyToManyField(
-        'auth.Group',
-        verbose_name='groups',
-        blank=True,
-        help_text='The groups this user belongs to. A user will get all permissions granted to each of their groups.',
-        related_name='customuser_set',
-        related_query_name='customuser',
-    )
-    user_permissions = models.ManyToManyField(
-        'auth.Permission',
-        verbose_name='user permissions',
-        blank=True,
-        help_text='Specific permissions for this user.',
-        related_name='customuser_set',
-        related_query_name='customuser',
-    )
-
-    class Meta:
-        pass
+    pass
 
 
 class SecretModel(models.Model):
@@ -234,8 +216,9 @@ class Project(models.Model):
     priority = models.CharField(
         max_length=10, choices=PRIORITY_CHOICES, default="medium"
     )
-    # due_date uses DateField (not DateTimeField) to store only the date, not the time, for project deadlines.
-    # This is intentional to simplify deadline logic and UI; if time precision is needed, consider switching to DateTimeField.
+    # due_date uses DateField (not DateTimeField) to store only the date, not the time,
+    # for project deadlines. This is intentional to simplify deadline logic and UI; if time
+    # precision is needed, consider switching to DateTimeField.
     due_date = models.DateField()
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="pending")
     completed = models.BooleanField(default=False)
@@ -648,8 +631,10 @@ class WorkOrder(models.Model):
         from django.db import transaction
 
         with transaction.atomic():
-            # Use select_related for single-valued relationships and prefetch_related for many-to-many or reverse relationships
-            # Example: prefetch_related('some_related_set') if you access line_item.some_related_set.all() in the loop
+            # Use select_related for single-valued relationships and prefetch_related for
+            # many-to-many or reverse relationships
+            # Example: prefetch_related('some_related_set') if you access
+            # line_item.some_related_set.all() in the loop
             qs = self.line_items.select_related("warehouse_item")
             # If you need to access additional related objects, add them here:
             # qs = qs.prefetch_related('some_related_set')
@@ -661,7 +646,8 @@ class WorkOrder(models.Model):
                         if warehouse_item.quantity < line_item.quantity:
                             raise ValidationError(
                                 f"Cannot reduce inventory of {warehouse_item.name} below zero. "
-                                f"Attempted to subtract {line_item.quantity}, only {warehouse_item.quantity} available."
+                                f"Attempted to subtract {line_item.quantity}, only "
+                                f"{warehouse_item.quantity} available."
                             )
                         warehouse_item.quantity -= line_item.quantity
                         warehouse_item.save()
@@ -671,7 +657,10 @@ class WorkOrder(models.Model):
                             user=self.project.assigned_to,
                             action="update",
                             content_object=warehouse_item,
-                            description=f"Inventory adjusted for WorkOrder #{self.id}: -{line_item.quantity} {warehouse_item.name}",
+                            description=(
+                                f"Inventory adjusted for WorkOrder #{self.id}: "
+                                f"-{line_item.quantity} {warehouse_item.name}"
+                            ),
                         )
 
     def __str__(self):
@@ -751,10 +740,12 @@ class WorkOrderInvoice(models.Model):
         Send invoice email to customer.
         Implements part of REQ-204: customer communication automation.
         """
-        from django.conf import settings
         from django.core.mail import send_mail
 
-        subject = f'Invoice #{self.id} from {getattr(settings, "COMPANY_NAME", None) or getattr(settings, "COMPANY_NAME_FALLBACK", "Converge")}'
+        company_name = getattr(settings, "COMPANY_NAME", None) or getattr(
+            settings, "COMPANY_NAME_FALLBACK", "Converge"
+        )
+        subject = f"Invoice #{self.id} from {company_name}"
         message = f"""
 Dear {self.work_order.project.contact.first_name},
 
@@ -770,7 +761,7 @@ Invoice Details:
 Thank you for your business!
 
 Best regards,
-{getattr(settings, "COMPANY_NAME", None) or getattr(settings, "COMPANY_NAME_FALLBACK", "Converge")} Team
+{company_name} Team
         """
         try:
             send_mail(
@@ -805,7 +796,6 @@ Best regards,
         Send overdue payment reminder email.
         Implements part of REQ-204: customer communication automation.
         """
-        from django.conf import settings
         from django.core.mail import send_mail
 
         days_overdue = self.days_overdue()
@@ -844,7 +834,10 @@ Best regards,
                 user=self.work_order.project.assigned_to,
                 action="email_sent",
                 content_object=self,
-                description=f"Overdue reminder sent to {self.work_order.project.contact.email} ({days_overdue} days overdue)",
+                description=(
+                    f"Overdue reminder sent to {self.work_order.project.contact.email} "
+                    f"({days_overdue} days overdue)"
+                ),
             )
 
             return True
