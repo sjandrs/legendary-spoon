@@ -77,7 +77,7 @@ Instructions for generating high-quality Power Apps Code Apps using TypeScript, 
   ```typescript
   // Example: Using custom PCF control for data visualization
   import { PCFControlWrapper } from './components/PCFControlWrapper';
-  
+
   const MyComponent = () => {
     return (
       <PCFControlWrapper
@@ -95,7 +95,7 @@ Instructions for generating high-quality Power Apps Code Apps using TypeScript, 
 - **Embed Power BI reports**: Integrate interactive dashboards and reports
   ```typescript
   import { PowerBIEmbed } from 'powerbi-client-react';
-  
+
   const DashboardComponent = () => {
     return (
       <PowerBIEmbed
@@ -123,12 +123,12 @@ Instructions for generating high-quality Power Apps Code Apps using TypeScript, 
   const processDocument = async (file: File) => {
     const formData = new FormData();
     formData.append('file', file);
-    
+
     const result = await AIBuilderService.ProcessDocument({
       modelId: 'document-processing-model-id',
       document: formData
     });
-    
+
     return result.extractedFields;
   };
   ```
@@ -141,12 +141,12 @@ Instructions for generating high-quality Power Apps Code Apps using TypeScript, 
   ```typescript
   import { DirectLine } from 'botframework-directlinejs';
   import { WebChat } from 'botframework-webchat';
-  
+
   const ChatbotComponent = () => {
     const directLine = new DirectLine({
       token: chatbotToken
     });
-    
+
     return (
       <div style={{ height: '400px', width: '100%' }}>
         <WebChat directLine={directLine} />
@@ -221,7 +221,7 @@ Instructions for generating high-quality Power Apps Code Apps using TypeScript, 
   // Handle polymorphic customer lookup (Account or Contact)
   const customerType = record.customerType; // 'account' or 'contact'
   const customerId = record.customerId;
-  const customer = customerType === 'account' 
+  const customer = customerType === 'account'
     ? await AccountService.get(customerId)
     : await ContactService.get(customerId);
   ```
@@ -257,7 +257,7 @@ Instructions for generating high-quality Power Apps Code Apps using TypeScript, 
       const transaction = db.transaction(['data'], 'readwrite');
       transaction.objectStore('data').put({ id: key, data, timestamp: Date.now() });
     }
-    
+
     async loadData(key: string) {
       const db = await this.openDB();
       const transaction = db.transaction(['data'], 'readonly');
@@ -397,9 +397,9 @@ Instructions for generating high-quality Power Apps Code Apps using TypeScript, 
     onClick: () => void;
     children: React.ReactNode;
   }
-  
-  export const Button: React.FC<ButtonProps> = ({ 
-    variant, size, disabled, onClick, children 
+
+  export const Button: React.FC<ButtonProps> = ({
+    variant, size, disabled, onClick, children
   }) => {
     const classes = `btn btn-${variant} btn-${size} ${disabled ? 'btn-disabled' : ''}`;
     return <button className={classes} onClick={onClick} disabled={disabled}>{children}</button>;
@@ -416,14 +416,14 @@ Instructions for generating high-quality Power Apps Code Apps using TypeScript, 
     theme: 'light',
     toggleTheme: () => {}
   });
-  
+
   export const ThemeProvider: React.FC<{children: ReactNode}> = ({ children }) => {
     const [theme, setTheme] = useState<'light' | 'dark'>('light');
-    
+
     const toggleTheme = () => {
       setTheme(prev => prev === 'light' ? 'dark' : 'light');
     };
-    
+
     return (
       <ThemeContext.Provider value={{ theme, toggleTheme }}>
         <div className={`theme-${theme}`}>{children}</div>
@@ -441,7 +441,7 @@ Instructions for generating high-quality Power Apps Code Apps using TypeScript, 
   .card-container {
     container-type: inline-size;
   }
-  
+
   @container (min-width: 400px) {
     .card {
       display: grid;
@@ -456,7 +456,7 @@ Instructions for generating high-quality Power Apps Code Apps using TypeScript, 
 - **Framer Motion integration**: Smooth animations and transitions
   ```typescript
   import { motion, AnimatePresence } from 'framer-motion';
-  
+
   const AnimatedCard = () => {
     return (
       <motion.div
@@ -480,8 +480,8 @@ Instructions for generating high-quality Power Apps Code Apps using TypeScript, 
 - **ARIA implementation**: Proper semantic markup and ARIA attributes
   ```typescript
   // Example: Accessible modal component
-  const Modal: React.FC<{isOpen: boolean, onClose: () => void, children: ReactNode}> = ({ 
-    isOpen, onClose, children 
+  const Modal: React.FC<{isOpen: boolean, onClose: () => void, children: ReactNode}> = ({
+    isOpen, onClose, children
   }) => {
     useEffect(() => {
       if (isOpen) {
@@ -491,11 +491,11 @@ Instructions for generating high-quality Power Apps Code Apps using TypeScript, 
       }
       return () => { document.body.style.overflow = 'unset'; };
     }, [isOpen]);
-    
+
     return (
-      <div 
-        role="dialog" 
-        aria-modal="true" 
+      <div
+        role="dialog"
+        aria-modal="true"
         aria-labelledby="modal-title"
         className={isOpen ? 'modal-open' : 'modal-hidden'}
       >
@@ -512,10 +512,10 @@ Instructions for generating high-quality Power Apps Code Apps using TypeScript, 
 - **React-intl integration**: Multi-language support
   ```typescript
   import { FormattedMessage, useIntl } from 'react-intl';
-  
+
   const WelcomeMessage = ({ userName }: { userName: string }) => {
     const intl = useIntl();
-    
+
     return (
       <h1>
         <FormattedMessage

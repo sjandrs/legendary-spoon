@@ -6,29 +6,62 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('main', '0025_workorderinvoice_paid_date_and_more'),
+        ("main", "0025_workorderinvoice_paid_date_and_more"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='TimeEntry',
+            name="TimeEntry",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('date', models.DateField()),
-                ('hours', models.DecimalField(decimal_places=2, help_text='Hours worked (e.g., 2.5)', max_digits=5)),
-                ('description', models.CharField(max_length=255)),
-                ('billable', models.BooleanField(default=True)),
-                ('hourly_rate', models.DecimalField(blank=True, decimal_places=2, max_digits=8, null=True)),
-                ('billed', models.BooleanField(default=False)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('project', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='time_entries', to='main.project')),
-                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='time_entries', to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("date", models.DateField()),
+                (
+                    "hours",
+                    models.DecimalField(
+                        decimal_places=2,
+                        help_text="Hours worked (e.g., 2.5)",
+                        max_digits=5,
+                    ),
+                ),
+                ("description", models.CharField(max_length=255)),
+                ("billable", models.BooleanField(default=True)),
+                (
+                    "hourly_rate",
+                    models.DecimalField(
+                        blank=True, decimal_places=2, max_digits=8, null=True
+                    ),
+                ),
+                ("billed", models.BooleanField(default=False)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "project",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="time_entries",
+                        to="main.project",
+                    ),
+                ),
+                (
+                    "user",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="time_entries",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'ordering': ['-date', '-created_at'],
-                'unique_together': {('project', 'user', 'date', 'description')},
+                "ordering": ["-date", "-created_at"],
+                "unique_together": {("project", "user", "date", "description")},
             },
         ),
     ]

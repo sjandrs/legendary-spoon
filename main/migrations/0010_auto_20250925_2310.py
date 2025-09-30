@@ -4,10 +4,8 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('main', '0009_account_owner_contact_owner'),
+        ("main", "0009_account_owner_contact_owner"),
     ]
 
-    operations = [
-    ]
+    operations = []

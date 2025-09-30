@@ -47,7 +47,7 @@ const TaskDashboard = () => {
       };
 
       setTaskStats(stats);
-      
+
       // Get recent tasks (last 5)
       const sortedTasks = tasks
         .sort((a, b) => new Date(b.updated_at || b.created_at) - new Date(a.updated_at || a.created_at))
@@ -112,8 +112,8 @@ const TaskDashboard = () => {
       <div className="dashboard-header">
         <h1>Task & Activity Management</h1>
         <div className="header-actions">
-          <button 
-            onClick={() => window.location.reload()} 
+          <button
+            onClick={() => window.location.reload()}
             className="refresh-btn"
           >
             🔄 Refresh
@@ -203,7 +203,7 @@ const TaskDashboard = () => {
                 <h3>Recent Tasks</h3>
                 <a href="/tasks" className="view-all-link">View All Tasks →</a>
               </div>
-              
+
               {recentTasks.length === 0 ? (
                 <div className="no-tasks">
                   <p>No tasks found. Create your first task to get started!</p>
@@ -215,13 +215,13 @@ const TaskDashboard = () => {
                       <div className="task-header">
                         <h4 className="task-title">{task.title}</h4>
                         <div className="task-meta">
-                          <span 
+                          <span
                             className="task-priority"
                             style={{ backgroundColor: getPriorityColor(task.priority) }}
                           >
                             {task.priority}
                           </span>
-                          <span 
+                          <span
                             className="task-status"
                             style={{ color: getStatusColor(task.status) }}
                           >
@@ -229,7 +229,7 @@ const TaskDashboard = () => {
                           </span>
                         </div>
                       </div>
-                      
+
                       <div className="task-details">
                         {task.description && (
                           <p className="task-description">{task.description}</p>

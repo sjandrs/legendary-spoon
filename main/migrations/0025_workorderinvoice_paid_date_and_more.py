@@ -6,51 +6,128 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('main', '0024_ledgeraccount_rename_task_type_project_project_type_and_more'),
+        ("main", "0024_ledgeraccount_rename_task_type_project_project_type_and_more"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='workorderinvoice',
-            name='paid_date',
+            model_name="workorderinvoice",
+            name="paid_date",
             field=models.DateField(blank=True, null=True),
         ),
         migrations.AddField(
-            model_name='workorderinvoice',
-            name='payment_terms',
-            field=models.CharField(choices=[('net_15', 'Net 15 days'), ('net_30', 'Net 30 days'), ('net_60', 'Net 60 days'), ('due_on_receipt', 'Due on Receipt')], default='net_30', max_length=20),
+            model_name="workorderinvoice",
+            name="payment_terms",
+            field=models.CharField(
+                choices=[
+                    ("net_15", "Net 15 days"),
+                    ("net_30", "Net 30 days"),
+                    ("net_60", "Net 60 days"),
+                    ("due_on_receipt", "Due on Receipt"),
+                ],
+                default="net_30",
+                max_length=20,
+            ),
         ),
         migrations.CreateModel(
-            name='Budget',
+            name="Budget",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=100)),
-                ('budget_type', models.CharField(choices=[('monthly', 'Monthly'), ('quarterly', 'Quarterly'), ('annual', 'Annual')], default='monthly', max_length=20)),
-                ('year', models.PositiveIntegerField()),
-                ('month', models.PositiveIntegerField(blank=True, null=True)),
-                ('quarter', models.PositiveIntegerField(blank=True, null=True)),
-                ('categories', models.JSONField(default=dict)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('created_by', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(max_length=100)),
+                (
+                    "budget_type",
+                    models.CharField(
+                        choices=[
+                            ("monthly", "Monthly"),
+                            ("quarterly", "Quarterly"),
+                            ("annual", "Annual"),
+                        ],
+                        default="monthly",
+                        max_length=20,
+                    ),
+                ),
+                ("year", models.PositiveIntegerField()),
+                ("month", models.PositiveIntegerField(blank=True, null=True)),
+                ("quarter", models.PositiveIntegerField(blank=True, null=True)),
+                ("categories", models.JSONField(default=dict)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "created_by",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='Expense',
+            name="Expense",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('date', models.DateField()),
-                ('amount', models.DecimalField(decimal_places=2, max_digits=12)),
-                ('category', models.CharField(choices=[('office_supplies', 'Office Supplies'), ('travel', 'Travel'), ('meals', 'Meals & Entertainment'), ('utilities', 'Utilities'), ('rent', 'Rent'), ('marketing', 'Marketing'), ('software', 'Software & Subscriptions'), ('equipment', 'Equipment'), ('professional_services', 'Professional Services'), ('other', 'Other')], max_length=30)),
-                ('description', models.CharField(max_length=255)),
-                ('vendor', models.CharField(blank=True, max_length=100)),
-                ('receipt', models.FileField(blank=True, null=True, upload_to='receipts/')),
-                ('approved', models.BooleanField(default=False)),
-                ('approved_at', models.DateTimeField(blank=True, null=True)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('approved_by', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='approved_expenses', to=settings.AUTH_USER_MODEL)),
-                ('submitted_by', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='expenses', to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("date", models.DateField()),
+                ("amount", models.DecimalField(decimal_places=2, max_digits=12)),
+                (
+                    "category",
+                    models.CharField(
+                        choices=[
+                            ("office_supplies", "Office Supplies"),
+                            ("travel", "Travel"),
+                            ("meals", "Meals & Entertainment"),
+                            ("utilities", "Utilities"),
+                            ("rent", "Rent"),
+                            ("marketing", "Marketing"),
+                            ("software", "Software & Subscriptions"),
+                            ("equipment", "Equipment"),
+                            ("professional_services", "Professional Services"),
+                            ("other", "Other"),
+                        ],
+                        max_length=30,
+                    ),
+                ),
+                ("description", models.CharField(max_length=255)),
+                ("vendor", models.CharField(blank=True, max_length=100)),
+                (
+                    "receipt",
+                    models.FileField(blank=True, null=True, upload_to="receipts/"),
+                ),
+                ("approved", models.BooleanField(default=False)),
+                ("approved_at", models.DateTimeField(blank=True, null=True)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "approved_by",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="approved_expenses",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
+                (
+                    "submitted_by",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="expenses",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
         ),
     ]

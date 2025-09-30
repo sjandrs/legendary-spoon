@@ -18,7 +18,7 @@ Microsoft 365 Copilot declarative agents are powerful custom AI assistants that 
   "$schema": "https://developer.microsoft.com/json-schemas/copilot/declarative-agent/v1.5/schema.json",
   "version": "v1.5",
   "name": "string (max 100 characters)",
-  "description": "string (max 1000 characters)", 
+  "description": "string (max 1000 characters)",
   "instructions": "string (max 8000 characters)",
   "capabilities": ["array (max 5 items)"],
   "conversation_starters": ["array (max 4 items, optional)"]
@@ -27,7 +27,7 @@ Microsoft 365 Copilot declarative agents are powerful custom AI assistants that 
 
 ### Character Limits & Constraints
 - **Name**: Maximum 100 characters, required
-- **Description**: Maximum 1000 characters, required  
+- **Description**: Maximum 1000 characters, required
 - **Instructions**: Maximum 8000 characters, required
 - **Capabilities**: Maximum 5 items, minimum 1 item
 - **Conversation Starters**: Maximum 4 items, optional
@@ -75,30 +75,30 @@ model Agent {
   /** Schema version */
   @minLength(1)
   $schema: "https://developer.microsoft.com/json-schemas/copilot/declarative-agent/v1.5/schema.json";
-  
+
   /** Agent version */
   version: "v1.5";
-  
+
   /** Agent name (max 100 characters) */
   @maxLength(100)
   @minLength(1)
   name: string;
-  
+
   /** Agent description (max 1000 characters) */
   @maxLength(1000)
-  @minLength(1)  
+  @minLength(1)
   description: string;
-  
+
   /** Agent instructions (max 8000 characters) */
   @maxLength(8000)
   @minLength(1)
   instructions: string;
-  
+
   /** Agent capabilities (1-5 items) */
   @minItems(1)
   @maxItems(5)
   capabilities: AgentCapability[];
-  
+
   /** Conversation starters (max 4 items) */
   @maxItems(4)
   conversation_starters?: ConversationStarter[];
@@ -107,7 +107,7 @@ model Agent {
 /** Available agent capabilities */
 union AgentCapability {
   "WebSearch",
-  "OneDriveAndSharePoint", 
+  "OneDriveAndSharePoint",
   "GraphConnectors",
   "MicrosoftGraph",
   "TeamsAndOutlook",
@@ -231,7 +231,7 @@ graph LR
 
 ### 3. Environment Promotion
 - **Development**: Full debugging, verbose logging
-- **Staging**: Production-like testing, performance monitoring  
+- **Staging**: Production-like testing, performance monitoring
 - **Production**: Optimized performance, minimal logging
 
 ## Advanced Features
@@ -293,7 +293,7 @@ const log = {
 - Ensure compliance with GDPR, CCPA, and organizational policies
 - Use appropriate access controls for enterprise capabilities
 
-### Security Considerations  
+### Security Considerations
 - Validate all inputs and outputs
 - Implement rate limiting and abuse prevention
 - Monitor for suspicious activity patterns

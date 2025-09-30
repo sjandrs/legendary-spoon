@@ -57,7 +57,7 @@ const TagManager = ({ associatedTags, onTagsUpdate, entityId, entityType }) => {
             // 1. Create the new tag
             const createResponse = await api.post('/api/tags/', { name: newTagName, slug: newTagName.toLowerCase().replace(/\s+/g, '-') });
             const newTag = createResponse.data;
-            
+
             // 2. Update the list of all tags
             setAllTags(prevTags => [...prevTags, newTag]);
 
@@ -65,7 +65,7 @@ const TagManager = ({ associatedTags, onTagsUpdate, entityId, entityType }) => {
             const currentTagIds = associatedTags.map(t => t.id);
             const updatedTagIds = [...currentTagIds, newTag.id];
             const updateResponse = await api.patch(`/api/${entityType}/${entityId}/`, { tag_ids: updatedTagIds });
-            
+
             onTagsUpdate(updateResponse.data.tags);
             setNewTagName(''); // Clear input
         } catch (err) {

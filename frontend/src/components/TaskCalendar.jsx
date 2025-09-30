@@ -86,7 +86,7 @@ const TaskCalendar = () => {
   const eventStyleGetter = (event, start, end, isSelected) => {
     const task = event.resource;
     let backgroundColor = '#3174ad';
-    
+
     if (task.status === 'completed') backgroundColor = '#28a745';
     else if (task.is_overdue) backgroundColor = '#dc3545';
     else if (task.priority === 'urgent') backgroundColor = '#fd7e14';
@@ -131,7 +131,7 @@ const TaskCalendar = () => {
           </span>
         </div>
       </div>
-      
+
       <div className="calendar-wrapper">
         <Calendar
           localizer={localizer}
@@ -172,8 +172,8 @@ const TaskModal = ({ task, isEditing, onSave, onClose }) => {
     const fetchTaskTypes = async () => {
         try {
             const response = await apiClient.get('/api/task-types/');
-            const activeTypes = response.data.results 
-                ? response.data.results.filter(t => t.is_active) 
+            const activeTypes = response.data.results
+                ? response.data.results.filter(t => t.is_active)
                 : response.data.filter(t => t.is_active);
             setTaskTypes(activeTypes);
             // Set a default if the current one is not set or invalid
@@ -207,7 +207,7 @@ const TaskModal = ({ task, isEditing, onSave, onClose }) => {
           <h3>{isEditing ? 'Edit Task' : 'Create New Task'}</h3>
           <button onClick={onClose} className="close-btn">&times;</button>
         </div>
-        
+
         <form onSubmit={handleSubmit} className="task-form">
           <div className="form-group">
             <label>Title</label>
@@ -219,7 +219,7 @@ const TaskModal = ({ task, isEditing, onSave, onClose }) => {
               required
             />
           </div>
-          
+
           <div className="form-group">
             <label>Description</label>
             <textarea
@@ -229,7 +229,7 @@ const TaskModal = ({ task, isEditing, onSave, onClose }) => {
               rows="3"
             />
           </div>
-          
+
           <div className="form-row">
             <div className="form-group">
               <label>Due Date</label>
@@ -241,7 +241,7 @@ const TaskModal = ({ task, isEditing, onSave, onClose }) => {
                 required
               />
             </div>
-            
+
             <div className="form-group">
               <label>Priority</label>
               <select name="priority" value={formData.priority} onChange={handleChange}>
@@ -252,7 +252,7 @@ const TaskModal = ({ task, isEditing, onSave, onClose }) => {
               </select>
             </div>
           </div>
-          
+
           <div className="form-row">
             <div className="form-group">
               <label>Type</label>
@@ -265,7 +265,7 @@ const TaskModal = ({ task, isEditing, onSave, onClose }) => {
                 ))}
               </select>
             </div>
-            
+
             <div className="form-group">
               <label>Status</label>
               <select name="status" value={formData.status} onChange={handleChange}>
@@ -276,7 +276,7 @@ const TaskModal = ({ task, isEditing, onSave, onClose }) => {
               </select>
             </div>
           </div>
-          
+
           <div className="modal-actions">
             <button type="button" onClick={onClose} className="btn-cancel">
               Cancel

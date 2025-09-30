@@ -13,7 +13,7 @@ const SearchPage = () => {
     console.log('Executing search with params:', searchParams); // Added for debugging
     setLoading(true);
     setCurrentQuery(searchParams);
-    
+
     try {
       const params = new URLSearchParams();
       if (searchParams.q) params.append('q', searchParams.q);
@@ -30,9 +30,9 @@ const SearchPage = () => {
             }
         });
       }
-      
+
       const response = await get(`/api/search/?${params.toString()}`);
-      
+
       setSearchResults(response.data);
     } catch (error) {
       console.error('Search error:', error);
@@ -47,19 +47,19 @@ const SearchPage = () => {
 
   const handleBulkAction = async (action, selectedItems, actionData) => {
     setLoading(true);
-    
+
     try {
       const response = await post('/api/search/bulk-operations/', {
         action,
         items: selectedItems,
         data: actionData
       });
-      
+
       // Refresh search results
       if (currentQuery) {
         await handleSearch(currentQuery);
       }
-      
+
       // Show success message
       alert(`Bulk ${action} completed successfully!`);
     } catch (error) {
@@ -72,20 +72,20 @@ const SearchPage = () => {
 
   const handleLoadMore = async () => {
     if (!currentQuery) return;
-    
+
     setLoading(true);
-    
+
     try {
       const offset = searchResults?.results?.length || 0;
       const params = { ...currentQuery, offset };
-      
+
       let response;
       if (currentQuery.query && !currentQuery.filters) {
         response = await post('/api/search/', params);
       } else {
         response = await post('/api/search/advanced/', params);
       }
-      
+
       setSearchResults(prev => ({
         ...prev,
         results: prev.results.concat(response.results)
@@ -102,7 +102,7 @@ const SearchPage = () => {
     <div className="search-page">
       <div className="search-content">
         <div className="search-panel">
-          <AdvancedSearch 
+          <AdvancedSearch
             onSearch={handleSearch}
             loading={loading}
           />
@@ -115,12 +115,12 @@ const SearchPage = () => {
               <p>Searching...</p>
             </div>
           )}
-          
+
           <SearchResults
             results={searchResults}
             onBulkAction={handleBulkAction}
             onLoadMore={
-              searchResults && 
+              searchResults &&
               searchResults.total_count > (searchResults.results?.length || 0)
                 ? handleLoadMore
                 : null

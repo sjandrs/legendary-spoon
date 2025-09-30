@@ -68,7 +68,7 @@ const MainLayout = () => {
         <ul>
           <div className="nav-links">
             <li><Link to="/dashboard">Dashboard</Link></li>
-            <li 
+            <li
               className="dropdown-menu"
               onMouseEnter={() => setResourcesMenuOpen(true)}
               onMouseLeave={() => setResourcesMenuOpen(false)}

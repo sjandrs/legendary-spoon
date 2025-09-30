@@ -141,7 +141,7 @@ avm: {module repo URL or commit} # if applicable
 
 ## Phase 1 — {Phase Name}
 
-**Objective:** 
+**Objective:**
 
 {Description of the first phase, including objectives and expected outcomes}
 

@@ -8,7 +8,7 @@ const AdvancedSearch = ({ onSearch, onSaveSearch }) => {
 
   const [searchQuery, setSearchQuery] = useState(searchParams.get('q') || '');
   const [searchType, setSearchType] = useState(searchParams.get('type') || 'global');
-  
+
   const initialFilters = {};
   for (const [key, value] of searchParams.entries()) {
     if (key.startsWith('filter_')) {
@@ -115,7 +115,7 @@ const AdvancedSearch = ({ onSearch, onSaveSearch }) => {
     if (max !== null && max !== '') {
       rangeFilter.lte = parseFloat(max);
     }
-    
+
     if (Object.keys(rangeFilter).length > 0) {
       setFilters(prev => ({
         ...prev,
@@ -147,7 +147,7 @@ const AdvancedSearch = ({ onSearch, onSaveSearch }) => {
         sort_order: sortOrder,
         is_public: isPublic
       });
-      
+
       setShowSaveModal(false);
       if (onSaveSearch) {
         onSaveSearch(response.data);
@@ -279,7 +279,7 @@ const AdvancedSearch = ({ onSearch, onSaveSearch }) => {
               onFocus={() => setShowSuggestions(suggestions.length > 0)}
               onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
             />
-            
+
             {showSuggestions && suggestions.length > 0 && (
               <div className="search-suggestions">
                 {suggestions.map((suggestion, index) => (
@@ -323,7 +323,7 @@ const AdvancedSearch = ({ onSearch, onSaveSearch }) => {
                   <option value="name">Name</option>
                 </select>
               </div>
-              
+
               <div className="sort-group">
                 <label>Order:</label>
                 <select
@@ -351,18 +351,18 @@ const AdvancedSearch = ({ onSearch, onSaveSearch }) => {
           <div className="search-filters">
             <div className="filters-container">
               <div className="filters-grid">
-                {availableFilters.text_filters?.map(field => 
+                {availableFilters.text_filters?.map(field =>
                   renderTextFilter(field, field.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase()))
                 )}
-                
+
                 {Object.entries(availableFilters.choice_filters || {}).map(([field, choices]) =>
                   renderChoiceFilter(field, field.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase()), choices)
                 )}
-                
+
                 {availableFilters.date_filters?.map(field =>
                   renderDateFilter(field, field.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase()))
                 )}
-                
+
                 {availableFilters.number_filters?.map(field =>
                   renderNumberFilter(field, field.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase()))
                 )}
@@ -401,7 +401,7 @@ const SaveSearchModal = ({ onSave, onClose }) => {
           <h3>Save Search</h3>
           <button onClick={onClose} className="close-btn">&times;</button>
         </div>
-        
+
         <form onSubmit={handleSubmit} className="save-search-form">
           <div className="form-group">
             <label>Name *</label>
@@ -413,7 +413,7 @@ const SaveSearchModal = ({ onSave, onClose }) => {
               placeholder="Enter search name"
             />
           </div>
-          
+
           <div className="form-group">
             <label>Description</label>
             <textarea
@@ -423,7 +423,7 @@ const SaveSearchModal = ({ onSave, onClose }) => {
               rows="3"
             />
           </div>
-          
+
           <div className="form-group checkbox">
             <label>
               <input
@@ -434,7 +434,7 @@ const SaveSearchModal = ({ onSave, onClose }) => {
               Make this search public (available to all users)
             </label>
           </div>
-          
+
           <div className="modal-actions">
             <button type="button" onClick={onClose} className="btn-cancel">
               Cancel

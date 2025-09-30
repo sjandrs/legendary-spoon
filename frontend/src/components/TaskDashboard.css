@@ -268,63 +268,63 @@
   .task-dashboard {
     padding: 10px;
   }
-  
+
   .dashboard-header {
     flex-direction: column;
     align-items: flex-start;
     gap: 15px;
   }
-  
+
   .dashboard-header h1 {
     font-size: 24px;
   }
-  
+
   .stats-grid {
     grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
     gap: 15px;
   }
-  
+
   .stat-card {
     padding: 15px;
     gap: 12px;
   }
-  
+
   .stat-icon {
     width: 40px;
     height: 40px;
     font-size: 16px;
   }
-  
+
   .stat-value {
     font-size: 20px;
   }
-  
+
   .tab-navigation {
     flex-direction: column;
   }
-  
+
   .tab-btn {
     text-align: left;
     border-bottom: 1px solid #e9ecef;
     border-right: 3px solid transparent;
   }
-  
+
   .tab-btn.active {
     border-right-color: #007bff;
     border-bottom-color: #e9ecef;
   }
-  
+
   .task-header {
     flex-direction: column;
     align-items: flex-start;
     gap: 8px;
   }
-  
+
   .task-meta {
     align-self: stretch;
     justify-content: flex-start;
   }
-  
+
   .task-info {
     flex-direction: column;
     gap: 8px;
@@ -336,12 +336,12 @@
   .stats-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .tab-btn {
     padding: 12px 15px;
     font-size: 14px;
   }
-  
+
   .task-list-header {
     flex-direction: column;
     align-items: flex-start;

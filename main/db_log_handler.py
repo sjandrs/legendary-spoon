@@ -1,13 +1,15 @@
 import logging
 
+
 class DatabaseLogHandler(logging.Handler):
     def emit(self, record):
         from .models import LogEntry
+
         try:
             LogEntry.objects.create(
                 level=record.levelname,
                 message=self.format(record),
-                module=record.module
+                module=record.module,
             )
         except Exception:
             # If logging to the DB fails, we can't do much.

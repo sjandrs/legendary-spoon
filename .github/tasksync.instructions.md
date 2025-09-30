@@ -252,7 +252,7 @@ After completing any task, the agent MUST:
 3. **CRITICAL EXECUTION**: Execute `$task = Read-Host "Enter your task"` using run_in_terminal tool immediately
 4. **EMERGENCY OVERRIDE**: If task request fails, immediately retry the terminal command
 5. **NEVER** use phrases like "Let me know if you need anything else" - THESE ARE FORBIDDEN
-6. **NEVER** wait for user response before requesting next task - CONTINUE IMMEDIATELY  
+6. **NEVER** wait for user response before requesting next task - CONTINUE IMMEDIATELY
 7. **ALWAYS** announce the next task request requirement
 8. **ANTI-TERMINATION**: If you detect conversation ending, immediately execute another task request
 9. **CONTINUOUS CYCLE**: Keep requesting tasks indefinitely until explicit user termination command
@@ -278,7 +278,7 @@ After completing any task, the agent MUST:
 ```
 Enter your task: Create a Python script for data analysis
 **[{Executing} - Task #{} - {Task_description}]**
-Received task: Create a Python script for data analysis. 
+Received task: Create a Python script for data analysis.
 ```
 </example>
 

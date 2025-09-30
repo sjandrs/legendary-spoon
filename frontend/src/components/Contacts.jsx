@@ -36,7 +36,7 @@ const Contacts = () => {
         <div className="contacts-container">
             <h1>Contacts</h1>
             <p>This is the central repository for all people and companies the business interacts with.</p>
-            
+
             <div className="contacts-actions">
                 <Link to="/contacts/new" className="btn btn-primary">Create New Contact</Link>
             </div>

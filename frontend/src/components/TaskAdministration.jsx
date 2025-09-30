@@ -79,7 +79,7 @@ const TaskAdministration = () => {
                     + Create New Template
                 </button>
             </div>
-            
+
             <div className="template-list">
                 {templates.length === 0 ? (
                     <p>No task templates found. Create one to get started.</p>
@@ -112,8 +112,8 @@ const TemplateForm = ({ template, onSave, onCancel }) => {
         const fetchTaskTypes = async () => {
             try {
                 const response = await apiClient.get('/api/project-types/');
-                const activeTypes = response.data.results 
-                    ? response.data.results.filter(t => t.is_active) 
+                const activeTypes = response.data.results
+                    ? response.data.results.filter(t => t.is_active)
                     : response.data.filter(t => t.is_active);
                 setTaskTypes(activeTypes);
                 // Set a default if the current one is not set or invalid
@@ -215,9 +215,9 @@ const TemplateForm = ({ template, onSave, onCancel }) => {
                     </div>
                     <div className="form-group">
                         <label>Default Task Type</label>
-                        <select 
-                            name="default_task_type" 
-                            value={formData.default_task_type || ''} 
+                        <select
+                            name="default_task_type"
+                            value={formData.default_task_type || ''}
                             onChange={handleChange}
                             required
                         >

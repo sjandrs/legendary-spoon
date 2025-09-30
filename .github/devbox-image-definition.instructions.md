@@ -29,7 +29,7 @@ These tools include:
 
 - **Customization WinGet Task Generator** - For `~/winget` tasks
 - **Customization Git Clone Task Generator** - For `~/gitclone` tasks
-- **Customization PowerShell Task Generator** - For `~/powershell` tasks  
+- **Customization PowerShell Task Generator** - For `~/powershell` tasks
 - **Customization YAML Generation Planner** - For planning YAML files
 - **Customization YAML Validator** - For validating YAML files
 
@@ -87,7 +87,7 @@ This approach ensures users have the best experience while avoiding unnecessary 
 **IMPORTANT**: When working with intrinsic tasks, and using the short task name, ALWAYS use the `~/` prefix. This is a critical requirement that must be consistently applied to ensure the correct task is used and to avoid conflicts with any custom tasks that may have similar names. Examples:
 
 - ✅ **Correct**: `name: ~/winget` (for WinGet installations)
-- ✅ **Correct**: `name: ~/powershell` (for PowerShell scripts)  
+- ✅ **Correct**: `name: ~/powershell` (for PowerShell scripts)
 - ✅ **Correct**: `name: ~/gitclone` (for Git cloning)
 - ❌ **Incorrect**: `name: winget` (missing ~/prefix)
 - ❌ **Incorrect**: `name: powershell` (missing ~/prefix)

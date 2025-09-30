@@ -111,8 +111,8 @@ const Deals = () => {
                                 <td>{deal.name}</td>
                                 <td>{deal.account_name || 'N/A'}</td>
                                 <td>
-                                    <span 
-                                        className="deal-stage" 
+                                    <span
+                                        className="deal-stage"
                                         style={{ backgroundColor: getStageColor(deal.stage_name) }}
                                     >
                                         {deal.stage_name}

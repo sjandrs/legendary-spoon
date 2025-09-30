@@ -4,22 +4,21 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('main', '0022_account_tags_contact_tags'),
+        ("main", "0022_account_tags_contact_tags"),
     ]
 
     operations = [
         migrations.RenameModel(
-            old_name='Task',
-            new_name='Project',
+            old_name="Task",
+            new_name="Project",
         ),
         migrations.RenameModel(
-            old_name='TaskTemplate',
-            new_name='ProjectTemplate',
+            old_name="TaskTemplate",
+            new_name="ProjectTemplate",
         ),
         migrations.RenameModel(
-            old_name='TaskType',
-            new_name='ProjectType',
+            old_name="TaskType",
+            new_name="ProjectType",
         ),
     ]

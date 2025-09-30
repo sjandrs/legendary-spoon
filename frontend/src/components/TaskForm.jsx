@@ -8,7 +8,7 @@ const TaskForm = () => {
     const location = useLocation();
     const navigate = useNavigate();
     const { user } = useContext(AuthContext);
-    
+
     const { contact } = location.state || {};
 
     const [title, setTitle] = useState('');
@@ -106,7 +106,7 @@ const TaskForm = () => {
     return (
         <div className="task-form-container">
             <h2>Create New Task</h2>
-            
+
             {contactDetails && (
                 <div className="task-form-contact-card">
                     <div className="contact-avatar">
@@ -124,7 +124,7 @@ const TaskForm = () => {
                     </div>
                 </div>
             )}
-            
+
             {error && <p className="error-message">{error}</p>}
             {success && <p className="success-message">{success}</p>}
 
@@ -134,7 +134,7 @@ const TaskForm = () => {
                         <label htmlFor="title">Title</label>
                         <input id="title" type="text" value={title} onChange={e => setTitle(e.target.value)} required />
                     </div>
-                    
+
                     <div className="form-group">
                         <label htmlFor="due-date">Due Date</label>
                         <input id="due-date" type="date" value={dueDate} onChange={e => setDueDate(e.target.value)} required />

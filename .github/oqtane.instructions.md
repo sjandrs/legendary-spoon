@@ -32,10 +32,10 @@ applyTo: '**/*.razor, **/*.razor.cs, **/*.razor.css'
 - Follow client server patterns for module development.
 - The Client project has various modules in the modules folder.
 - Each action in the client module is a seperate razor file that inherits from ModuleBase with index.razor being the default action.
-- For complex client processing like getting data, create a service class that inherits from ServiceBase and lives in the services folder. One service class for each module. 
+- For complex client processing like getting data, create a service class that inherits from ServiceBase and lives in the services folder. One service class for each module.
 - Client service should call server endpoint using ServiceBase methods
 - Server project contains MVC Controllers, one for each module that match the client service calls.  Each controller will call server-side services or repositories managed by DI
-- Server projects use repository patterns for modules, one repository class per module to match the controllers. 
+- Server projects use repository patterns for modules, one repository class per module to match the controllers.
 
 ## Error Handling and Validation
 

@@ -15,20 +15,20 @@ const ActivityTimeline = ({ resourceType, resourceId, limit = 20 }) => {
     try {
       setLoading(true);
       let url = '/api/activity-logs/';
-      
+
       if (resourceType && resourceId) {
         url += `by_resource/?resource_type=${resourceType}&resource_id=${resourceId}`;
       } else {
         url += 'recent/';
       }
-      
+
       const response = await getActivityLogs(url);
       let filteredData = response.data;
-      
+
       if (filter !== 'all') {
         filteredData = filteredData.filter(activity => activity.action === filter);
       }
-      
+
       setActivities(filteredData.slice(0, limit));
     } catch (error) {
       console.error('Error loading activities:', error);
@@ -124,8 +124,8 @@ const ActivityTimeline = ({ resourceType, resourceId, limit = 20 }) => {
         <h3>Activity Timeline</h3>
         {!resourceType && (
           <div className="timeline-filters">
-            <select 
-              value={filter} 
+            <select
+              value={filter}
               onChange={(e) => setFilter(e.target.value)}
               className="filter-select"
             >
@@ -138,7 +138,7 @@ const ActivityTimeline = ({ resourceType, resourceId, limit = 20 }) => {
           </div>
         )}
       </div>
-      
+
       <div className="timeline-content">
         {activities.length === 0 ? (
           <div className="no-activities">
@@ -149,7 +149,7 @@ const ActivityTimeline = ({ resourceType, resourceId, limit = 20 }) => {
             {activities.map((activity, index) => (
               <div key={activity.id} className="timeline-item">
                 <div className="timeline-marker">
-                  <div 
+                  <div
                     className="timeline-icon"
                     style={{ backgroundColor: getActivityColor(activity.action) }}
                   >
@@ -157,7 +157,7 @@ const ActivityTimeline = ({ resourceType, resourceId, limit = 20 }) => {
                   </div>
                   {index !== activities.length - 1 && <div className="timeline-line"></div>}
                 </div>
-                
+
                 <div className="timeline-content-item">
                   <div className="activity-header">
                     <span className="activity-user">
@@ -173,11 +173,11 @@ const ActivityTimeline = ({ resourceType, resourceId, limit = 20 }) => {
                       {formatTimestamp(activity.timestamp)}
                     </span>
                   </div>
-                  
+
                   <div className="activity-description">
                     {activity.description}
                   </div>
-                  
+
                   {activity.details && (
                     <div className="activity-details">
                       <pre>{JSON.stringify(activity.details, null, 2)}</pre>
@@ -189,10 +189,10 @@ const ActivityTimeline = ({ resourceType, resourceId, limit = 20 }) => {
           </div>
         )}
       </div>
-      
+
       {activities.length >= limit && (
         <div className="timeline-footer">
-          <button 
+          <button
             onClick={() => {/* TODO: Load more activities */}}
             className="load-more-btn"
           >

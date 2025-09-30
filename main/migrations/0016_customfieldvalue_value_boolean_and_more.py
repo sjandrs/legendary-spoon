@@ -4,20 +4,27 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('main', '0015_rename_name_deal_title'),
+        ("main", "0015_rename_name_deal_title"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='customfieldvalue',
-            name='value_boolean',
+            model_name="customfieldvalue",
+            name="value_boolean",
             field=models.BooleanField(blank=True, null=True),
         ),
         migrations.AlterField(
-            model_name='customfield',
-            name='field_type',
-            field=models.CharField(choices=[('text', 'Text'), ('number', 'Number'), ('date', 'Date'), ('boolean', 'Boolean')], max_length=20),
+            model_name="customfield",
+            name="field_type",
+            field=models.CharField(
+                choices=[
+                    ("text", "Text"),
+                    ("number", "Number"),
+                    ("date", "Date"),
+                    ("boolean", "Boolean"),
+                ],
+                max_length=20,
+            ),
         ),
     ]

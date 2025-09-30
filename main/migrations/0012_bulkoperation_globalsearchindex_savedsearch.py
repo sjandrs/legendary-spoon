@@ -6,79 +6,225 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('contenttypes', '0002_remove_content_type_name'),
-        ('main', '0011_task_completed_at_task_created_by_task_deal_and_more'),
+        ("contenttypes", "0002_remove_content_type_name"),
+        ("main", "0011_task_completed_at_task_created_by_task_deal_and_more"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='BulkOperation',
+            name="BulkOperation",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('operation_type', models.CharField(choices=[('update', 'Update'), ('delete', 'Delete'), ('export', 'Export'), ('merge', 'Merge')], max_length=20)),
-                ('status', models.CharField(choices=[('pending', 'Pending'), ('running', 'Running'), ('completed', 'Completed'), ('failed', 'Failed'), ('cancelled', 'Cancelled')], default='pending', max_length=20)),
-                ('entity_type', models.CharField(max_length=50)),
-                ('total_records', models.PositiveIntegerField(default=0)),
-                ('processed_records', models.PositiveIntegerField(default=0)),
-                ('successful_records', models.PositiveIntegerField(default=0)),
-                ('failed_records', models.PositiveIntegerField(default=0)),
-                ('filters', models.JSONField(default=dict, help_text='Filters used to select records')),
-                ('operation_data', models.JSONField(default=dict, help_text='Data for the operation')),
-                ('results', models.JSONField(default=dict, help_text='Operation results')),
-                ('error_message', models.TextField(blank=True)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('started_at', models.DateTimeField(blank=True, null=True)),
-                ('completed_at', models.DateTimeField(blank=True, null=True)),
-                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='bulk_operations', to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "operation_type",
+                    models.CharField(
+                        choices=[
+                            ("update", "Update"),
+                            ("delete", "Delete"),
+                            ("export", "Export"),
+                            ("merge", "Merge"),
+                        ],
+                        max_length=20,
+                    ),
+                ),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("pending", "Pending"),
+                            ("running", "Running"),
+                            ("completed", "Completed"),
+                            ("failed", "Failed"),
+                            ("cancelled", "Cancelled"),
+                        ],
+                        default="pending",
+                        max_length=20,
+                    ),
+                ),
+                ("entity_type", models.CharField(max_length=50)),
+                ("total_records", models.PositiveIntegerField(default=0)),
+                ("processed_records", models.PositiveIntegerField(default=0)),
+                ("successful_records", models.PositiveIntegerField(default=0)),
+                ("failed_records", models.PositiveIntegerField(default=0)),
+                (
+                    "filters",
+                    models.JSONField(
+                        default=dict, help_text="Filters used to select records"
+                    ),
+                ),
+                (
+                    "operation_data",
+                    models.JSONField(default=dict, help_text="Data for the operation"),
+                ),
+                (
+                    "results",
+                    models.JSONField(default=dict, help_text="Operation results"),
+                ),
+                ("error_message", models.TextField(blank=True)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("started_at", models.DateTimeField(blank=True, null=True)),
+                ("completed_at", models.DateTimeField(blank=True, null=True)),
+                (
+                    "user",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="bulk_operations",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'ordering': ['-created_at'],
+                "ordering": ["-created_at"],
             },
         ),
         migrations.CreateModel(
-            name='GlobalSearchIndex',
+            name="GlobalSearchIndex",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('object_id', models.PositiveIntegerField()),
-                ('title', models.CharField(db_index=True, max_length=200)),
-                ('content', models.TextField()),
-                ('tags', models.TextField(blank=True, help_text='Space-separated searchable tags')),
-                ('entity_type', models.CharField(db_index=True, max_length=50)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('search_vector', models.TextField(blank=True, help_text='Generated search vector for full-text search')),
-                ('boost_score', models.FloatField(default=1.0, help_text='Boost score for search ranking')),
-                ('content_type', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='contenttypes.contenttype')),
-                ('owner', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("object_id", models.PositiveIntegerField()),
+                ("title", models.CharField(db_index=True, max_length=200)),
+                ("content", models.TextField()),
+                (
+                    "tags",
+                    models.TextField(
+                        blank=True, help_text="Space-separated searchable tags"
+                    ),
+                ),
+                ("entity_type", models.CharField(db_index=True, max_length=50)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                (
+                    "search_vector",
+                    models.TextField(
+                        blank=True,
+                        help_text="Generated search vector for full-text search",
+                    ),
+                ),
+                (
+                    "boost_score",
+                    models.FloatField(
+                        default=1.0, help_text="Boost score for search ranking"
+                    ),
+                ),
+                (
+                    "content_type",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="contenttypes.contenttype",
+                    ),
+                ),
+                (
+                    "owner",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'indexes': [models.Index(fields=['entity_type', 'owner'], name='main_global_entity__18723d_idx'), models.Index(fields=['created_at'], name='main_global_created_f91927_idx'), models.Index(fields=['title'], name='main_global_title_7fc0c2_idx')],
-                'unique_together': {('content_type', 'object_id')},
+                "indexes": [
+                    models.Index(
+                        fields=["entity_type", "owner"],
+                        name="main_global_entity__18723d_idx",
+                    ),
+                    models.Index(
+                        fields=["created_at"], name="main_global_created_f91927_idx"
+                    ),
+                    models.Index(fields=["title"], name="main_global_title_7fc0c2_idx"),
+                ],
+                "unique_together": {("content_type", "object_id")},
             },
         ),
         migrations.CreateModel(
-            name='SavedSearch',
+            name="SavedSearch",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=100)),
-                ('description', models.TextField(blank=True)),
-                ('search_type', models.CharField(choices=[('global', 'Global Search'), ('accounts', 'Accounts'), ('contacts', 'Contacts'), ('tasks', 'Tasks'), ('deals', 'Deals'), ('quotes', 'Quotes'), ('invoices', 'Invoices')], max_length=50)),
-                ('search_query', models.TextField(blank=True, help_text='Main search query')),
-                ('filters', models.JSONField(default=dict, help_text='Filter parameters as JSON')),
-                ('sort_by', models.CharField(blank=True, max_length=50)),
-                ('sort_order', models.CharField(choices=[('asc', 'Ascending'), ('desc', 'Descending')], default='desc', max_length=4)),
-                ('is_public', models.BooleanField(default=False, help_text='Make this search available to all users')),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('last_used', models.DateTimeField(blank=True, null=True)),
-                ('use_count', models.PositiveIntegerField(default=0)),
-                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='saved_searches', to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(max_length=100)),
+                ("description", models.TextField(blank=True)),
+                (
+                    "search_type",
+                    models.CharField(
+                        choices=[
+                            ("global", "Global Search"),
+                            ("accounts", "Accounts"),
+                            ("contacts", "Contacts"),
+                            ("tasks", "Tasks"),
+                            ("deals", "Deals"),
+                            ("quotes", "Quotes"),
+                            ("invoices", "Invoices"),
+                        ],
+                        max_length=50,
+                    ),
+                ),
+                (
+                    "search_query",
+                    models.TextField(blank=True, help_text="Main search query"),
+                ),
+                (
+                    "filters",
+                    models.JSONField(
+                        default=dict, help_text="Filter parameters as JSON"
+                    ),
+                ),
+                ("sort_by", models.CharField(blank=True, max_length=50)),
+                (
+                    "sort_order",
+                    models.CharField(
+                        choices=[("asc", "Ascending"), ("desc", "Descending")],
+                        default="desc",
+                        max_length=4,
+                    ),
+                ),
+                (
+                    "is_public",
+                    models.BooleanField(
+                        default=False,
+                        help_text="Make this search available to all users",
+                    ),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                ("last_used", models.DateTimeField(blank=True, null=True)),
+                ("use_count", models.PositiveIntegerField(default=0)),
+                (
+                    "user",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="saved_searches",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'ordering': ['-last_used', '-created_at'],
-                'unique_together': {('user', 'name', 'search_type')},
+                "ordering": ["-last_used", "-created_at"],
+                "unique_together": {("user", "name", "search_type")},
             },
         ),
     ]

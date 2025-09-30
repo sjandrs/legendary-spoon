@@ -409,7 +409,7 @@ Example: Check if a payment is overdue AND incomplete:
 
 While Azure Logic Apps and Power Automate share the same underlying workflow engine and language, they have different target audiences and capabilities:
 
-- **Power Automate**: 
+- **Power Automate**:
   - User-friendly interface for business users
   - Part of the Power Platform ecosystem
   - Integration with Microsoft 365 and Dynamics 365
@@ -1552,15 +1552,15 @@ Integrate Logic Apps with Azure API Management for enhanced security, governance
         </claim>
       </required-claims>
     </validate-jwt>
-    
+
     <!-- Rate limiting -->
     <rate-limit calls="5" renewal-period="60" />
-    
+
     <!-- Request transformation -->
     <set-header name="Correlation-Id" exists-action="override">
       <value>@(context.RequestId)</value>
     </set-header>
-    
+
     <!-- Logging -->
     <log-to-eventhub logger-id="api-logger">
       @{

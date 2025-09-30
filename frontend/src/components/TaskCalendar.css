@@ -236,30 +236,30 @@
   .task-calendar-container {
     padding: 10px;
   }
-  
+
   .calendar-header {
     flex-direction: column;
     align-items: flex-start;
   }
-  
+
   .calendar-legend {
     justify-content: flex-start;
   }
-  
+
   .form-row {
     grid-template-columns: 1fr;
   }
-  
+
   .modal-content {
     width: 95%;
     margin: 20px;
   }
-  
+
   .rbc-toolbar {
     flex-direction: column;
     gap: 10px;
   }
-  
+
   .rbc-toolbar-label {
     order: -1;
   }

@@ -20,7 +20,7 @@ const CustomFieldsSettings = () => {
                     { id: 8, name: 'account' }, // Assuming ID 8 is for the Account model
                     { id: 11, name: 'deal' }, // Assuming ID 11 is for the Deal model
                 ]);
-                
+
                 await fetchFields();
                 setError(null);
             } catch (err) {
@@ -108,7 +108,7 @@ const CustomFieldsSettings = () => {
     return (
         <div className="custom-fields-settings">
             <h2>Manage Custom Fields</h2>
-            
+
             <form onSubmit={handleSubmit} className="add-field-form">
                 <h3>Add New Field</h3>
                 <div className="form-row">

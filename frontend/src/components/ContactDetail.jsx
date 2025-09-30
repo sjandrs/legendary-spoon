@@ -23,11 +23,11 @@ const ContactDetail = () => {
                 // Fetch interactions separately
                 const interactionsResponse = await api.get(`/api/interactions/?contact=${id}`);
                 // The response might be paginated, so check for a 'results' property
-                const interactionData = Array.isArray(interactionsResponse.data.results) 
-                    ? interactionsResponse.data.results 
+                const interactionData = Array.isArray(interactionsResponse.data.results)
+                    ? interactionsResponse.data.results
                     : (Array.isArray(interactionsResponse.data) ? interactionsResponse.data : []);
                 setInteractions(interactionData);
-                
+
                 setError(null);
             } catch (err) {
                 console.error('There was an error fetching the contact details!', err);
@@ -71,7 +71,7 @@ const ContactDetail = () => {
                     </Link>
                 </div>
             </div>
-            
+
             <div className="contact-body">
                 <div className="contact-info">
                     <p><strong>Email:</strong> {contact.email || 'N/A'}</p>
@@ -91,7 +91,7 @@ const ContactDetail = () => {
                 </div>
 
                 <div className="contact-main-content">
-                    <TagManager 
+                    <TagManager
                         associatedTags={contact.tags || []}
                         onTagsUpdate={handleTagsUpdate}
                         entityId={id}

@@ -18,7 +18,7 @@ applyTo: '**/*.csproj, **/*.cs'
   - Example: `<Compile Include="Path\To\NewFile.cs" />`
 
 - **No Implicit Imports**: Unlike SDK-style projects, .NET Framework projects do not automatically import common namespaces or assemblies
- 
+
 - **Build Configuration**: Contains explicit `<PropertyGroup>` sections for Debug/Release configurations
 
 - **Output Paths**: Explicit `<OutputPath>` and `<IntermediateOutputPath>` definitions

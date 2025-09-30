@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('main', '0002_category_tag_page_post_comment_richtextcontent'),
+        ("main", "0002_category_tag_page_post_comment_richtextcontent"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='richtextcontent',
-            name='approved',
+            model_name="richtextcontent",
+            name="approved",
             field=models.BooleanField(blank=True, default=None, null=True),
         ),
     ]

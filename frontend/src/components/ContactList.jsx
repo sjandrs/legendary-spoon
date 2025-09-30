@@ -12,7 +12,7 @@ const ContactList = () => {
             try {
                 setLoading(true);
                 // The endpoint /api/my-contacts/ should return contacts for the logged-in user
-                const response = await get('/api/my-contacts/'); 
+                const response = await get('/api/my-contacts/');
                 const contactData = Array.isArray(response.data) ? response.data : [];
                 setContacts(contactData);
                 setError(null);

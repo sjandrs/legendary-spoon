@@ -415,35 +415,35 @@
     grid-template-columns: 1fr;
     gap: 10px;
   }
-  
+
   .search-type-selector {
     order: 1;
   }
-  
+
   .search-input-container {
     order: 2;
   }
-  
+
   .search-button {
     order: 3;
     width: 100%;
   }
-  
+
   .sort-options {
     flex-direction: column;
     align-items: flex-start;
     gap: 10px;
   }
-  
+
   .filters-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .search-actions {
     flex-direction: column;
     gap: 8px;
   }
-  
+
   .modal-content {
     width: 95%;
     margin: 20px;
@@ -456,13 +456,13 @@
     align-items: flex-start;
     gap: 15px;
   }
-  
+
   .date-inputs,
   .number-inputs {
     flex-direction: column;
     align-items: stretch;
   }
-  
+
   .date-inputs span,
   .number-inputs span {
     text-align: center;

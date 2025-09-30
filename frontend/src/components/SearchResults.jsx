@@ -10,7 +10,7 @@ const SearchResults = ({ results, onBulkAction, onLoadMore }) => {
   const handleSelectAll = (type) => {
     const typeResults = results.results[type] || results.results;
     const allIds = typeResults.map(item => `${type}:${item.id}`);
-    
+
     if (selectedItems.some(id => id.startsWith(`${type}:`))) {
       // Deselect all of this type
       setSelectedItems(prev => prev.filter(id => !id.startsWith(`${type}:`)));
@@ -22,8 +22,8 @@ const SearchResults = ({ results, onBulkAction, onLoadMore }) => {
 
   const handleSelectItem = (type, itemId) => {
     const fullId = `${type}:${itemId}`;
-    setSelectedItems(prev => 
-      prev.includes(fullId) 
+    setSelectedItems(prev =>
+      prev.includes(fullId)
         ? prev.filter(id => id !== fullId)
         : [...prev, fullId]
     );
@@ -53,7 +53,7 @@ const SearchResults = ({ results, onBulkAction, onLoadMore }) => {
 
   const getStatusBadge = (status) => {
     if (!status) return null;
-    
+
     const statusColors = {
       completed: '#28a745',
       pending: '#ffc107',
@@ -66,7 +66,7 @@ const SearchResults = ({ results, onBulkAction, onLoadMore }) => {
     };
 
     return (
-      <span 
+      <span
         className="status-badge"
         style={{ backgroundColor: statusColors[status] || '#6c757d' }}
       >
@@ -77,7 +77,7 @@ const SearchResults = ({ results, onBulkAction, onLoadMore }) => {
 
   const getPriorityBadge = (priority) => {
     if (!priority) return null;
-    
+
     const priorityColors = {
       urgent: '#dc3545',
       high: '#fd7e14',
@@ -86,7 +86,7 @@ const SearchResults = ({ results, onBulkAction, onLoadMore }) => {
     };
 
     return (
-      <span 
+      <span
         className="priority-badge"
         style={{ backgroundColor: priorityColors[priority] || '#6c757d' }}
       >
@@ -117,7 +117,7 @@ const SearchResults = ({ results, onBulkAction, onLoadMore }) => {
           onChange={() => handleSelectItem(type, item.id)}
         />
       </div>
-      
+
       <div className="result-content">
         <div className="result-header">
           <h4 className="result-title">
@@ -130,28 +130,28 @@ const SearchResults = ({ results, onBulkAction, onLoadMore }) => {
             {getPriorityBadge(item.priority)}
           </div>
         </div>
-        
+
         <div className="result-details">
           <span className="result-type">{type.charAt(0).toUpperCase() + type.slice(1)}</span>
-          
+
           {item.email && (
             <span className="result-email">📧 {item.email}</span>
           )}
-          
+
           {item.phone && (
             <span className="result-phone">📞 {item.phone}</span>
           )}
-          
+
           {item.value && (
             <span className="result-value">💰 {formatCurrency(item.value)}</span>
           )}
-          
+
           {item.due_date && (
             <span className={`result-date ${new Date(item.due_date) < new Date() ? 'overdue' : ''}`}>
               📅 Due: {formatDate(item.due_date)}
             </span>
           )}
-          
+
           {item.created_at && (
             <span className="result-date">
               📅 Created: {formatDate(item.created_at)}
@@ -177,7 +177,7 @@ const SearchResults = ({ results, onBulkAction, onLoadMore }) => {
           </h3>
         </div>
       </div>
-      
+
       <div className="result-items">
         {items.map((item, index) => renderResultItem(item, type, index))}
       </div>
@@ -205,7 +205,7 @@ const SearchResults = ({ results, onBulkAction, onLoadMore }) => {
   }
 
   const isGlobalSearch = typeof results.results === 'object' && !Array.isArray(results.results);
-  const hasResults = isGlobalSearch 
+  const hasResults = isGlobalSearch
     ? Object.values(results.results).some(items => items.length > 0)
     : results.results.length > 0;
 
@@ -227,7 +227,7 @@ const SearchResults = ({ results, onBulkAction, onLoadMore }) => {
           <h3>Search Results ({results.total_count} total)</h3>
           {results.query && <p>Searching for: "<strong>{results.query}</strong>"</p>}
         </div>
-        
+
         {selectedItems.length > 0 && (
           <div className="bulk-actions">
             <span className="selected-count">
@@ -255,7 +255,7 @@ const SearchResults = ({ results, onBulkAction, onLoadMore }) => {
 
       <div className="results-content">
         {isGlobalSearch ? (
-          Object.entries(results.results).map(([type, items]) => 
+          Object.entries(results.results).map(([type, items]) =>
             items.length > 0 ? renderResultSection(type, items) : null
           )
         ) : (
@@ -360,17 +360,17 @@ const BulkActionModal = ({ action, selectedItems, onConfirm, onCancel }) => {
           <h3>Confirm Bulk Action</h3>
           <button onClick={onCancel} className="close-btn">&times;</button>
         </div>
-        
+
         <div className="modal-body">
           {renderActionForm()}
         </div>
-        
+
         <div className="modal-actions">
           <button onClick={onCancel} className="btn-cancel">
             Cancel
           </button>
-          <button 
-            onClick={handleConfirm} 
+          <button
+            onClick={handleConfirm}
             className={`btn-confirm ${action === 'delete' ? 'btn-danger' : ''}`}
           >
             Confirm {action.charAt(0).toUpperCase() + action.slice(1)}

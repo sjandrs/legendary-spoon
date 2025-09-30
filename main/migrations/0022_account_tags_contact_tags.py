@@ -4,20 +4,19 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('main', '0021_logentry'),
+        ("main", "0021_logentry"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='account',
-            name='tags',
-            field=models.ManyToManyField(blank=True, to='main.tag'),
+            model_name="account",
+            name="tags",
+            field=models.ManyToManyField(blank=True, to="main.tag"),
         ),
         migrations.AddField(
-            model_name='contact',
-            name='tags',
-            field=models.ManyToManyField(blank=True, to='main.tag'),
+            model_name="contact",
+            name="tags",
+            field=models.ManyToManyField(blank=True, to="main.tag"),
         ),
     ]

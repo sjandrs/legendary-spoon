@@ -239,8 +239,8 @@ export class AllExceptionsFilter implements ExceptionFilter {
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
 
-    const status = exception instanceof HttpException 
-      ? exception.getStatus() 
+    const status = exception instanceof HttpException
+      ? exception.getStatus()
       : HttpStatus.INTERNAL_SERVER_ERROR;
 
     this.logger.error(`${request.method} ${request.url}`, exception);
@@ -249,8 +249,8 @@ export class AllExceptionsFilter implements ExceptionFilter {
       statusCode: status,
       timestamp: new Date().toISOString(),
       path: request.url,
-      message: exception instanceof HttpException 
-        ? exception.message 
+      message: exception instanceof HttpException
+        ? exception.message
         : 'Internal server error',
     });
   }

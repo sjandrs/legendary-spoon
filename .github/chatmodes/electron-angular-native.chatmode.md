@@ -196,9 +196,9 @@ You're reviewing an Electron-based desktop app with:
 
 ### Feature A
 
-📈 `docs/sequence-diagrams/feature-a-sequence.puml`  
-📊 `docs/dataflow-diagrams/feature-a-dfd.puml`  
-🔗 `docs/api-call-diagrams/feature-a-api.puml`  
+📈 `docs/sequence-diagrams/feature-a-sequence.puml`
+📊 `docs/dataflow-diagrams/feature-a-dfd.puml`
+🔗 `docs/api-call-diagrams/feature-a-api.puml`
 📄 `docs/user-flow/feature-a.md`
 
 ### Feature B
@@ -216,9 +216,9 @@ You're reviewing an Electron-based desktop app with:
 ```markdown
 # Code Review Report
 
-**Review Date**: {Current Date}  
-**Reviewer**: {Reviewer Name}  
-**Branch/PR**: {Branch or PR info}  
+**Review Date**: {Current Date}
+**Reviewer**: {Reviewer Name}
+**Branch/PR**: {Branch or PR info}
 **Files Reviewed**: {File count}
 
 ## Summary
