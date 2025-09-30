@@ -124,21 +124,35 @@ const EmailCommunication = () => {
                 </tr>
               </thead>
               <tbody>
+                {/* Helper function for work order display */}
                 {overdueInvoices.map(invoice => {
                   const dueDate = new Date(invoice.due_date);
                   const today = new Date();
                   const daysOverdue = Math.floor((today - dueDate) / (1000 * 60 * 60 * 24));
 
+                  const getWorkOrderDisplay = (invoice) => {
+                    if (invoice.work_order?.project?.title) {
+                      return invoice.work_order.project.title;
+                    }
+                    if (invoice.work_order?.description) {
+                      return invoice.work_order.description;
+                    }
+                    return 'N/A';
+                  };
+
+                  const getCustomerDisplay = (invoice) => {
+                    const contact = invoice.work_order?.project?.contact;
+                    if (contact) {
+                      return `${contact.first_name} ${contact.last_name}`;
+                    }
+                    return 'N/A';
+                  };
+
                   return (
                     <tr key={invoice.id}>
                       <td>{invoice.id}</td>
-                      <td>{invoice.work_order?.title || 'N/A'}</td>
-                      <td>
-                        {invoice.work_order?.project?.contact
-                          ? `${invoice.work_order.project.contact.first_name} ${invoice.work_order.project.contact.last_name}`
-                          : 'N/A'
-                        }
-                      </td>
+                      <td>{getWorkOrderDisplay(invoice)}</td>
+                      <td>{getCustomerDisplay(invoice)}</td>
                       <td>${invoice.total_amount}</td>
                       <td>{dueDate.toLocaleDateString()}</td>
                       <td>

@@ -223,11 +223,6 @@ class ContactWithCustomFieldsSerializer(ContactSerializer):
             values = [v for v in values if v.object_id == obj.id]
         return CustomFieldValueSerializer(values, many=True).data
 
-    def get_custom_fields(self, obj):
-        content_type = ContentType.objects.get_for_model(obj)
-        values = CustomFieldValue.objects.filter(content_type=content_type, object_id=obj.id)
-        return CustomFieldValueSerializer(values, many=True).data
-
 class AccountWithCustomFieldsSerializer(AccountSerializer):
     custom_fields = serializers.SerializerMethodField()
 

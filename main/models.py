@@ -3,6 +3,10 @@ from django.contrib.auth.models import AbstractUser
 from django_ckeditor_5.fields import CKEditor5Field
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
+from django.core.exceptions import ValidationError
+
+# Fallback company name for emails and notifications
+from django.conf import settings
 
 # In-app notification model
 class Notification(models.Model):
@@ -380,7 +384,6 @@ class DefaultWorkOrderItem(models.Model):
 
     def clean(self):
         if self.item_type == 'equipment' and not self.serial_number:
-            from django.core.exceptions import ValidationError
             raise ValidationError({'serial_number': 'Serial number is required for equipment.'})
 
 # Import search models
@@ -469,37 +472,38 @@ class WorkOrder(models.Model):
         """
         Adjust warehouse inventory when work order is completed.
         Implements REQ-203: inventory integration.
+        Ensures atomicity and prevents negative inventory.
         """
-        for line_item in self.line_items.all():
-            if line_item.warehouse_item:
-                # Decrease inventory for parts/equipment used
-                if line_item.warehouse_item.item_type in ['part', 'equipment', 'consumable']:
-                    line_item.warehouse_item.quantity -= line_item.quantity
-                    line_item.warehouse_item.save()
+        from django.db import transaction
+        from django.core.exceptions import ValidationError
 
-                    # Log the inventory adjustment
-                    ActivityLog.objects.create(
-                        user=self.project.assigned_to,
-                        action='update',
-                        content_object=line_item.warehouse_item,
-                        description=f'Inventory adjusted for WorkOrder #{self.id}: -{line_item.quantity} {line_item.warehouse_item.name}'
-                    )
+        with transaction.atomic():
+            # Use select_related for single-valued relationships and prefetch_related for many-to-many or reverse relationships
+            # Example: prefetch_related('some_related_set') if you access line_item.some_related_set.all() in the loop
+            qs = self.line_items.select_related('warehouse_item')
+            # If you need to access additional related objects, add them here:
+            # qs = qs.prefetch_related('some_related_set')
+            for line_item in qs.all():
+                warehouse_item = line_item.warehouse_item
+                if warehouse_item:
+                    # Decrease inventory for parts/equipment/consumable used
+                    if warehouse_item.item_type in ['part', 'equipment', 'consumable']:
+                        if warehouse_item.quantity < line_item.quantity:
+                            raise ValidationError(
+                                f"Cannot reduce inventory of {warehouse_item.name} below zero. "
+                                f"Attempted to subtract {line_item.quantity}, only {warehouse_item.quantity} available."
+                            )
+                        warehouse_item.quantity -= line_item.quantity
+                        warehouse_item.save()
 
-    def complete_work_order(self):
-        """
-        Mark work order as completed and adjust inventory.
-        """
-        self.status = 'completed'
-        self.save()
-        self.adjust_inventory()
-
-        # Log completion
-        ActivityLog.objects.create(
-            user=self.project.assigned_to,
-            action='complete',
-            content_object=self,
-            description=f'WorkOrder #{self.id} completed and inventory adjusted'
-        )
+                        # Log the inventory adjustment
+                        ActivityLog.objects.create(
+                            user=self.project.assigned_to,
+                            action='update',
+                            content_object=warehouse_item,
+                            description=f'Inventory adjusted for WorkOrder #{self.id}: -{line_item.quantity} {warehouse_item.name}'
+                        )
+        
 
     def __str__(self):
         return f"WorkOrder #{self.id} for {self.project}"
@@ -566,7 +570,7 @@ class WorkOrderInvoice(models.Model):
         from django.core.mail import send_mail
         from django.conf import settings
 
-        subject = f'Invoice #{self.id} from {settings.COMPANY_NAME or "Converge"}'
+        subject = f'Invoice #{self.id} from {getattr(settings, "COMPANY_NAME", None) or getattr(settings, "COMPANY_NAME_FALLBACK", "Converge")}'
         message = f"""
 Dear {self.work_order.project.contact.first_name},
 
@@ -582,9 +586,8 @@ Invoice Details:
 Thank you for your business!
 
 Best regards,
-{settings.COMPANY_NAME or "Converge"} Team
+{getattr(settings, "COMPANY_NAME", None) or getattr(settings, "COMPANY_NAME_FALLBACK", "Converge")} Team
         """
-
         try:
             send_mail(
                 subject=subject,
@@ -641,9 +644,8 @@ Please remit payment at your earliest convenience to avoid additional late fees.
 Thank you for your prompt attention to this matter.
 
 Best regards,
-{settings.COMPANY_NAME or "Converge"} Team
+{getattr(settings, "COMPANY_NAME", None) or COMPANY_NAME_FALLBACK} Team
         """
-
         try:
             send_mail(
                 subject=subject,
