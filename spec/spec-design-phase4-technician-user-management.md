@@ -199,7 +199,7 @@ class TechnicianCertification(models.Model):
     certificate_number = models.CharField(max_length=100, blank=True)
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
-    
+
     class Meta:
         unique_together = ('technician', 'certification')
 
@@ -210,7 +210,7 @@ class CoverageArea(models.Model):
     travel_time_minutes = models.PositiveIntegerField(default=0)
     is_primary = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
-    
+
     class Meta:
         unique_together = ('technician', 'zip_code')
 
@@ -220,7 +220,7 @@ class TechnicianAvailability(models.Model):
         (0, 'Monday'), (1, 'Tuesday'), (2, 'Wednesday'),
         (3, 'Thursday'), (4, 'Friday'), (5, 'Saturday'), (6, 'Sunday')
     ]
-    
+
     technician = models.ForeignKey(Technician, on_delete=models.CASCADE)
     weekday = models.PositiveSmallIntegerField(choices=WEEKDAY_CHOICES)
     start_time = models.TimeField()
@@ -250,7 +250,7 @@ class WorkOrderCertificationRequirement(models.Model):
     certification = models.ForeignKey(Certification, on_delete=models.CASCADE)
     is_required = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
-    
+
     class Meta:
         unique_together = ('work_order', 'certification')
 ```
@@ -398,7 +398,7 @@ qualified_technicians = Technician.objects.filter(
 # Geographic availability checking
 def find_available_technicians(work_order):
     address_zip = work_order.service_address_zip
-    
+
     available_techs = Technician.objects.filter(
         is_active=True,
         coveragearea__zip_code=address_zip,
@@ -407,7 +407,7 @@ def find_available_technicians(work_order):
         technicianavailability__end_time__gte=work_order.scheduled_time,
         technicianavailability__is_active=True
     ).distinct()
-    
+
     return available_techs
 ```
 
@@ -457,8 +457,8 @@ def find_available_technicians(work_order):
 ## Comprehensive User Stories for Automated Testing
 
 ### User Story 1: Technician Certification Management
-**As a** operations manager  
-**I want to** manage technician certifications with expiration tracking  
+**As a** operations manager
+**I want to** manage technician certifications with expiration tracking
 **So that** only qualified technicians are assigned to appropriate work orders
 
 **Scenarios:**
@@ -481,8 +481,8 @@ def find_available_technicians(work_order):
    - And the search results show which certifications each technician possesses
 
 ### User Story 2: Coverage Area Management
-**As a** dispatch coordinator  
-**I want to** assign technicians based on geographic coverage areas  
+**As a** dispatch coordinator
+**I want to** assign technicians based on geographic coverage areas
 **So that** customers receive timely service with minimal travel costs
 
 **Scenarios:**
@@ -505,8 +505,8 @@ def find_available_technicians(work_order):
    - And prioritizes by availability and current workload
 
 ### User Story 3: Availability Scheduling
-**As a** technician  
-**I want to** set my weekly availability schedule  
+**As a** technician
+**I want to** set my weekly availability schedule
 **So that** I am only assigned work orders during times I can work
 
 **Scenarios:**
@@ -529,8 +529,8 @@ def find_available_technicians(work_order):
    - And I am excluded from overlapping time slots
 
 ### User Story 4: Work Order Assignment Integration
-**As a** dispatch manager  
-**I want to** automatically find qualified technicians for work orders  
+**As a** dispatch manager
+**I want to** automatically find qualified technicians for work orders
 **So that** assignments are made efficiently based on skills and availability
 
 **Scenarios:**
@@ -553,8 +553,8 @@ def find_available_technicians(work_order):
    - And provides a summary of successful assignments and failures
 
 ### User Story 5: User Hierarchy Management
-**As a** team manager  
-**I want to** manage subordinate users and their permissions  
+**As a** team manager
+**I want to** manage subordinate users and their permissions
 **So that** team members have appropriate access to data and functions
 
 **Scenarios:**
@@ -577,8 +577,8 @@ def find_available_technicians(work_order):
    - And their former subordinates maintain their access levels
 
 ### User Story 6: Technician-User Linking
-**As a** system administrator  
-**I want to** link user accounts to technician profiles  
+**As a** system administrator
+**I want to** link user accounts to technician profiles
 **So that** field workers can access system features appropriate to their role
 
 **Scenarios:**
@@ -601,8 +601,8 @@ def find_available_technicians(work_order):
    - And audit logs track the synchronization
 
 ### User Story 7: Payroll Integration
-**As a** payroll administrator  
-**I want to** calculate technician pay based on completed work orders  
+**As a** payroll administrator
+**I want to** calculate technician pay based on completed work orders
 **So that** accurate compensation is provided for field work
 
 **Scenarios:**
@@ -625,8 +625,8 @@ def find_available_technicians(work_order):
    - And export functionality provides data for external payroll systems
 
 ### User Story 8: Certification Requirement Enforcement
-**As a** quality assurance manager  
-**I want to** ensure work orders are only assigned to properly certified technicians  
+**As a** quality assurance manager
+**I want to** ensure work orders are only assigned to properly certified technicians
 **So that** compliance requirements are met and work quality is maintained
 
 **Scenarios:**
@@ -649,8 +649,8 @@ def find_available_technicians(work_order):
    - And recommendations are provided for training or hiring needs
 
 ### User Story 9: Emergency Assignment Handling
-**As a** emergency dispatch coordinator  
-**I want to** quickly find available technicians for urgent work orders  
+**As a** emergency dispatch coordinator
+**I want to** quickly find available technicians for urgent work orders
 **So that** emergency situations are resolved as quickly as possible
 
 **Scenarios:**
@@ -673,8 +673,8 @@ def find_available_technicians(work_order):
    - And alternative resources or external contractors are suggested
 
 ### User Story 10: Mobile Technician Interface
-**As a** field technician  
-**I want to** access my work assignments and update my status from mobile devices  
+**As a** field technician
+**I want to** access my work assignments and update my status from mobile devices
 **So that** I can manage my work efficiently while in the field
 
 **Scenarios:**

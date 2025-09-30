@@ -49,6 +49,7 @@ import TaxReport from './components/TaxReport';
 import TimeTracking from './components/TimeTracking';
 import EmailCommunication from './components/EmailCommunication';
 import AnalyticsDashboard from './components/AnalyticsDashboard';
+import TechnicianManagement from './components/TechnicianManagement';
 
 // This component contains the main application layout with navigation
 const MainLayout = () => {
@@ -56,6 +57,7 @@ const MainLayout = () => {
   const [legacyMenuOpen, setLegacyMenuOpen] = useState(false);
   const [resourcesMenuOpen, setResourcesMenuOpen] = useState(false);
   const [tasksMenuOpen, setTasksMenuOpen] = useState(false);
+  const [staffMenuOpen, setStaffMenuOpen] = useState(false);
 
   const handleLogout = () => {
     // We can get logout from context now, but this is also fine
@@ -102,7 +104,19 @@ const MainLayout = () => {
             </li>
             <li><Link to="/orders">Orders</Link></li>
             <li><Link to="/warehouse">Warehouse</Link></li>
-            <li><Link to="/staff">Staff</Link></li>
+            <li
+              className="dropdown-menu"
+              onMouseEnter={() => setStaffMenuOpen(true)}
+              onMouseLeave={() => setStaffMenuOpen(false)}
+            >
+              <button className="dropdown-button">Staff</button>
+              {staffMenuOpen && (
+                <div className="dropdown-menu-content">
+                  <Link to="/staff">User Management</Link>
+                  <Link to="/technicians">Technicians</Link>
+                </div>
+              )}
+            </li>
             <li className="dropdown-menu"
                 onMouseEnter={() => setLegacyMenuOpen(true)}
                 onMouseLeave={() => setLegacyMenuOpen(false)}
@@ -172,6 +186,7 @@ function App() {
           <Route path="/invoicing" element={<Invoicing />} />
           <Route path="/accounting" element={<Accounting />} />
           <Route path="/staff" element={<Staff />} />
+          <Route path="/technicians" element={<TechnicianManagement />} />
           <Route path="/chat" element={<Chat />} />
           <Route path="/resources" element={<Resources />} />
           <Route path="/orders" element={<Orders />} />

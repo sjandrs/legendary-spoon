@@ -30,25 +30,61 @@ This document outlines the planned features for the Converge application, listed
     *   **Project Boards:** Group related tasks into projects with their own statuses and timelines.
     *   **Calendar View:** Display tasks and events on a shared company or personal calendar.
 
-## 4. Accounting (was Orders) (❌ Not Implemented)
+## 4. Accounting & Financial Management (✅ Complete - Phases 1-2)
 *   **Core Idea:** A robust system for managing the company's finances, from work orders to a full general ledger.
-*   **Core Models:** `WorkOrder`, `Invoice`, `Payment`, `LineItem`, `LedgerAccount`, `JournalEntry`.
+*   **Core Models:** `WorkOrder`, `WorkOrderInvoice`, `Payment`, `LineItem`, `LedgerAccount`, `JournalEntry`, `Expense`, `Budget`, `TimeEntry`.
 *   **Features:**
-    *   **Work Order Management:** Create detailed work orders from deals or tasks.
-    *   **Invoicing:** Generate invoices from work orders, track payment status, and send reminders.
-    *   **Payment Tracking:** Record full or partial payments against invoices.
+    *   **Work Order Management:** Create detailed work orders from deals or tasks with automated project conversion.
+    *   **Invoicing:** Generate invoices from work orders, track payment status, and send automated reminders.
+    *   **Payment Tracking:** Record full or partial payments against invoices with reconciliation.
     *   **General Ledger:** A full chart of accounts (Assets, Liabilities, Equity, Revenue, Expenses).
     *   **Journal Entries:** System-generated and manual entries to track all financial transactions.
     *   **Financial Reporting:** Generate core reports like Balance Sheet, Income Statement, and Cash Flow Statement.
-    *   **Expense Tracking:** Log and categorize business expenses.
+    *   **Expense Tracking:** Log and categorize business expenses with approval workflows.
+    *   **Time Tracking & Billing:** Project-based time logging with billable hours and automated payroll.
+    *   **Budget Management:** Create and track budgets with variance analysis.
 
-## 5. Warehouse (❌ Not Implemented)
-*   **Core Idea:** Basic inventory management for products and parts.
-*   **Core Models:** `Product`, `InventoryAdjustment`.
+## 5. Warehouse & Inventory Management (✅ Complete - Phase 2)
+*   **Core Idea:** Comprehensive inventory management integrated with work orders and financial systems.
+*   **Core Models:** `Warehouse`, `WarehouseItem`, integrated with `WorkOrder` and `LineItem`.
 *   **Features:**
-    *   **Product/Item Catalog:** A list of all sellable products or internal parts with SKU, name, and price.
-    *   **Stock Level Tracking:** Manage on-hand quantities for each item.
-    *   **Stock Adjustments:** Manually adjust stock levels for shipments, returns, or physical counts.
+    *   **Multi-Warehouse Support:** Manage multiple warehouse locations with individual stock tracking.
+    *   **Item Catalog:** Complete inventory of parts, equipment, consumables, and finished goods with SKU tracking.
+    *   **Stock Level Management:** Real-time quantity tracking with minimum stock alerts.
+    *   **Automated Adjustments:** Inventory automatically updated from work order completion.
+    *   **Low Stock Alerts:** Proactive notifications for items below minimum thresholds.
+    *   **Inventory Valuation:** Calculate total inventory value and cost tracking.
+    *   **Work Order Integration:** Seamless inventory consumption and adjustment workflows.
+
+## 6. Advanced Analytics & Business Intelligence (✅ Complete - Phase 3)
+*   **Core Idea:** Comprehensive analytics and predictive insights for data-driven business decisions.
+*   **Core Models:** `AnalyticsSnapshot`, `DealPrediction`, `CustomerLifetimeValue`, `RevenueForecast`.
+*   **Features:**
+    *   **Historical Analytics:** Daily automated snapshots of key business metrics with trend analysis.
+    *   **Predictive Analytics:** ML-based deal outcome predictions and confidence scoring.
+    *   **Customer Lifetime Value:** Advanced CLV calculations with segmentation and forecasting.
+    *   **Revenue Forecasting:** Multiple forecasting methods (linear regression, moving average, ARIMA).
+    *   **Cross-Module Dashboards:** Integrated analytics across sales, projects, finance, and operations.
+    *   **Performance Metrics:** Comprehensive KPI tracking and business intelligence reporting.
+
+## 7. Technician & User Management System (✅ Backend Complete - Phase 4, 📋 Frontend Planned - Phase 4A)
+*   **Core Idea:** Advanced field service management with hierarchical user organization and technician lifecycle management.
+*   **Core Models:** `Technician`, `Certification`, `TechnicianCertification`, `CoverageArea`, `TechnicianAvailability`, `EnhancedUser`, `WorkOrderCertificationRequirement`.
+*   **Backend Features (✅ Complete):**
+    *   **Technician Lifecycle Management:** Complete technician profiles with hire tracking, rates, and contact information.
+    *   **Certification Tracking:** Comprehensive certification management with expiration alerts and renewal workflows.
+    *   **Coverage Area Management:** Geographic service territories with ZIP code mapping and travel time calculations.
+    *   **Availability Scheduling:** Weekly availability patterns with real-time status tracking.
+    *   **Hierarchical User Management:** Manager-subordinate relationships with department and job title organization.
+    *   **Work Order Assignment:** Intelligent technician matching with qualification enforcement and availability validation.
+    *   **Payroll Integration:** Automated payroll calculations based on time entries and technician rates.
+    *   **Performance Tracking:** Technician efficiency metrics and workload balancing.
+*   **Frontend Features (📋 Specification Ready - Phase 4A):**
+    *   **Technician Management Interface:** Comprehensive UI for technician profile management with photo upload and real-time status.
+    *   **User Hierarchy Visualization:** Interactive organizational charts with drag-and-drop team reorganization.
+    *   **Certification Management UI:** Dashboard with expiration alerts, competency matrices, and bulk operations.
+    *   **Work Order Assignment Workflows:** Intelligent assignment wizard with real-time availability and conflict resolution.
+    *   **Mobile-Responsive Design:** Field service manager optimized interfaces with accessibility compliance.
     *   **Low Stock Alerts:** Notifications when an item's quantity drops below a threshold.
 
 ## 6. Staff (🚧 Partial)

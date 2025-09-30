@@ -9,14 +9,9 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .search_models import BulkOperation, GlobalSearchIndex, SavedSearch
+from .search_models import BulkOperation, SavedSearch
 from .search_service import BulkOperationService, SearchService
-from .serializers import (
-    BulkOperationSerializer,
-    GlobalSearchIndexSerializer,
-    SavedSearchSerializer,
-    SearchResultSerializer,
-)
+from .serializers import BulkOperationSerializer, SavedSearchSerializer
 
 
 class SearchAPIView(APIView):

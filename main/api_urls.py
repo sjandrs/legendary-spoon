@@ -52,7 +52,36 @@ router.register(
 )
 # Phase 3: Analytics APIs
 router.register(
-    r"analytics-snapshots", api_views.AnalyticsSnapshotViewSet, basename="analyticssnapshot"
+    r"analytics-snapshots",
+    api_views.AnalyticsSnapshotViewSet,
+    basename="analyticssnapshot",
+)
+
+# Phase 4: Technician & User Management APIs
+router.register(
+    r"certifications", api_views.CertificationViewSet, basename="certification"
+)
+router.register(r"technicians", api_views.TechnicianViewSet, basename="technician")
+router.register(
+    r"technician-certifications",
+    api_views.TechnicianCertificationViewSet,
+    basename="techniciancertification",
+)
+router.register(
+    r"coverage-areas", api_views.CoverageAreaViewSet, basename="coveragearea"
+)
+router.register(
+    r"technician-availability",
+    api_views.TechnicianAvailabilityViewSet,
+    basename="technicianavailability",
+)
+router.register(
+    r"enhanced-users", api_views.EnhancedUserViewSet, basename="enhanceduser"
+)
+router.register(
+    r"work-order-cert-requirements",
+    api_views.WorkOrderCertificationRequirementViewSet,
+    basename="workordercertrequirement",
 )
 
 # The API URLs are now determined automatically by the router.
@@ -132,5 +161,26 @@ urlpatterns = [
         "analytics/forecast/",
         api_views.generate_revenue_forecast,
         name="generate-revenue-forecast",
+    ),
+    # Phase 4: Technician Assignment & Matching APIs
+    path(
+        "work-orders/<int:work_order_id>/find-technicians/",
+        api_views.find_available_technicians,
+        name="find-available-technicians",
+    ),
+    path(
+        "work-orders/<int:work_order_id>/assign-technician/",
+        api_views.assign_technician_to_work_order,
+        name="assign-technician-to-work-order",
+    ),
+    path(
+        "technicians/available/",
+        api_views.get_available_technicians,
+        name="get-available-technicians",
+    ),
+    path(
+        "technicians/<int:technician_id>/payroll/",
+        api_views.technician_payroll_report,
+        name="technician-payroll-report",
     ),
 ]

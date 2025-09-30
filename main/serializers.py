@@ -8,15 +8,18 @@ from .models import (
     ActivityLog,
     AnalyticsSnapshot,
     Budget,
+    Certification,
     Contact,
+    CoverageArea,
+    CustomerLifetimeValue,
     CustomField,
     CustomFieldValue,
     CustomUser,
-    CustomerLifetimeValue,
     Deal,
     DealPrediction,
     DealStage,
     DefaultWorkOrderItem,
+    EnhancedUser,
     Expense,
     Interaction,
     Invoice,
@@ -33,10 +36,14 @@ from .models import (
     QuoteItem,
     RevenueForecast,
     Tag,
+    Technician,
+    TechnicianAvailability,
+    TechnicianCertification,
     TimeEntry,
     Warehouse,
     WarehouseItem,
     WorkOrder,
+    WorkOrderCertificationRequirement,
     WorkOrderInvoice,
 )
 from .search_models import BulkOperation, GlobalSearchIndex, SavedSearch
@@ -892,7 +899,9 @@ class DealPredictionSerializer(serializers.ModelSerializer):
     """Serializer for deal outcome predictions"""
 
     deal_title = serializers.CharField(source="deal.title", read_only=True)
-    deal_value = serializers.DecimalField(source="deal.value", max_digits=10, decimal_places=2, read_only=True)
+    deal_value = serializers.DecimalField(
+        source="deal.value", max_digits=10, decimal_places=2, read_only=True
+    )
     confidence_percentage = serializers.SerializerMethodField()
 
     class Meta:
@@ -965,3 +974,220 @@ class RevenueForecastSerializer(serializers.ModelSerializer):
             "created_at",
         ]
         read_only_fields = ["created_at"]
+
+
+# Phase 4: Technician & User Management Serializers
+
+
+class CertificationSerializer(serializers.ModelSerializer):
+    """Serializer for technician certifications"""
+
+    class Meta:
+        model = Certification
+        fields = [
+            "id",
+            "name",
+            "description",
+            "tech_level",
+            "category",
+            "requires_renewal",
+            "renewal_period_months",
+            "issuing_authority",
+            "created_at",
+        ]
+
+
+class TechnicianCertificationSerializer(serializers.ModelSerializer):
+    """Serializer for technician certification links"""
+
+    certification_name = serializers.CharField(
+        source="certification.name", read_only=True
+    )
+    certification_level = serializers.IntegerField(
+        source="certification.tech_level", read_only=True
+    )
+    is_expired = serializers.ReadOnlyField()
+    days_until_expiry = serializers.ReadOnlyField()
+
+    class Meta:
+        model = TechnicianCertification
+        fields = [
+            "id",
+            "technician",
+            "certification",
+            "certification_name",
+            "certification_level",
+            "obtained_date",
+            "expiration_date",
+            "certificate_number",
+            "is_active",
+            "is_expired",
+            "days_until_expiry",
+            "created_at",
+        ]
+
+
+class CoverageAreaSerializer(serializers.ModelSerializer):
+    """Serializer for technician coverage areas"""
+
+    technician_name = serializers.CharField(
+        source="technician.full_name", read_only=True
+    )
+
+    class Meta:
+        model = CoverageArea
+        fields = [
+            "id",
+            "technician",
+            "technician_name",
+            "zip_code",
+            "travel_time_minutes",
+            "is_primary",
+            "is_active",
+            "created_at",
+        ]
+
+
+class TechnicianAvailabilitySerializer(serializers.ModelSerializer):
+    """Serializer for technician availability schedules"""
+
+    technician_name = serializers.CharField(
+        source="technician.full_name", read_only=True
+    )
+    weekday_display = serializers.CharField(
+        source="get_weekday_display", read_only=True
+    )
+
+    class Meta:
+        model = TechnicianAvailability
+        fields = [
+            "id",
+            "technician",
+            "technician_name",
+            "weekday",
+            "weekday_display",
+            "start_time",
+            "end_time",
+            "is_active",
+            "created_at",
+        ]
+
+
+class TechnicianSerializer(serializers.ModelSerializer):
+    """Serializer for technicians"""
+
+    user_details = UserSerializer(source="user", read_only=True)
+    full_name = serializers.ReadOnlyField()
+    active_certifications = TechnicianCertificationSerializer(
+        source="techniciancertification_set", many=True, read_only=True
+    )
+    coverage_areas = CoverageAreaSerializer(
+        source="coveragearea_set", many=True, read_only=True
+    )
+    availability = TechnicianAvailabilitySerializer(
+        source="technicianavailability_set", many=True, read_only=True
+    )
+
+    class Meta:
+        model = Technician
+        fields = [
+            "id",
+            "user",
+            "user_details",
+            "employee_id",
+            "first_name",
+            "last_name",
+            "full_name",
+            "phone",
+            "email",
+            "hire_date",
+            "is_active",
+            "base_hourly_rate",
+            "emergency_contact",
+            "active_certifications",
+            "coverage_areas",
+            "availability",
+            "created_at",
+            "updated_at",
+        ]
+
+
+class EnhancedUserSerializer(serializers.ModelSerializer):
+    """Enhanced serializer for user management with hierarchy"""
+
+    manager_name = serializers.CharField(source="manager.get_full_name", read_only=True)
+    technician_details = TechnicianSerializer(source="technician", read_only=True)
+    subordinates_count = serializers.SerializerMethodField()
+    hierarchy_level = serializers.SerializerMethodField()
+    is_account_locked = serializers.ReadOnlyField()
+
+    class Meta:
+        model = EnhancedUser
+        fields = [
+            "id",
+            "username",
+            "email",
+            "first_name",
+            "last_name",
+            "manager",
+            "manager_name",
+            "technician",
+            "technician_details",
+            "employee_id",
+            "department",
+            "job_title",
+            "phone",
+            "hire_date",
+            "custom_fields",
+            "is_active",
+            "is_staff",
+            "is_superuser",
+            "last_login",
+            "last_login_ip",
+            "failed_login_attempts",
+            "account_locked_until",
+            "is_account_locked",
+            "subordinates_count",
+            "hierarchy_level",
+            "date_joined",
+            "created_at",
+            "updated_at",
+        ]
+        read_only_fields = [
+            "last_login",
+            "last_login_ip",
+            "failed_login_attempts",
+            "account_locked_until",
+            "date_joined",
+            "created_at",
+            "updated_at",
+        ]
+
+    def get_subordinates_count(self, obj):
+        return obj.subordinates.count()
+
+    def get_hierarchy_level(self, obj):
+        return obj.get_hierarchy_level()
+
+
+class WorkOrderCertificationRequirementSerializer(serializers.ModelSerializer):
+    """Serializer for work order certification requirements"""
+
+    certification_name = serializers.CharField(
+        source="certification.name", read_only=True
+    )
+    work_order_description = serializers.CharField(
+        source="work_order.description", read_only=True
+    )
+
+    class Meta:
+        model = WorkOrderCertificationRequirement
+        fields = [
+            "id",
+            "work_order",
+            "work_order_description",
+            "certification",
+            "certification_name",
+            "is_required",
+            "created_at",
+        ]

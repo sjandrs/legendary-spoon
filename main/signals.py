@@ -61,7 +61,8 @@ def deal_status_changed_handler(sender, instance, created, **kwargs):
                 user=instance.owner,
                 action="create",
                 content_object=work_order,
-                description=f"Automatically created WorkOrder #{work_order.id} for won Deal: {instance.title}",
+                description=f"Automatically created WorkOrder #{work_order.id} "
+                f"for won Deal: {instance.title}",
             )
 
             # Log the project creation

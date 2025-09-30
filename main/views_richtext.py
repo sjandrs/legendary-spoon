@@ -1,33 +1,27 @@
-# View for user to see their notifications
+# All imports at top of file
+from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import login_required
+from django.core.mail import send_mail
+from django.http import JsonResponse
+from django.shortcuts import get_object_or_404, redirect, render
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_GET
+
+from .models import Notification, RichTextContent
 
 
+# View for user to see their notifications
 @login_required
 def notifications(request):
     notes = request.user.notifications.order_by("-created_at")
     return render(request, "notifications.html", {"notifications": notes})
 
 
-from django.core.mail import send_mail
-
 # Public view for approved rich text content
-from django.views.decorators.http import require_GET
-
-from .models import Notification
-
-
 @require_GET
 def richtext_public(request):
     items = RichTextContent.objects.filter(approved=True).order_by("-created_at")
     return render(request, "richtext_public.html", {"items": items})
-
-
-from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse
-from django.shortcuts import get_object_or_404, redirect, render
-from django.views.decorators.csrf import csrf_exempt
-
-from .models import RichTextContent
 
 
 @login_required
@@ -41,9 +35,6 @@ def richtext_editor(request):
 
 
 # View to list and moderate submitted rich text content
-from django.contrib.admin.views.decorators import staff_member_required
-
-
 @staff_member_required
 def richtext_submissions(request):
     submissions = RichTextContent.objects.all().order_by("-created_at")
@@ -66,12 +57,14 @@ def moderate_richtext(request, pk, action):
             if obj.user:
                 Notification.objects.create(
                     user=obj.user,
-                    message=f"Your content submitted on {obj.created_at} has been approved. Moderator notes: {notes}",
+                    message=f"Your content submitted on {obj.created_at} has been "
+                    f"approved. Moderator notes: {notes}",
                 )
             if user_email:
                 send_mail(
                     "Your submission has been approved",
-                    f"Your content submitted on {obj.created_at} has been approved.\n\nModerator notes: {notes}",
+                    f"Your content submitted on {obj.created_at} has been approved."
+                    f"\n\nModerator notes: {notes}",
                     None,
                     [user_email],
                     fail_silently=True,
@@ -84,12 +77,14 @@ def moderate_richtext(request, pk, action):
             if obj.user:
                 Notification.objects.create(
                     user=obj.user,
-                    message=f"Your content submitted on {obj.created_at} was rejected. Reason: {obj.rejection_reason} Moderator notes: {notes}",
+                    message=f"Your content submitted on {obj.created_at} was rejected. "
+                    f"Reason: {obj.rejection_reason} Moderator notes: {notes}",
                 )
             if user_email:
                 send_mail(
                     "Your submission has been rejected",
-                    f"Your content submitted on {obj.created_at} was rejected.\nReason: {obj.rejection_reason}\nModerator notes: {notes}",
+                    f"Your content submitted on {obj.created_at} was rejected."
+                    f"\nReason: {obj.rejection_reason}\nModerator notes: {notes}",
                     None,
                     [user_email],
                     fail_silently=True,

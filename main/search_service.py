@@ -1,10 +1,9 @@
 import re
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Tuple
 
-from django.contrib.contenttypes.models import ContentType
 from django.db.models import Q
 
-from .models import Account, ActivityLog, Contact, Deal, Invoice, Project, Quote
+from .models import Account, Contact, Deal, Invoice, Project, Quote
 from .search_models import GlobalSearchIndex, SavedSearch
 
 
@@ -94,7 +93,7 @@ class SearchService:
             order_prefix = "-" if sort_order == "desc" else ""
             try:
                 queryset = queryset.order_by(f"{order_prefix}{sort_by}")
-            except:
+            except Exception:
                 # Fallback to default ordering if sort field is invalid
                 pass
 

@@ -1057,6 +1057,7 @@ class AnalyticsSnapshot(models.Model):
     Daily snapshots of key business metrics for historical trending.
     Implements part of REQ-301: Advanced Analytics Dashboard.
     """
+
     date = models.DateField(unique=True)
     total_revenue = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     total_deals = models.PositiveIntegerField(default=0)
@@ -1067,7 +1068,9 @@ class AnalyticsSnapshot(models.Model):
     total_contacts = models.PositiveIntegerField(default=0)
     total_accounts = models.PositiveIntegerField(default=0)
     inventory_value = models.DecimalField(max_digits=12, decimal_places=2, default=0)
-    outstanding_invoices = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    outstanding_invoices = models.DecimalField(
+        max_digits=12, decimal_places=2, default=0
+    )
     overdue_invoices = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -1080,67 +1083,75 @@ class AnalyticsSnapshot(models.Model):
     @classmethod
     def create_daily_snapshot(cls):
         """Create a daily snapshot of current business metrics (optimized for fewer DB hits)"""
-        from django.db.models import Sum, Count, Q, F
+        from django.db.models import Count, F, Q, Sum
         from django.utils import timezone
 
         today = timezone.now().date()
 
         # Revenue calculations
-        total_revenue = Payment.objects.filter(
-            payment_date__lte=today
-        ).aggregate(total=Sum('amount'))['total'] or 0
+        total_revenue = (
+            Payment.objects.filter(payment_date__lte=today).aggregate(
+                total=Sum("amount")
+            )["total"]
+            or 0
+        )
 
         # Deal statistics (single query with annotation)
         deal_stats = Deal.objects.aggregate(
-            total_deals=Count('id'),
-            won_deals=Count('id', filter=Q(status='won')),
-            lost_deals=Count('id', filter=Q(status='lost'))
+            total_deals=Count("id"),
+            won_deals=Count("id", filter=Q(status="won")),
+            lost_deals=Count("id", filter=Q(status="lost")),
         )
-        total_deals = deal_stats['total_deals']
-        won_deals = deal_stats['won_deals']
-        lost_deals = deal_stats['lost_deals']
+        total_deals = deal_stats["total_deals"]
+        won_deals = deal_stats["won_deals"]
+        lost_deals = deal_stats["lost_deals"]
 
         # Project statistics (single query with annotation)
         project_stats = Project.objects.aggregate(
-            active_projects=Count('id', filter=Q(status='in_progress')),
-            completed_projects=Count('id', filter=Q(status='completed'))
+            active_projects=Count("id", filter=Q(status="in_progress")),
+            completed_projects=Count("id", filter=Q(status="completed")),
         )
-        active_projects = project_stats['active_projects']
-        completed_projects = project_stats['completed_projects']
+        active_projects = project_stats["active_projects"]
+        completed_projects = project_stats["completed_projects"]
 
         # Contact and account counts (single query each)
         total_contacts = Contact.objects.count()
         total_accounts = Account.objects.count()
 
         # Inventory value (single aggregate query)
-        inventory_value = WarehouseItem.objects.aggregate(
-            total=Sum(F('quantity') * F('unit_cost'))
-        )['total'] or 0
+        inventory_value = (
+            WarehouseItem.objects.aggregate(total=Sum(F("quantity") * F("unit_cost")))[
+                "total"
+            ]
+            or 0
+        )
 
         # Invoice statistics (single query with annotation)
         invoice_stats = WorkOrderInvoice.objects.aggregate(
-            outstanding_invoices=Sum('total_amount', filter=Q(is_paid=False)),
-            overdue_invoices=Sum('total_amount', filter=Q(is_paid=False, due_date__lt=today))
+            outstanding_invoices=Sum("total_amount", filter=Q(is_paid=False)),
+            overdue_invoices=Sum(
+                "total_amount", filter=Q(is_paid=False, due_date__lt=today)
+            ),
         )
-        outstanding_invoices = invoice_stats['outstanding_invoices'] or 0
-        overdue_invoices = invoice_stats['overdue_invoices'] or 0
+        outstanding_invoices = invoice_stats["outstanding_invoices"] or 0
+        overdue_invoices = invoice_stats["overdue_invoices"] or 0
 
         # Create or update snapshot
         snapshot, created = cls.objects.get_or_create(
             date=today,
             defaults={
-                'total_revenue': total_revenue,
-                'total_deals': total_deals,
-                'won_deals': won_deals,
-                'lost_deals': lost_deals,
-                'active_projects': active_projects,
-                'completed_projects': completed_projects,
-                'total_contacts': total_contacts,
-                'total_accounts': total_accounts,
-                'inventory_value': inventory_value,
-                'outstanding_invoices': outstanding_invoices,
-                'overdue_invoices': overdue_invoices,
-            }
+                "total_revenue": total_revenue,
+                "total_deals": total_deals,
+                "won_deals": won_deals,
+                "lost_deals": lost_deals,
+                "active_projects": active_projects,
+                "completed_projects": completed_projects,
+                "total_contacts": total_contacts,
+                "total_accounts": total_accounts,
+                "inventory_value": inventory_value,
+                "outstanding_invoices": outstanding_invoices,
+                "overdue_invoices": overdue_invoices,
+            },
         )
 
         if not created:
@@ -1166,20 +1177,32 @@ class DealPrediction(models.Model):
     Machine learning predictions for deal outcomes.
     Implements predictive analytics for REQ-301.
     """
-    deal = models.OneToOneField(Deal, on_delete=models.CASCADE, related_name='prediction')
+
+    deal = models.OneToOneField(
+        Deal, on_delete=models.CASCADE, related_name="prediction"
+    )
     predicted_outcome = models.CharField(
         max_length=20,
-        choices=[('won', 'Will Win'), ('lost', 'Will Lose'), ('pending', 'Still Pending')]
+        choices=[
+            ("won", "Will Win"),
+            ("lost", "Will Lose"),
+            ("pending", "Still Pending"),
+        ],
     )
-    confidence_score = models.DecimalField(max_digits=3, decimal_places=2)  # 0.00 to 1.00
+    confidence_score = models.DecimalField(
+        max_digits=3, decimal_places=2
+    )  # 0.00 to 1.00
     predicted_close_date = models.DateField(null=True, blank=True)
     factors = models.JSONField(default=dict)  # Store prediction factors
-    model_version = models.CharField(max_length=50, default='v1.0')
+    model_version = models.CharField(max_length=50, default="v1.0")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"Prediction for {self.deal.title}: {self.predicted_outcome} ({self.confidence_score})"
+        return (
+            f"Prediction for {self.deal.title}: "
+            f"{self.predicted_outcome} ({self.confidence_score})"
+        )
 
 
 class CustomerLifetimeValue(models.Model):
@@ -1187,11 +1210,16 @@ class CustomerLifetimeValue(models.Model):
     Calculated customer lifetime value metrics.
     Implements CLV calculations for REQ-301.
     """
-    contact = models.OneToOneField(Contact, on_delete=models.CASCADE, related_name='clv')
+
+    contact = models.OneToOneField(
+        Contact, on_delete=models.CASCADE, related_name="clv"
+    )
     total_revenue = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     total_deals = models.PositiveIntegerField(default=0)
     average_deal_size = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    deal_win_rate = models.DecimalField(max_digits=3, decimal_places=2, default=0)  # 0.00 to 1.00
+    deal_win_rate = models.DecimalField(
+        max_digits=3, decimal_places=2, default=0
+    )  # 0.00 to 1.00
     customer_since = models.DateField()
     last_activity = models.DateField()
     predicted_clv = models.DecimalField(max_digits=12, decimal_places=2, default=0)
@@ -1206,22 +1234,24 @@ class CustomerLifetimeValue(models.Model):
     @classmethod
     def calculate_for_contact(cls, contact):
         """Calculate CLV for a specific contact"""
-        from django.db.models import Avg, Count, Sum
+        from django.db.models import Avg, Sum
         from django.utils import timezone
 
         # Get deal statistics
         deals = Deal.objects.filter(primary_contact=contact)
         total_deals = deals.count()
-        won_deals = deals.filter(status='won')
-        total_revenue = won_deals.aggregate(total=Sum('value'))['total'] or 0
-        average_deal_size = won_deals.aggregate(avg=Avg('value'))['avg'] or 0
+        won_deals = deals.filter(status="won")
+        total_revenue = won_deals.aggregate(total=Sum("value"))["total"] or 0
+        average_deal_size = won_deals.aggregate(avg=Avg("value"))["avg"] or 0
         deal_win_rate = won_deals.count() / total_deals if total_deals > 0 else 0
 
         # Calculate customer tenure
         customer_since = contact.created_at.date()
         last_activity = max(
             contact.created_at.date(),
-            deals.order_by('-updated_at').first().updated_at.date() if deals.exists() else contact.created_at.date()
+            deals.order_by("-updated_at").first().updated_at.date()
+            if deals.exists()
+            else contact.created_at.date(),
         )
 
         # Simple CLV prediction (can be enhanced with ML)
@@ -1233,31 +1263,31 @@ class CustomerLifetimeValue(models.Model):
         # Customer segments
         segments = []
         if total_revenue > 10000:
-            segments.append('high_value')
+            segments.append("high_value")
         elif total_revenue > 5000:
-            segments.append('medium_value')
+            segments.append("medium_value")
         else:
-            segments.append('low_value')
+            segments.append("low_value")
 
         if deal_win_rate > 0.7:
-            segments.append('high_conversion')
+            segments.append("high_conversion")
         if months_active > 12:
-            segments.append('loyal')
+            segments.append("loyal")
 
         # Create or update CLV record
         clv, created = cls.objects.get_or_create(
             contact=contact,
             defaults={
-                'total_revenue': total_revenue,
-                'total_deals': total_deals,
-                'average_deal_size': average_deal_size,
-                'deal_win_rate': deal_win_rate,
-                'customer_since': customer_since,
-                'last_activity': last_activity,
-                'predicted_clv': predicted_clv,
-                'clv_confidence': clv_confidence,
-                'segments': segments,
-            }
+                "total_revenue": total_revenue,
+                "total_deals": total_deals,
+                "average_deal_size": average_deal_size,
+                "deal_win_rate": deal_win_rate,
+                "customer_since": customer_since,
+                "last_activity": last_activity,
+                "predicted_clv": predicted_clv,
+                "clv_confidence": clv_confidence,
+                "segments": segments,
+            },
         )
 
         if not created:
@@ -1280,14 +1310,15 @@ class RevenueForecast(models.Model):
     Revenue forecasting models and predictions.
     Implements revenue forecasting for REQ-301.
     """
+
     forecast_date = models.DateField()
     forecast_period = models.CharField(
         max_length=20,
         choices=[
-            ('monthly', 'Monthly'),
-            ('quarterly', 'Quarterly'),
-            ('annual', 'Annual')
-        ]
+            ("monthly", "Monthly"),
+            ("quarterly", "Quarterly"),
+            ("annual", "Annual"),
+        ],
     )
     predicted_revenue = models.DecimalField(max_digits=12, decimal_places=2)
     confidence_interval_lower = models.DecimalField(max_digits=12, decimal_places=2)
@@ -1295,17 +1326,327 @@ class RevenueForecast(models.Model):
     forecast_method = models.CharField(
         max_length=50,
         choices=[
-            ('linear_regression', 'Linear Regression'),
-            ('moving_average', 'Moving Average'),
-            ('seasonal_arima', 'Seasonal ARIMA')
-        ]
+            ("linear_regression", "Linear Regression"),
+            ("moving_average", "Moving Average"),
+            ("seasonal_arima", "Seasonal ARIMA"),
+        ],
     )
     factors = models.JSONField(default=dict)  # Forecast factors and assumptions
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        unique_together = ('forecast_date', 'forecast_period', 'forecast_method')
-        ordering = ['-forecast_date']
+        unique_together = ("forecast_date", "forecast_period", "forecast_method")
+        ordering = ["-forecast_date"]
 
     def __str__(self):
-        return f"{self.forecast_period.title()} forecast for {self.forecast_date}: ${self.predicted_revenue}"
+        return f"{self.forecast_period.title()} forecast: ${self.predicted_revenue}"
+
+
+# Phase 4: Technician & User Management Models
+
+
+class Certification(models.Model):
+    """
+    Certification model for technician qualifications.
+    Implements REQ-401: certification tracking with expiration.
+    """
+
+    CATEGORY_CHOICES = [
+        ("safety", "Safety"),
+        ("equipment", "Equipment"),
+        ("vendor", "Vendor Specific"),
+        ("general", "General"),
+    ]
+
+    name = models.CharField(max_length=200)
+    description = models.TextField(blank=True)
+    tech_level = models.PositiveIntegerField(help_text="Certification level (1-10)")
+    category = models.CharField(max_length=100, choices=CATEGORY_CHOICES)
+    requires_renewal = models.BooleanField(default=True)
+    renewal_period_months = models.PositiveIntegerField(null=True, blank=True)
+    issuing_authority = models.CharField(max_length=200, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.name} (Level {self.tech_level})"
+
+
+class Technician(models.Model):
+    """
+    Technician model for field service workers.
+    Implements REQ-401 through REQ-408: complete technician lifecycle management.
+    """
+
+    user = models.OneToOneField(
+        CustomUser,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="technician_profile",
+    )
+    employee_id = models.CharField(max_length=50, unique=True)
+    first_name = models.CharField(max_length=100)
+    last_name = models.CharField(max_length=100)
+    phone = models.CharField(max_length=20)
+    email = models.EmailField()
+    hire_date = models.DateField()
+    is_active = models.BooleanField(default=True)
+    base_hourly_rate = models.DecimalField(max_digits=8, decimal_places=2)
+    emergency_contact = models.JSONField(default=dict)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.first_name} {self.last_name} ({self.employee_id})"
+
+    @property
+    def full_name(self):
+        return f"{self.first_name} {self.last_name}"
+
+    def get_active_certifications(self):
+        """Get all active (non-expired) certifications"""
+        from django.db import models as db_models
+        from django.utils import timezone
+
+        # Handle certifications without expiration dates (they don't expire)
+        # and those with future expiration dates
+        return self.certifications.filter(is_active=True).filter(
+            db_models.Q(expiration_date__isnull=True)
+            | db_models.Q(expiration_date__gt=timezone.now().date())
+        )
+
+    def has_certification(self, certification, min_level=None):
+        """Check if technician has specific certification"""
+        certs = self.get_active_certifications().filter(certification=certification)
+        if not certs.exists():
+            return False
+        if min_level is not None:
+            return certs.filter(certification__tech_level__gte=min_level).exists()
+        return True
+
+    def get_coverage_areas(self):
+        """Get all active coverage areas"""
+        return self.coverage_areas.filter(is_active=True)
+
+    def is_available_on_date(self, date, start_time=None, end_time=None):
+        """Check availability for specific date/time range"""
+        weekday = date.weekday()
+        availabilities = self.availability.filter(weekday=weekday, is_active=True)
+
+        if not availabilities.exists():
+            return False
+
+        if start_time and end_time:
+            # Check if requested time fits within availability
+            for avail in availabilities:
+                if avail.start_time <= start_time and avail.end_time >= end_time:
+                    return True
+            return False
+
+        return True
+
+
+class TechnicianCertification(models.Model):
+    """
+    Link model between technicians and certifications.
+    Implements certification assignment and tracking.
+    """
+
+    technician = models.ForeignKey(
+        Technician, on_delete=models.CASCADE, related_name="certifications"
+    )
+    certification = models.ForeignKey(Certification, on_delete=models.CASCADE)
+    obtained_date = models.DateField()
+    expiration_date = models.DateField(null=True, blank=True)
+    certificate_number = models.CharField(max_length=100, blank=True)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ("technician", "certification")
+
+    def __str__(self):
+        return f"{self.technician} - {self.certification}"
+
+    @property
+    def is_expired(self):
+        """Check if certification is expired"""
+        if not self.expiration_date:
+            return False
+        from django.utils import timezone
+
+        return timezone.now().date() > self.expiration_date
+
+    @property
+    def days_until_expiry(self):
+        """Calculate days until expiration"""
+        if not self.expiration_date:
+            return None
+        from django.utils import timezone
+
+        delta = self.expiration_date - timezone.now().date()
+        return delta.days
+
+    @property
+    def is_active_and_valid(self):
+        """Check if certification is both active and not expired"""
+        return self.is_active and not self.is_expired
+
+
+class CoverageArea(models.Model):
+    """
+    Geographic coverage areas for technicians.
+    Implements REQ-403: coverage area validation.
+    """
+
+    technician = models.ForeignKey(
+        Technician, on_delete=models.CASCADE, related_name="coverage_areas"
+    )
+    zip_code = models.CharField(max_length=10)
+    travel_time_minutes = models.PositiveIntegerField(default=0)
+    is_primary = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ("technician", "zip_code")
+
+    def __str__(self):
+        return f"{self.technician} covers {self.zip_code}"
+
+
+class TechnicianAvailability(models.Model):
+    """
+    Weekly availability schedule for technicians.
+    Implements REQ-404: availability scheduling.
+    """
+
+    WEEKDAY_CHOICES = [
+        (0, "Monday"),
+        (1, "Tuesday"),
+        (2, "Wednesday"),
+        (3, "Thursday"),
+        (4, "Friday"),
+        (5, "Saturday"),
+        (6, "Sunday"),
+    ]
+
+    technician = models.ForeignKey(
+        Technician, on_delete=models.CASCADE, related_name="availability"
+    )
+    weekday = models.PositiveSmallIntegerField(choices=WEEKDAY_CHOICES)
+    start_time = models.TimeField()
+    end_time = models.TimeField()
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.technician} - {self.get_weekday_display()}"
+
+
+class EnhancedUser(AbstractUser):
+    """
+    Enhanced user model replacing CustomUser for Phase 4.
+    Implements REQ-409 through REQ-416: hierarchical user management.
+    """
+
+    groups = models.ManyToManyField(
+        "auth.Group",
+        verbose_name="groups",
+        blank=True,
+        help_text="The groups this user belongs to. A user will get all permissions "
+        "granted to each of their groups.",
+        related_name="enhanceduser_set",
+        related_query_name="enhanceduser",
+    )
+    user_permissions = models.ManyToManyField(
+        "auth.Permission",
+        verbose_name="user permissions",
+        blank=True,
+        help_text="Specific permissions for this user.",
+        related_name="enhanceduser_set",
+        related_query_name="enhanceduser",
+    )
+    manager = models.ForeignKey(
+        "self",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="subordinates",
+    )
+    technician = models.OneToOneField(
+        Technician,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="user_account",
+    )
+    employee_id = models.CharField(max_length=50, unique=True, null=True, blank=True)
+    department = models.CharField(max_length=100, blank=True)
+    job_title = models.CharField(max_length=100, blank=True)
+    phone = models.CharField(max_length=20, blank=True)
+    hire_date = models.DateField(null=True, blank=True)
+    custom_fields = models.JSONField(default=dict)
+    last_login_ip = models.GenericIPAddressField(null=True, blank=True)
+    failed_login_attempts = models.PositiveIntegerField(default=0)
+    account_locked_until = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.get_full_name()} ({self.username})"
+
+    @property
+    def is_account_locked(self):
+        """Check if account is currently locked"""
+        if not self.account_locked_until:
+            return False
+        from django.utils import timezone
+
+        return timezone.now() < self.account_locked_until
+
+    def get_hierarchy_level(self):
+        """Get the depth level in the management hierarchy"""
+        level = 0
+        current = self.manager
+        while current:
+            level += 1
+            current = current.manager
+        return level
+
+    def get_all_subordinates(self):
+        """Get all subordinates recursively"""
+        subordinates = set()
+        direct_subs = self.subordinates.all()
+        subordinates.update(direct_subs)
+
+        for sub in direct_subs:
+            subordinates.update(sub.get_all_subordinates())
+
+        return subordinates
+
+    def can_manage_user(self, user):
+        """Check if this user can manage the given user"""
+        if self == user:
+            return False
+        return user in self.get_all_subordinates()
+
+
+class WorkOrderCertificationRequirement(models.Model):
+    """
+    Certification requirements for work orders.
+    Implements work order qualification enforcement.
+    """
+
+    work_order = models.ForeignKey(
+        WorkOrder, on_delete=models.CASCADE, related_name="certification_requirements"
+    )
+    certification = models.ForeignKey(Certification, on_delete=models.CASCADE)
+    is_required = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ("work_order", "certification")
+
+    def __str__(self):
+        return f"{self.work_order} requires {self.certification}"

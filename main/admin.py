@@ -1,11 +1,10 @@
+from django import forms
 from django.contrib import admin
 from django.contrib.auth.admin import GroupAdmin, UserAdmin
 from django.contrib.auth.models import Group, Permission
 from django.contrib.contenttypes.models import ContentType
 from django.core.paginator import Paginator
 from django.utils.safestring import mark_safe
-
-from django import forms
 
 from .models import (
     Account,
@@ -21,7 +20,11 @@ from .models import (
     Interaction,
     Invoice,
     InvoiceItem,
+    JournalEntry,
+    LedgerAccount,
+    LineItem,
     Page,
+    Payment,
     Post,
     Project,
     ProjectTemplate,
@@ -30,6 +33,8 @@ from .models import (
     QuoteItem,
     RichTextContent,
     Tag,
+    WorkOrder,
+    WorkOrderInvoice,
 )
 
 
@@ -125,17 +130,17 @@ class PermissionsCheckboxSelectMultiple(forms.CheckboxSelectMultiple):
             if not permissions:
                 continue
 
-            output += f"<tr>"
+            output += "<tr>"
             output += f"<td>{ct.name}</td>"
-            output += f"<td>"
+            output += "<td>"
             for perm in permissions:
                 checked = "checked" if value and perm.id in value else ""
-                output += f'<label style="display: block;">'
+                output += '<label style="display: block;">'
                 output += f'<input type="checkbox" name="{name}" value="{perm.id}" {checked}> '
                 output += f"{perm.name}"
-                output += f"</label>"
-            output += f"</td>"
-            output += f"</tr>"
+                output += "</label>"
+            output += "</td>"
+            output += "</tr>"
 
         output += "</tbody></table>"
         output += "</div>"
@@ -247,24 +252,7 @@ class CommentAdmin(HistoryPaginationMixin, admin.ModelAdmin):
     search_fields = ("content",)
 
 
-# CRM admin registrations
-from .models import (
-    Account,
-    Contact,
-    CustomField,
-    CustomFieldValue,
-    Deal,
-    DealStage,
-    DefaultWorkOrderItem,
-    Interaction,
-    Invoice,
-    InvoiceItem,
-    Project,
-    ProjectTemplate,
-    ProjectType,
-    Quote,
-    QuoteItem,
-)
+# CRM admin registrations (models already imported at top)
 
 
 @admin.register(Account)
@@ -323,15 +311,7 @@ class QuoteItemAdmin(HistoryPaginationMixin, admin.ModelAdmin):
     list_display = ("quote", "description", "quantity", "unit_price")
 
 
-# Remove old Invoice/InvoiceItem admin and register new accounting models
-from .models import (
-    InvoiceItem,
-    JournalEntry,
-    LedgerAccount,
-    LineItem,
-    Payment,
-    WorkOrder,
-)
+# Register new accounting models (models already imported at top)
 
 
 # CRM Invoice admin (old model)
@@ -348,8 +328,7 @@ class InvoiceItemAdmin(HistoryPaginationMixin, admin.ModelAdmin):
     search_fields = ("description",)
 
 
-# Accounting WorkOrderInvoice admin (new model)
-from .models import WorkOrderInvoice
+# Accounting WorkOrderInvoice admin (new model) - imported at top
 
 
 @admin.register(WorkOrderInvoice)

@@ -113,7 +113,7 @@ class Command(BaseCommand):
                 status="in_progress",  # Explicitly set status
             )
             deals.append(deal)
-        self.stdout.write(f"Created 5 'in_progress' deals for user 'sam'.")
+        self.stdout.write("Created 5 'in_progress' deals for user 'sam'.")
 
         # Create other random deals
         for _ in range(10):
@@ -134,7 +134,7 @@ class Command(BaseCommand):
                 status=status,
             )
             deals.append(deal)
-        self.stdout.write(f"Created 10 additional random deals.")
+        self.stdout.write("Created 10 additional random deals.")
 
         # --- Create Tasks ---
         task_titles = [

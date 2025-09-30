@@ -15,6 +15,7 @@ repos:
       - id: black
         language_version: python3.13
         files: ^(main|web)/.*\.py$
+        exclude: ^main/migrations/
 
   - repo: https://github.com/pycqa/isort
     rev: 5.13.2
@@ -22,6 +23,7 @@ repos:
       - id: isort
         args: ["--profile", "black"]
         files: ^(main|web)/.*\.py$
+        exclude: ^main/migrations/
 
   - repo: https://github.com/pycqa/flake8
     rev: 7.0.0
@@ -29,6 +31,7 @@ repos:
       - id: flake8
         args: ["--max-line-length=100", "--extend-ignore=E203,W503"]
         files: ^(main|web)/.*\.py$
+        exclude: ^main/migrations/
 
 # ESLint is handled in CI/CD pipeline with proper working directory
 

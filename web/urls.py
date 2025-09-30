@@ -4,7 +4,6 @@ from django.contrib import admin
 from django.contrib.auth import views as auth_views
 from django.shortcuts import render
 from django.urls import include, path, re_path
-from rest_framework.authtoken import views as authtoken_views
 
 from main import views
 from main.views import RateLimitedPasswordResetView, spa_view
