@@ -44,6 +44,8 @@ from .models import (  # New models for comprehensive testing
     WorkOrderInvoice,
 )
 
+# Phase 2 tests are auto-discovered by Django's test runner
+
 # from .reports import FinancialReports
 
 
@@ -2435,10 +2437,4 @@ class UserStoryCoverageReport(TestCase):
 # IMPORT PHASE 2 TESTS
 # ============================================================================
 
-# Import Phase 2 test classes to include them in the test suite
-from .test_phase2 import (
-    Phase2CeleryTaskTests,
-    Phase2ManagementCommandTests,
-    Phase2ServiceIntegrationTests,
-    Phase2SignalIntegrationTests,
-)
+# Phase 2 test classes are imported at the top of the file

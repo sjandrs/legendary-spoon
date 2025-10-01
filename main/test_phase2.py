@@ -3,9 +3,7 @@ Tests for Phase 2: Backend - Services & Automation
 Advanced Field Service Management Module
 """
 
-import os
-import tempfile
-from datetime import datetime, timedelta
+from datetime import timedelta
 from unittest.mock import MagicMock, patch
 
 from django.core.management import call_command
@@ -14,20 +12,16 @@ from django.utils import timezone
 
 from .celery_tasks import (
     generate_daily_analytics_snapshot,
-    process_post_appointment_workflow,
     process_recurring_appointments,
     reserve_inventory_for_appointment,
     send_daily_appointment_reminders,
     send_technician_assignment_notification,
 )
-from .inventory_service import InventoryService, get_inventory_service
-from .map_service import get_map_service
+from .inventory_service import get_inventory_service
 from .models import (
     Account,
     Contact,
     CustomUser,
-    InventoryReservation,
-    NotificationLog,
     Project,
     ScheduledEvent,
     SchedulingAnalytics,
@@ -36,16 +30,10 @@ from .models import (
     WarehouseItem,
     WorkOrder,
 )
-from .notification_service import NotificationService, get_notification_service
-from .pdf_service import get_pdf_service
+from .notification_service import get_notification_service
 
-# Conditional imports for services that may have external dependencies
-try:
-    from .pdf_service import PDFService
-
-    PDF_SERVICE_AVAILABLE = True
-except ImportError:
-    PDF_SERVICE_AVAILABLE = False
+# PDF service is available for testing
+PDF_SERVICE_AVAILABLE = True
 
 try:
     from .map_service import MapService
@@ -110,7 +98,7 @@ class Phase2CeleryTaskTests(TestCase):
         """Test the daily appointment reminders Celery task"""
         # Create a scheduled event for tomorrow
         tomorrow = timezone.now() + timedelta(days=1)
-        scheduled_event = ScheduledEvent.objects.create(
+        ScheduledEvent.objects.create(
             work_order=self.work_order,
             technician=self.technician,
             start_time=tomorrow,
@@ -274,7 +262,7 @@ class Phase2ManagementCommandTests(TestCase):
         """Test the send_appointment_reminders management command"""
         # Create scheduled event for tomorrow
         tomorrow = timezone.now() + timedelta(days=1)
-        scheduled_event = ScheduledEvent.objects.create(
+        ScheduledEvent.objects.create(
             work_order=WorkOrder.objects.create(
                 project=Project.objects.create(
                     title="Test Project",
@@ -312,7 +300,7 @@ class Phase2ManagementCommandTests(TestCase):
         yesterday = timezone.now() - timedelta(days=1)
 
         # Create completed scheduled event from yesterday
-        scheduled_event = ScheduledEvent.objects.create(
+        ScheduledEvent.objects.create(
             work_order=WorkOrder.objects.create(
                 project=Project.objects.create(
                     title="Test Project",
@@ -421,7 +409,7 @@ class Phase2ServiceIntegrationTests(TestCase):
         warehouse = Warehouse.objects.create(
             name="Test Warehouse", location="123 Storage St"
         )
-        warehouse_item = WarehouseItem.objects.create(
+        WarehouseItem.objects.create(
             warehouse=warehouse,
             name="Test Item",
             sku="TEST-001",

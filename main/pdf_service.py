@@ -143,17 +143,29 @@ class PDFService:
                 <title>Service Report - Work Order #{work_order.id}</title>
                 <style>
                     body {{ font-family: Arial, sans-serif; margin: 40px; line-height: 1.6; }}
-                    .header {{ text-align: center; margin-bottom: 30px; border-bottom: 2px solid #333; padding-bottom: 20px; }}
+                    .header {{
+                        text-align: center; margin-bottom: 30px;
+                        border-bottom: 2px solid #333; padding-bottom: 20px;
+                    }}
                     .company-name {{ font-size: 24px; font-weight: bold; color: #333; }}
                     .report-title {{ font-size: 18px; margin-top: 10px; }}
                     .section {{ margin-bottom: 25px; }}
-                    .section-title {{ font-size: 16px; font-weight: bold; color: #333; border-bottom: 1px solid #ccc; padding-bottom: 5px; }}
+                    .section-title {{
+                        font-size: 16px; font-weight: bold; color: #333;
+                        border-bottom: 1px solid #ccc; padding-bottom: 5px;
+                    }}
                     .field-row {{ margin-bottom: 8px; }}
                     .label {{ font-weight: bold; display: inline-block; width: 150px; }}
                     .value {{ color: #555; }}
-                    .notes-box {{ border: 1px solid #ccc; padding: 15px; background-color: #f9f9f9; min-height: 100px; }}
+                    .notes-box {{
+                        border: 1px solid #ccc; padding: 15px;
+                        background-color: #f9f9f9; min-height: 100px;
+                    }}
                     .signature-area {{ margin-top: 50px; text-align: center; }}
-                    .signature-line {{ border-top: 1px solid #000; width: 300px; margin: 20px auto; padding-top: 5px; }}
+                    .signature-line {{
+                        border-top: 1px solid #000; width: 300px;
+                        margin: 20px auto; padding-top: 5px;
+                    }}
                     table {{ width: 100%; border-collapse: collapse; margin-top: 10px; }}
                     th, td {{ border: 1px solid #ddd; padding: 10px; text-align: left; }}
                     th {{ background-color: #f2f2f2; font-weight: bold; }}
@@ -181,7 +193,9 @@ class PDFService:
                     </div>
                     <div class="field-row">
                         <span class="label">Created:</span>
-                        <span class="value">{work_order.created_at.strftime('%B %d, %Y at %I:%M %p')}</span>
+                        <span class="value">
+                            {work_order.created_at.strftime('%B %d, %Y at %I:%M %p')}
+                        </span>
                     </div>
                 </div>
             """

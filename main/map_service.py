@@ -45,8 +45,6 @@ class MapService:
             return None
 
         try:
-            import googlemaps
-
             # Get distance matrix
             result = self.maps_client.distance_matrix(
                 origins=[origin],
@@ -136,8 +134,6 @@ class MapService:
                 return None
 
             # Use Google Maps Directions API for route optimization
-            import googlemaps
-
             result = self.maps_client.directions(
                 origin=technician_location,
                 destination=technician_location,  # Return to start
@@ -245,8 +241,6 @@ class MapService:
             return None
 
         try:
-            import googlemaps
-
             result = self.maps_client.geocode(address)
 
             if result:
@@ -269,8 +263,6 @@ class MapService:
             return None
 
         try:
-            import googlemaps
-
             result = self.maps_client.reverse_geocode((lat, lng))
 
             if result:

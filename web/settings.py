@@ -13,6 +13,8 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 import os
 from pathlib import Path
 
+from celery.schedules import crontab
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -292,8 +294,6 @@ CELERY_RESULT_SERIALIZER = "json"
 CELERY_TIMEZONE = TIME_ZONE
 
 # Celery Beat Schedule for periodic tasks
-from celery.schedules import crontab
-
 CELERY_BEAT_SCHEDULE = {
     "send-daily-appointment-reminders": {
         "task": "main.celery_tasks.send_daily_appointment_reminders",

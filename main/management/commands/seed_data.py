@@ -52,7 +52,7 @@ class Command(BaseCommand):
             )
             user.groups.add(sales_rep_group)
             users.append(user)
-        self.stdout.write(f"Created {len(users)-1} additional random users.")
+        self.stdout.write(f"Created {len(users) - 1} additional random users.")
 
         # --- Create Accounts ---
         accounts = []
