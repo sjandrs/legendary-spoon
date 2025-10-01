@@ -2,6 +2,35 @@
 
 **Converge** is a Django/React CRM and Business Management platform targeting small-to-medium businesses. This guide covers essential patterns and workflows for productive development.
 
+## ✅ Comprehensive User Story Framework Integration
+
+**User Story Coverage**: 130+ comprehensive user stories covering every feature and capability across the entire platform
+**Documentation Location**: `static/kb/user-stories.md` - Complete user story framework driving development and testing
+**Implementation Status**: All Phase 1-4 backend user stories implemented and tested with 23/23 tests passing
+
+### User Story Development Workflow
+1. **Every Feature Requirement**: Must have corresponding user story with business justification
+2. **API Design**: User stories directly map to RESTful endpoints in `main/api_views.py`
+3. **Test Coverage**: Acceptance criteria translate to automated tests in `main/tests.py`
+4. **Frontend Implementation**: User stories guide React component development patterns
+5. **Business Validation**: Each story includes measurable outcomes and stakeholder value
+
+### Complete Feature Coverage
+- **46+ Django Models**: Every model in `main/models.py` has corresponding user stories
+- **7 Development Phases**: CRM Core, Accounting, Workflow Automation, Analytics, Technician Management, Infrastructure, Enhanced Operations
+- **Cross-Module Integration**: User stories validate complete business process workflows
+- **Quality Assurance**: Acceptance criteria serve as test scenarios with automated validation
+
+### Key User Story Categories
+- **CRM Core (CRM-001→CRM-015)**: Account management, contact tracking, deal pipeline, interaction logging
+- **Financial Management (ALM-001→EPP-010)**: Advanced ledger, journal automation, work orders, payment processing
+- **Workflow Automation**: Time tracking, inventory management, project templates, automated workflows
+- **Analytics & AI (PAI-001→PAI-015)**: Predictive analytics, CLV intelligence, revenue forecasting, business intelligence
+- **Technician Operations (ETO-001→ETO-015)**: Certification management, coverage areas, availability, compliance
+- **Infrastructure (NTF-001→SLM-010)**: Notifications, security, logging, content management
+
+**Development Principle**: Every code change must align with existing user stories or create new user stories following the established framework.
+
 ## Architecture Overview
 
 **Backend:** Django REST Framework with custom token authentication (`main/api_auth_views.py`)

@@ -84,6 +84,17 @@ router.register(
     basename="workordercertrequirement",
 )
 
+# Infrastructure APIs
+router.register(
+    r"notifications", api_views.NotificationViewSet, basename="notification"
+)
+router.register(
+    r"rich-text-content", api_views.RichTextContentViewSet, basename="richtextcontent"
+)
+router.register(r"log-entries", api_views.LogEntryViewSet, basename="logentry")
+router.register(r"pages", api_views.PageViewSet, basename="page")
+router.register(r"comments", api_views.CommentViewSet, basename="comment")
+
 # The API URLs are now determined automatically by the router.
 urlpatterns = [
     path("", include(router.urls)),

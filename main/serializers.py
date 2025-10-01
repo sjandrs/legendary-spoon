@@ -8,7 +8,9 @@ from .models import (
     ActivityLog,
     AnalyticsSnapshot,
     Budget,
+    Category,
     Certification,
+    Comment,
     Contact,
     CoverageArea,
     CustomerLifetimeValue,
@@ -27,6 +29,9 @@ from .models import (
     JournalEntry,
     LedgerAccount,
     LineItem,
+    LogEntry,
+    Notification,
+    Page,
     Payment,
     Post,
     Project,
@@ -35,6 +40,7 @@ from .models import (
     Quote,
     QuoteItem,
     RevenueForecast,
+    RichTextContent,
     Tag,
     Technician,
     TechnicianAvailability,
@@ -51,8 +57,22 @@ from .search_models import BulkOperation, GlobalSearchIndex, SavedSearch
 
 class PostSerializer(serializers.ModelSerializer):
     author = serializers.ReadOnlyField(source="author.username")
-    categories = serializers.StringRelatedField(many=True)
-    tags = serializers.StringRelatedField(many=True)
+    categories = serializers.StringRelatedField(many=True, read_only=True)
+    tags = serializers.StringRelatedField(many=True, read_only=True)
+    category_ids = serializers.PrimaryKeyRelatedField(
+        queryset=Category.objects.all(),
+        many=True,
+        source="categories",
+        write_only=True,
+        required=False,
+    )
+    tag_ids = serializers.PrimaryKeyRelatedField(
+        queryset=Tag.objects.all(),
+        many=True,
+        source="tags",
+        write_only=True,
+        required=False,
+    )
 
     class Meta:
         model = Post
@@ -69,8 +89,29 @@ class PostSerializer(serializers.ModelSerializer):
             "updated_at",
             "categories",
             "tags",
+            "category_ids",
+            "tag_ids",
             "image",
         ]
+        read_only_fields = ["author", "created_at", "updated_at"]
+
+
+class CommentSerializer(serializers.ModelSerializer):
+    author = serializers.ReadOnlyField(source="author.username")
+    post_title = serializers.CharField(source="post.title", read_only=True)
+
+    class Meta:
+        model = Comment
+        fields = [
+            "id",
+            "post",
+            "post_title",
+            "author",
+            "content",
+            "created_at",
+            "approved",
+        ]
+        read_only_fields = ["author", "created_at"]
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -250,9 +291,21 @@ class DealSerializer(serializers.ModelSerializer):
         fields = [
             "id",
             "title",
+            "account",
+            "primary_contact",
+            "stage",
             "value",
             "close_date",
+            "owner",
             "status",
+            "created_at",
+            "updated_at",
+            "owner_username",
+            "account_name",
+            "primary_contact_name",
+            "stage_name",
+        ]
+        read_only_fields = [
             "created_at",
             "updated_at",
             "owner_username",
@@ -607,13 +660,13 @@ class JournalEntrySerializer(serializers.ModelSerializer):
         queryset=LedgerAccount.objects.all(),
         source="debit_account",
         write_only=True,
-        required=False,
+        required=True,
     )
     credit_account_id = serializers.PrimaryKeyRelatedField(
         queryset=LedgerAccount.objects.all(),
         source="credit_account",
         write_only=True,
-        required=False,
+        required=True,
     )
 
     class Meta:
@@ -1191,3 +1244,74 @@ class WorkOrderCertificationRequirementSerializer(serializers.ModelSerializer):
             "is_required",
             "created_at",
         ]
+
+
+# Missing Infrastructure Serializers
+
+
+class NotificationSerializer(serializers.ModelSerializer):
+    """Serializer for in-app notifications"""
+
+    class Meta:
+        model = Notification
+        fields = [
+            "id",
+            "user",
+            "message",
+            "created_at",
+            "read",
+        ]
+        read_only_fields = ["user", "created_at"]
+
+
+class RichTextContentSerializer(serializers.ModelSerializer):
+    """Serializer for rich text content submissions"""
+
+    class Meta:
+        model = RichTextContent
+        fields = [
+            "id",
+            "user",
+            "content",
+            "created_at",
+            "approved",
+            "moderation_notes",
+            "rejection_reason",
+        ]
+        read_only_fields = ["user", "created_at"]
+
+
+class LogEntrySerializer(serializers.ModelSerializer):
+    """Serializer for system log entries"""
+
+    class Meta:
+        model = LogEntry
+        fields = [
+            "id",
+            "timestamp",
+            "level",
+            "message",
+            "module",
+        ]
+        read_only_fields = ["timestamp"]
+
+
+class PageSerializer(serializers.ModelSerializer):
+    """Serializer for CMS pages"""
+
+    class Meta:
+        model = Page
+        fields = [
+            "id",
+            "title",
+            "slug",
+            "content",
+            "rich_content",
+            "image",
+            "status",
+            "published",
+            "created_at",
+            "updated_at",
+            "author",
+        ]
+        read_only_fields = ["created_at", "updated_at"]
