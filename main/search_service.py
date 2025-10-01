@@ -3,60 +3,21 @@ from typing import Any, Dict, List, Tuple
 
 from django.db.models import Q
 
-from .models import Account, Contact, Deal, Invoice, Project, Quote
+from .search.factory import SearchProviderFactory
 from .search_models import GlobalSearchIndex, SavedSearch
 
 
 class SearchService:
-    """Service class for advanced search functionality"""
-
-    SEARCHABLE_MODELS = {
-        "accounts": Account,
-        "contacts": Contact,
-        "projects": Project,
-        "deals": Deal,
-        "quotes": Quote,
-        "invoices": Invoice,
-    }
+    """
+    Service class for advanced search functionality.
+    This class acts as a context for the configured search provider,
+    delegating search-related tasks to it.
+    """
 
     def __init__(self, user=None):
         self.user = user
-
-    def global_search(
-        self, query: str, filters: Dict[str, Any] = None, limit: int = 50
-    ) -> Dict[str, List]:
-        """Perform global search across all entities"""
-        results = {}
-
-        if not query or len(query.strip()) < 2:
-            return results
-
-        # Normalize query
-        query = query.strip().lower()
-        search_terms = self._extract_search_terms(query)
-
-        for entity_type, model in self.SEARCHABLE_MODELS.items():
-            # Apply user-based filtering
-            queryset = self._get_user_queryset(model)
-
-            # Apply search
-            search_results = self._search_in_model(queryset, search_terms, model)
-
-            # Apply additional filters if provided
-            if filters and entity_type in filters:
-                search_results = self._apply_filters(
-                    search_results, filters[entity_type], model
-                )
-
-            # Limit results
-            search_results = search_results[:limit]
-
-            if search_results:
-                results[entity_type] = [
-                    self._serialize_search_result(obj) for obj in search_results
-                ]
-
-        return results
+        self.provider_factory = SearchProviderFactory()
+        self.provider = self.provider_factory.get_provider(user=self.user)
 
     def advanced_search(
         self,
@@ -68,39 +29,21 @@ class SearchService:
         offset: int = 0,
         limit: int = 50,
     ) -> Tuple[List, int]:
-        """Perform advanced search on a specific entity type"""
+        """
+        Perform advanced search on a specific entity type by delegating to the
+        configured search provider.
+        """
+        return self.provider.advanced_search(
+            entity_type, query, filters, sort_by, sort_order, offset, limit
+        )
 
-        if entity_type not in self.SEARCHABLE_MODELS:
-            raise ValueError(f"Entity type '{entity_type}' not supported")
-
-        model = self.SEARCHABLE_MODELS[entity_type]
-        queryset = self._get_user_queryset(model)
-
-        # Apply text search if query provided
-        if query and len(query.strip()) >= 2:
-            search_terms = self._extract_search_terms(query)
-            queryset = self._search_in_model(queryset, search_terms, model)
-
-        # Apply filters
-        if filters:
-            queryset = self._apply_filters(queryset, filters, model)
-
-        # Get total count before pagination
-        total_count = queryset.count()
-
-        # Apply sorting
-        if sort_by:
-            order_prefix = "-" if sort_order == "desc" else ""
-            try:
-                queryset = queryset.order_by(f"{order_prefix}{sort_by}")
-            except Exception:
-                # Fallback to default ordering if sort field is invalid
-                pass
-
-        # Apply pagination
-        results = queryset[offset : offset + limit]
-
-        return list(results), total_count
+    def get_search_suggestions(
+        self, query: str, entity_type: str = None, limit: int = 10
+    ) -> List[Dict]:
+        """
+        Get search suggestions by delegating to the configured search provider.
+        """
+        return self.provider.get_search_suggestions(query, entity_type, limit)
 
     def save_search(
         self,
@@ -165,34 +108,45 @@ class SearchService:
                 limit,
             )
 
-    def get_search_suggestions(
-        self, query: str, entity_type: str = None, limit: int = 10
-    ) -> List[str]:
-        """Get search suggestions based on indexed content"""
+    def global_search(
+        self, query: str, filters: Dict[str, Any] = None, limit: int = 50
+    ) -> Dict[str, List]:
+        """Perform global search across all entities"""
+        results = {}
 
-        if len(query.strip()) < 2:
-            return []
+        if not query or len(query.strip()) < 2:
+            return results
 
+        # Normalize query
         query = query.strip().lower()
+        search_terms = self._extract_search_terms(query)
 
-        # Query the search index for suggestions
-        index_query = GlobalSearchIndex.objects.filter(search_vector__icontains=query)
+        for entity_type, model in self.SEARCHABLE_MODELS.items():
+            # Apply user-based filtering
+            queryset = self._get_user_queryset(model)
 
-        if entity_type and entity_type in self.SEARCHABLE_MODELS:
-            index_query = index_query.filter(entity_type=entity_type)
+            # Apply search
+            search_results = self._search_in_model(queryset, search_terms, model)
 
-        if self.user:
-            index_query = index_query.filter(owner=self.user)
+            # Apply additional filters if provided
+            if filters and entity_type in filters:
+                search_results = self._apply_filters(
+                    search_results, filters[entity_type], model
+                )
 
-        suggestions = []
-        for index_entry in index_query[: limit * 2]:  # Get more to filter duplicates
-            title = index_entry.title
-            if title.lower().startswith(query) and title not in suggestions:
-                suggestions.append(title)
-                if len(suggestions) >= limit:
-                    break
+            # Limit results
+            search_results = search_results[:limit]
 
-        return suggestions
+            if search_results:
+                results[entity_type] = [
+                    self._serialize_search_result(obj) for obj in search_results
+                ]
+
+        return results
+
+    def get_search_models(self):
+        """Return the list of searchable models"""
+        return list(self.SEARCHABLE_MODELS.keys())
 
     def _get_user_queryset(self, model):
         """Get queryset filtered by user permissions"""

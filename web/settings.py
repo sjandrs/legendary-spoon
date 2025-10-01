@@ -205,6 +205,9 @@ REST_FRAMEWORK = {
     "DEFAULT_FILTER_BACKENDS": ["django_filters.rest_framework.DjangoFilterBackend"],
 }
 
+# Search Service Provider
+SEARCH_PROVIDER = "main.search.db_provider.DatabaseSearchProvider"
+
 # Add this for django-mailbox
 DJANGO_MAILBOX = {
     "poll_every": 60,  # Poll for new messages every 60 seconds

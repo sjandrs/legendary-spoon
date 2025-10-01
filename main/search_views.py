@@ -33,8 +33,6 @@ class SearchAPIView(APIView):
         for key, value in request.query_params.items():
             if key.startswith("filter_"):
                 filter_key = key.replace("filter_", "")
-
-                # Parse JSON values for complex filters
                 try:
                     if value.startswith("{") or value.startswith("["):
                         filters[filter_key] = json.loads(value)
@@ -43,18 +41,23 @@ class SearchAPIView(APIView):
                 except json.JSONDecodeError:
                     filters[filter_key] = value
 
-        search_service = SearchService(request.user)
-
         try:
+            search_service = SearchService(request.user)
+
             if search_type == "global":
-                results = search_service.global_search(query, filters, limit)
-                total_count = sum(len(v) for v in results.values())
+                # Restore global search by aggregating results from key entity providers.
+                results, total_count = search_service.global_search(
+                    query, filters, sort_by, sort_order, offset, limit
+                )
                 return Response(
                     {
                         "results": results,
                         "total_count": total_count,
+                        "offset": offset,
+                        "limit": limit,
                         "query": query,
                         "type": search_type,
+                        "message": "Global search aggregates results from multiple entities.",
                     }
                 )
             else:
@@ -62,16 +65,10 @@ class SearchAPIView(APIView):
                     search_type, query, filters, sort_by, sort_order, offset, limit
                 )
 
-                # Serialize results
-                serialized_results = []
-                for result in results:
-                    serialized_results.append(
-                        search_service._serialize_search_result(result)
-                    )
-
+                # The search service now returns serialized data directly.
                 return Response(
                     {
-                        "results": serialized_results,
+                        "results": results,
                         "total_count": total_count,
                         "offset": offset,
                         "limit": limit,

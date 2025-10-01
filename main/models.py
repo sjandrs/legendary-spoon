@@ -137,8 +137,8 @@ class Comment(models.Model):
 
 class Account(models.Model):
     name = models.CharField(max_length=255, unique=True)
-    industry = models.CharField(max_length=255, blank=True)
-    website = models.URLField(blank=True)
+    industry = models.CharField(max_length=255, blank=True, db_index=True)
+    website = models.URLField(blank=True, db_index=True)
     phone_number = models.CharField(max_length=20, blank=True)
     address = models.TextField(blank=True)
     notes = models.TextField(blank=True)
@@ -150,7 +150,7 @@ class Account(models.Model):
         related_name="owned_accounts",
     )
     tags = models.ManyToManyField(Tag, blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(auto_now_add=True, db_index=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
@@ -173,9 +173,9 @@ class Contact(models.Model):
         null=True,
         blank=True,
     )
-    first_name = models.CharField(max_length=100)
-    last_name = models.CharField(max_length=100)
-    email = models.EmailField(unique=True)
+    first_name = models.CharField(max_length=100, db_index=True)
+    last_name = models.CharField(max_length=100, db_index=True)
+    email = models.EmailField(unique=True, db_index=True)
     phone_number = models.CharField(max_length=20, blank=True)
     title = models.CharField(max_length=100, blank=True)
     owner = models.ForeignKey(
@@ -186,7 +186,7 @@ class Contact(models.Model):
         related_name="owned_contacts",
     )
     tags = models.ManyToManyField(Tag, blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(auto_now_add=True, db_index=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
@@ -310,21 +310,21 @@ class Deal(models.Model):
         ("won", "Won"),
         ("lost", "Lost"),
     ]
-    title = models.CharField(max_length=255)
+    title = models.CharField(max_length=255, db_index=True)
     account = models.ForeignKey(Account, on_delete=models.CASCADE, related_name="deals")
     primary_contact = models.ForeignKey(
         Contact, on_delete=models.SET_NULL, null=True, blank=True, related_name="deals"
     )
     stage = models.ForeignKey(DealStage, on_delete=models.PROTECT, related_name="deals")
-    value = models.DecimalField(max_digits=10, decimal_places=2)
-    close_date = models.DateField()
+    value = models.DecimalField(max_digits=10, decimal_places=2, db_index=True)
+    close_date = models.DateField(db_index=True)
     owner = models.ForeignKey(
         CustomUser, on_delete=models.CASCADE, related_name="deals"
     )
     status = models.CharField(
-        max_length=20, choices=STATUS_CHOICES, default="in_progress"
+        max_length=20, choices=STATUS_CHOICES, default="in_progress", db_index=True
     )
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(auto_now_add=True, db_index=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
