@@ -1650,3 +1650,387 @@ class WorkOrderCertificationRequirement(models.Model):
 
     def __str__(self):
         return f"{self.work_order} requires {self.certification}"
+
+
+# Advanced Field Service Management Models
+
+
+class ScheduledEvent(models.Model):
+    """
+    Scheduled events linking work orders to technicians with date/time.
+    Implements REQ-001: scheduling with recurrence support.
+    """
+
+    work_order = models.ForeignKey(
+        WorkOrder, on_delete=models.CASCADE, related_name="scheduled_events"
+    )
+    technician = models.ForeignKey(
+        Technician, on_delete=models.CASCADE, related_name="scheduled_events"
+    )
+    start_time = models.DateTimeField()
+    end_time = models.DateTimeField()
+
+    # Recurrence support
+    recurrence_rule = models.CharField(
+        max_length=255,
+        blank=True,
+        help_text="RRULE format for recurring events (e.g., FREQ=WEEKLY;BYDAY=MO)",
+    )
+    parent_event = models.ForeignKey(
+        "self",
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE,
+        related_name="recurring_instances",
+    )
+
+    # Status and notes
+    status = models.CharField(
+        max_length=20,
+        choices=[
+            ("scheduled", "Scheduled"),
+            ("in_progress", "In Progress"),
+            ("completed", "Completed"),
+            ("cancelled", "Cancelled"),
+            ("rescheduled", "Rescheduled"),
+        ],
+        default="scheduled",
+    )
+    notes = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["start_time"]
+
+    def __str__(self):
+        return f"{self.work_order} - {self.technician.full_name} ({self.start_time})"
+
+    @property
+    def duration_hours(self):
+        """Calculate duration in hours"""
+        delta = self.end_time - self.start_time
+        return delta.total_seconds() / 3600
+
+    def is_overdue(self):
+        """Check if event is overdue"""
+        from django.utils import timezone
+
+        return self.status == "scheduled" and timezone.now() > self.end_time
+
+
+class NotificationLog(models.Model):
+    """
+    Log of all automated notifications (email, SMS).
+    Implements REQ-005: multi-channel notification logging.
+    """
+
+    CHANNEL_CHOICES = [
+        ("email", "Email"),
+        ("sms", "SMS"),
+        ("push", "Push Notification"),
+    ]
+
+    STATUS_CHOICES = [
+        ("pending", "Pending"),
+        ("sent", "Sent"),
+        ("failed", "Failed"),
+        ("delivered", "Delivered"),
+        ("bounced", "Bounced"),
+    ]
+
+    # Generic foreign key for linking to any model
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+    object_id = models.PositiveIntegerField()
+    content_object = GenericForeignKey("content_type", "object_id")
+
+    recipient = models.CharField(max_length=255)  # Email address or phone number
+    channel = models.CharField(max_length=10, choices=CHANNEL_CHOICES)
+    subject = models.CharField(max_length=255, blank=True)
+    message = models.TextField()
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="pending")
+
+    # Tracking fields
+    sent_at = models.DateTimeField(null=True, blank=True)
+    delivered_at = models.DateTimeField(null=True, blank=True)
+    error_message = models.TextField(blank=True)
+    external_id = models.CharField(max_length=255, blank=True)  # Provider message ID
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"{self.channel.upper()} to {self.recipient} - {self.status}"
+
+
+class PaperworkTemplate(models.Model):
+    """
+    Custom document templates with conditional logic.
+    Implements REQ-008: dynamic paperwork templates.
+    """
+
+    name = models.CharField(max_length=255, unique=True)
+    description = models.TextField(blank=True)
+    content = models.TextField(
+        help_text="HTML template with Django template syntax for conditional logic"
+    )
+
+    # Template settings
+    is_active = models.BooleanField(default=True)
+    requires_signature = models.BooleanField(default=False)
+
+    # Metadata
+    created_by = models.ForeignKey(
+        CustomUser,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name="paperwork_templates",
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.name
+
+
+class AppointmentRequest(models.Model):
+    """
+    Customer self-service appointment booking requests.
+    Implements REQ-012: customer portal functionality.
+    """
+
+    STATUS_CHOICES = [
+        ("pending", "Pending Review"),
+        ("approved", "Approved"),
+        ("denied", "Denied"),
+        ("scheduled", "Scheduled"),
+    ]
+
+    # Customer information
+    account = models.ForeignKey(
+        Account, on_delete=models.CASCADE, related_name="appointment_requests"
+    )
+    contact = models.ForeignKey(
+        Contact, on_delete=models.CASCADE, related_name="appointment_requests"
+    )
+
+    # Request details
+    requested_start_time = models.DateTimeField()
+    requested_end_time = models.DateTimeField()
+    work_description = models.TextField()
+    priority = models.CharField(
+        max_length=10, choices=Project.PRIORITY_CHOICES, default="medium"
+    )
+
+    # Approval workflow
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="pending")
+    reviewed_by = models.ForeignKey(
+        CustomUser,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="reviewed_appointment_requests",
+    )
+    reviewed_at = models.DateTimeField(null=True, blank=True)
+    review_notes = models.TextField(blank=True)
+
+    # Resulting scheduled event (if approved)
+    scheduled_event = models.OneToOneField(
+        ScheduledEvent,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="appointment_request",
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"Request from {self.contact} - {self.requested_start_time}"
+
+
+class DigitalSignature(models.Model):
+    """
+    Digital signatures for paperwork.
+    Implements REQ-015: digital signature capture.
+    """
+
+    # Generic foreign key (typically links to WorkOrder)
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+    object_id = models.PositiveIntegerField()
+    content_object = GenericForeignKey("content_type", "object_id")
+
+    # Signature data
+    signature_data = models.TextField(help_text="Base64 encoded signature image")
+    signer_name = models.CharField(max_length=255)
+    signer_email = models.EmailField(blank=True)
+
+    # Document information
+    document_name = models.CharField(max_length=255)
+    paperwork_template = models.ForeignKey(
+        PaperworkTemplate, null=True, blank=True, on_delete=models.SET_NULL
+    )
+
+    # Verification
+    ip_address = models.GenericIPAddressField()
+    user_agent = models.TextField(blank=True)
+    signed_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Signature by {self.signer_name} on {self.document_name}"
+
+
+class InventoryReservation(models.Model):
+    """
+    Inventory reservations for scheduled work orders.
+    Implements REQ-017: inventory integration.
+    """
+
+    STATUS_CHOICES = [
+        ("reserved", "Reserved"),
+        ("allocated", "Allocated"),
+        ("consumed", "Consumed"),
+        ("released", "Released"),
+    ]
+
+    scheduled_event = models.ForeignKey(
+        ScheduledEvent, on_delete=models.CASCADE, related_name="inventory_reservations"
+    )
+    warehouse_item = models.ForeignKey(
+        WarehouseItem, on_delete=models.CASCADE, related_name="reservations"
+    )
+
+    quantity_reserved = models.DecimalField(max_digits=10, decimal_places=2)
+    quantity_consumed = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="reserved")
+    reserved_by = models.ForeignKey(
+        CustomUser, on_delete=models.CASCADE, related_name="inventory_reservations"
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ("scheduled_event", "warehouse_item")
+
+    def __str__(self):
+        return (
+            f"Reserved {self.quantity_reserved} {self.warehouse_item.name} "
+            f"for {self.scheduled_event}"
+        )
+
+    def release_reservation(self):
+        """Release the inventory reservation"""
+        self.status = "released"
+        self.save()
+
+    def consume_inventory(self, quantity=None):
+        """Mark inventory as consumed"""
+        if quantity is None:
+            quantity = self.quantity_reserved
+
+        self.quantity_consumed = min(quantity, self.quantity_reserved)
+        self.status = "consumed"
+        self.save()
+
+
+class SchedulingAnalytics(models.Model):
+    """
+    Analytics snapshots for scheduling performance.
+    Implements REQ-018: scheduling analytics dashboard.
+    """
+
+    date = models.DateField(unique=True)
+
+    # Technician metrics
+    total_technicians = models.PositiveIntegerField(default=0)
+    active_technicians = models.PositiveIntegerField(default=0)
+    average_utilization_rate = models.DecimalField(
+        max_digits=5, decimal_places=2, default=0
+    )
+
+    # Scheduling metrics
+    total_scheduled_events = models.PositiveIntegerField(default=0)
+    completed_events = models.PositiveIntegerField(default=0)
+    cancelled_events = models.PositiveIntegerField(default=0)
+    rescheduled_events = models.PositiveIntegerField(default=0)
+
+    # Performance metrics
+    on_time_completion_rate = models.DecimalField(
+        max_digits=5, decimal_places=2, default=0
+    )
+    average_travel_time_minutes = models.PositiveIntegerField(default=0)
+    customer_satisfaction_score = models.DecimalField(
+        max_digits=3, decimal_places=2, default=0
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-date"]
+
+    def __str__(self):
+        return f"Scheduling Analytics for {self.date}"
+
+    @classmethod
+    def create_daily_snapshot(cls):
+        """Create daily scheduling analytics snapshot"""
+        from django.db.models import Avg, Count, Q
+        from django.utils import timezone
+
+        today = timezone.now().date()
+
+        # Technician metrics
+        total_technicians = Technician.objects.count()
+        active_technicians = Technician.objects.filter(is_active=True).count()
+
+        # Scheduling metrics for today
+        events_today = ScheduledEvent.objects.filter(start_time__date=today)
+        total_scheduled_events = events_today.count()
+        completed_events = events_today.filter(status="completed").count()
+        cancelled_events = events_today.filter(status="cancelled").count()
+        rescheduled_events = events_today.filter(status="rescheduled").count()
+
+        # Calculate on-time completion rate
+        on_time_rate = 0
+        if completed_events > 0:
+            # Simplified calculation - can be enhanced with actual completion times
+            on_time_rate = (
+                (completed_events / total_scheduled_events) * 100
+                if total_scheduled_events > 0
+                else 0
+            )
+
+        # Create or update snapshot
+        snapshot, created = cls.objects.get_or_create(
+            date=today,
+            defaults={
+                "total_technicians": total_technicians,
+                "active_technicians": active_technicians,
+                "total_scheduled_events": total_scheduled_events,
+                "completed_events": completed_events,
+                "cancelled_events": cancelled_events,
+                "rescheduled_events": rescheduled_events,
+                "on_time_completion_rate": on_time_rate,
+            },
+        )
+
+        if not created:
+            # Update existing snapshot
+            snapshot.total_technicians = total_technicians
+            snapshot.active_technicians = active_technicians
+            snapshot.total_scheduled_events = total_scheduled_events
+            snapshot.completed_events = completed_events
+            snapshot.cancelled_events = cancelled_events
+            snapshot.rescheduled_events = rescheduled_events
+            snapshot.on_time_completion_rate = on_time_rate
+            snapshot.save()
+
+        return snapshot

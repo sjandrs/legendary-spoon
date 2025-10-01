@@ -8,7 +8,222 @@ All user stories now have **comprehensive automated validation** through our **C
 
 ## Executive Summary
 
-This document contains **130+ comprehensive user stories** covering every feature and capability across the entire Converge CRM platform. These user stories drive development, testing, and feature validation across all phases of the project.
+This document contains **130+ comprehensive user stories** covering every feature and capability across the entire Converge CRM platform. These user - **Financial Control:** Comprehensive financial management with real-time reporting and compliance
+- **Operational Excellence:** Optimized resource utilization with performance tracking and continuous improvement
+
+## Phase 5: Advanced Field Service Management Module (SCHED-001 → SCHED-016)
+
+### Field Service Scheduling & Operations
+
+**SCHED-001** - **Manager: Work Order Scheduling**
+- **User**: As a Manager
+- **Goal**: I want to schedule a work order for a technician
+- **Value**: So that I can assign tasks efficiently and manage my team's time
+- **Acceptance Criteria**:
+  - Manager can create ScheduledEvent linking WorkOrder to Technician
+  - Calendar interface shows available time slots and conflicts
+  - System validates technician availability and qualifications
+  - Route optimization suggestions provided for multiple appointments
+  - Inventory requirements automatically reserved upon scheduling
+- **API Integration**: POST `/api/scheduled-events/` with WorkOrder and Technician assignment
+- **UI Component**: SchedulePage.jsx with FullCalendar integration
+
+**SCHED-002** - **Technician: Assignment Notifications**
+- **User**: As a Technician
+- **Goal**: I want to receive an email and/or SMS notification when a work order is assigned to me
+- **Value**: So that I am immediately aware of my new task
+- **Acceptance Criteria**:
+  - Automatic notification sent upon ScheduledEvent creation
+  - Multi-channel support (email, SMS) based on technician preferences
+  - NotificationLog entry created for audit trail
+  - Notification includes job details, location, and requirements
+  - Failed notifications trigger retry mechanism
+- **API Integration**: Django signals trigger notification service
+- **Technical Component**: NotificationService with email/SMS integration
+
+**SCHED-003** - **Customer: Pre-Appointment Reminders**
+- **User**: As a Customer
+- **Goal**: I want to receive an email or SMS reminder 24 hours before a scheduled service, including necessary paperwork as a PDF
+- **Value**: So that I am prepared for the appointment
+- **Acceptance Criteria**:
+  - Automated reminder sent 24 hours before appointment
+  - PDF paperwork generated from PaperworkTemplate
+  - Customer preferences respected for communication channel
+  - Reminder includes technician details and appointment specifics
+  - Delivery status tracked in NotificationLog
+- **API Integration**: Automated task processes upcoming ScheduledEvents
+- **Technical Component**: PDF generation service with template rendering
+
+**SCHED-004** - **Administrator: Notification Audit Trail**
+- **User**: As an Administrator
+- **Goal**: I want to view a log of all automated notifications sent by the system
+- **Value**: So that I can audit communications and troubleshoot delivery issues
+- **Acceptance Criteria**:
+  - Complete NotificationLog with status, timestamp, and recipient
+  - Filtering by channel, status, date range, and recipient
+  - Export functionality for compliance reporting
+  - Failed notification analysis with retry attempts
+  - Integration with system monitoring and alerting
+- **API Integration**: GET `/api/notification-logs/` with comprehensive filtering
+- **UI Component**: Admin interface with notification management
+
+**SCHED-005** - **Manager: Team Schedule Overview**
+- **User**: As a Manager
+- **Goal**: I want to view a consolidated calendar of my team's schedule
+- **Value**: So that I can effectively manage workloads and availability
+- **Acceptance Criteria**:
+  - Multi-technician calendar view with color coding
+  - Workload balancing indicators and capacity utilization
+  - Drag-and-drop rescheduling with conflict detection
+  - Resource allocation visibility across team members
+  - Performance metrics integration for scheduling decisions
+- **API Integration**: GET `/api/scheduled-events/` with team filtering
+- **UI Component**: SchedulePage.jsx with team management features
+
+**SCHED-006** - **Administrator: Dynamic Paperwork Templates**
+- **User**: As an Administrator
+- **Goal**: I want to create and manage custom paperwork templates with conditional logic
+- **Value**: So that I can create dynamic, standardized documents
+- **Acceptance Criteria**:
+  - Rich text editor with variable insertion capabilities
+  - Conditional logic support (if/then statements)
+  - Template preview with sample data rendering
+  - Version control and template library management
+  - Template testing and validation tools
+- **API Integration**: CRUD operations on `/api/paperwork-templates/`
+- **UI Component**: PaperworkTemplateManager.jsx with editor interface
+
+**SCHED-007** - **Technician: Personal Schedule Management**
+- **User**: As a Technician
+- **Goal**: I want to view my own upcoming schedule on a calendar
+- **Value**: So that I can easily plan my workday
+- **Acceptance Criteria**:
+  - Personal calendar view with appointment details
+  - Travel time calculations and route suggestions
+  - Work order details and customer information access
+  - Mobile-responsive interface for field access
+  - Integration with navigation and mapping services
+- **API Integration**: GET `/api/scheduled-events/` filtered by technician
+- **UI Component**: Personal calendar view in SchedulePage.jsx
+
+**SCHED-008** - **Manager: Route Optimization**
+- **User**: As a Manager
+- **Goal**: I want the system to suggest an optimized route when I schedule multiple jobs for a technician
+- **Value**: So that I can minimize travel time
+- **Acceptance Criteria**:
+  - Mapping service integration for route calculations
+  - Travel time estimation between appointments
+  - Optimization algorithm for multiple stops
+  - Traffic and road condition considerations
+  - Alternative route suggestions and comparisons
+- **API Integration**: Mapping service integration with route optimization
+- **Technical Component**: MapService with route optimization algorithms
+
+**SCHED-009** - **Customer: Self-Service Appointment Booking**
+- **User**: As a Customer
+- **Goal**: I want to request an appointment through a portal by selecting from available time slots
+- **Value**: So that I can schedule service at my convenience
+- **Acceptance Criteria**:
+  - Customer portal with available time slot display
+  - Service type selection and requirements specification
+  - Contact information management and preferences
+  - Appointment request submission with confirmation
+  - Real-time availability checking and booking prevention conflicts
+- **API Integration**: POST `/api/appointment-requests/` with customer data
+- **UI Component**: CustomerPortal.jsx with booking interface
+
+**SCHED-010** - **Manager: Appointment Request Management**
+- **User**: As a Manager
+- **Goal**: I want to approve or deny customer appointment requests from a queue
+- **Value**: So that I can control the final schedule
+- **Acceptance Criteria**:
+  - Appointment request queue with filtering and sorting
+  - One-click approval with technician assignment
+  - Denial with customer notification and alternative options
+  - Bulk operations for multiple requests
+  - Integration with technician availability and qualifications
+- **API Integration**: PUT `/api/appointment-requests/{id}/approve/` or `/deny/`
+- **UI Component**: AppointmentRequestQueue.jsx with approval workflow
+
+**SCHED-011** - **Manager: Recurring Service Contracts**
+- **User**: As a Manager
+- **Goal**: I want to create a recurring schedule for a service contract
+- **Value**: So that maintenance appointments are automatically generated
+- **Acceptance Criteria**:
+  - Recurrence rule configuration (daily, weekly, monthly, yearly)
+  - Contract-based scheduling with customer agreement terms
+  - Automatic ScheduledEvent generation for future appointments
+  - Exception handling for holidays and technician unavailability
+  - Contract renewal and modification workflows
+- **API Integration**: POST `/api/scheduled-events/` with recurrence_rule
+- **Technical Component**: Management command for recurring event generation
+
+**SCHED-012** - **Technician: "On My Way" Customer Communication**
+- **User**: As a Technician
+- **Goal**: I want to press a button to notify the customer I'm on my way, including an ETA
+- **Value**: So that they are prepared for my arrival
+- **Acceptance Criteria**:
+  - One-click notification button in work order interface
+  - Automatic ETA calculation based on current location
+  - Multi-channel notification (SMS, email) to customer
+  - Real-time location tracking and updated ETA
+  - Customer confirmation and preparation instructions
+- **API Integration**: POST `/api/work-orders/{id}/on-my-way/`
+- **UI Component**: Enhanced WorkOrderList.jsx with notification button
+
+**SCHED-013** - **Customer: Digital Signature Workflow**
+- **User**: As a Customer
+- **Goal**: I want to be able to digitally sign paperwork on the technician's device or via a link
+- **Value**: So that we can have a paperless and efficient process
+- **Acceptance Criteria**:
+  - Touch-responsive signature capture interface
+  - Digital signature storage with legal compliance
+  - PDF integration with signature placement
+  - Multiple signature support for complex documents
+  - Audit trail and signature verification capabilities
+- **API Integration**: POST `/api/digital-signatures/` with signature data
+- **UI Component**: DigitalSignaturePad.jsx with signature capture
+
+**SCHED-014** - **System: Post-Appointment Automation**
+- **User**: As the System
+- **Goal**: After a work order is completed, I want to automatically send the final invoice and a satisfaction survey to the customer
+- **Value**: So that the service lifecycle is closed efficiently
+- **Acceptance Criteria**:
+  - WorkOrder completion triggers automated workflow
+  - Invoice generation and email delivery to customer
+  - Customer satisfaction survey with rating system
+  - Follow-up scheduling for future maintenance
+  - Integration with CRM for customer relationship tracking
+- **API Integration**: Django signals on WorkOrder status change
+- **Technical Component**: Post-completion workflow automation
+
+**SCHED-015** - **System: Inventory Integration**
+- **User**: As the System
+- **Goal**: When a work order is scheduled, I want to reserve the necessary parts from inventory
+- **Value**: So that we can prevent stock conflicts
+- **Acceptance Criteria**:
+  - Automatic inventory reservation upon scheduling
+  - Stock level validation and low-stock alerts
+  - Reserved item release on appointment cancellation
+  - Inventory consumption tracking on job completion
+  - Procurement alerts for replenishment needs
+- **API Integration**: Integration with WarehouseItem model
+- **Technical Component**: InventoryService with reservation management
+
+**SCHED-016** - **Manager: Field Service Analytics**
+- **User**: As a Manager
+- **Goal**: I want to view a dashboard with technician utilization rates, on-time performance, and travel times
+- **Value**: So that I can make data-driven decisions to improve efficiency
+- **Acceptance Criteria**:
+  - Comprehensive analytics dashboard with KPI visualization
+  - Technician performance metrics and trend analysis
+  - Route efficiency and travel time optimization insights
+  - Customer satisfaction correlation with service metrics
+  - Predictive analytics for capacity planning and resource optimization
+- **API Integration**: GET `/api/analytics/scheduling-dashboard/`
+- **UI Component**: SchedulingDashboard.jsx with Chart.js integration
+
+This comprehensive expansion ensures every feature in the Converge CRM platform has clear business justification, technical implementation guidance, and measurable success criteria, supporting both current operations and future scalability.ies drive development, testing, and feature validation across all phases of the project.
 
 **Scope**: Complete platform coverage including CRM Core (Phase 1), Accounting & Financial Management (Phase 1), Workflow Automation (Phase 2), Advanced Analytics & AI (Phase 3), Technician & User Management (Phase 4), Infrastructure & Security, and all 46+ models in the system.
 

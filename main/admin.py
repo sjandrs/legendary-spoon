@@ -8,6 +8,7 @@ from django.utils.safestring import mark_safe
 
 from .models import (
     Account,
+    AppointmentRequest,
     Category,
     Comment,
     Contact,
@@ -17,13 +18,17 @@ from .models import (
     Deal,
     DealStage,
     DefaultWorkOrderItem,
+    DigitalSignature,
     Interaction,
+    InventoryReservation,
     Invoice,
     InvoiceItem,
     JournalEntry,
     LedgerAccount,
     LineItem,
+    NotificationLog,
     Page,
+    PaperworkTemplate,
     Payment,
     Post,
     Project,
@@ -32,6 +37,8 @@ from .models import (
     Quote,
     QuoteItem,
     RichTextContent,
+    ScheduledEvent,
+    SchedulingAnalytics,
     Tag,
     WorkOrder,
     WorkOrderInvoice,
@@ -430,3 +437,114 @@ class ProjectTypeAdmin(admin.ModelAdmin):
     list_display = ("name", "is_active")
     list_filter = ("is_active",)
     search_fields = ("name",)
+
+
+# Advanced Field Service Management Admin
+
+
+@admin.register(ScheduledEvent)
+class ScheduledEventAdmin(HistoryPaginationMixin, admin.ModelAdmin):
+    list_display = (
+        "work_order",
+        "technician",
+        "start_time",
+        "end_time",
+        "status",
+        "duration_display",
+    )
+    list_filter = ("status", "start_time", "technician")
+    search_fields = (
+        "work_order__description",
+        "technician__first_name",
+        "technician__last_name",
+    )
+    date_hierarchy = "start_time"
+
+    def duration_display(self, obj):
+        return f"{obj.duration_hours:.1f}h"
+
+    duration_display.short_description = "Duration"
+
+
+@admin.register(NotificationLog)
+class NotificationLogAdmin(HistoryPaginationMixin, admin.ModelAdmin):
+    list_display = (
+        "recipient",
+        "channel",
+        "status",
+        "subject",
+        "sent_at",
+        "content_object",
+    )
+    list_filter = ("channel", "status", "sent_at")
+    search_fields = ("recipient", "subject", "message")
+    readonly_fields = ("sent_at", "delivered_at", "created_at")
+
+
+@admin.register(PaperworkTemplate)
+class PaperworkTemplateAdmin(HistoryPaginationMixin, admin.ModelAdmin):
+    list_display = (
+        "name",
+        "is_active",
+        "requires_signature",
+        "created_by",
+        "created_at",
+    )
+    list_filter = ("is_active", "requires_signature", "created_by")
+    search_fields = ("name", "description")
+
+
+@admin.register(AppointmentRequest)
+class AppointmentRequestAdmin(HistoryPaginationMixin, admin.ModelAdmin):
+    list_display = (
+        "contact",
+        "account",
+        "requested_start_time",
+        "status",
+        "priority",
+        "reviewed_by",
+    )
+    list_filter = ("status", "priority", "reviewed_by", "requested_start_time")
+    search_fields = (
+        "contact__first_name",
+        "contact__last_name",
+        "account__name",
+        "work_description",
+    )
+    readonly_fields = ("created_at", "updated_at")
+
+
+@admin.register(DigitalSignature)
+class DigitalSignatureAdmin(HistoryPaginationMixin, admin.ModelAdmin):
+    list_display = ("signer_name", "document_name", "content_object", "signed_at")
+    list_filter = ("signed_at", "paperwork_template")
+    search_fields = ("signer_name", "signer_email", "document_name")
+    readonly_fields = ("signed_at", "ip_address", "user_agent")
+
+
+@admin.register(InventoryReservation)
+class InventoryReservationAdmin(HistoryPaginationMixin, admin.ModelAdmin):
+    list_display = (
+        "scheduled_event",
+        "warehouse_item",
+        "quantity_reserved",
+        "quantity_consumed",
+        "status",
+        "reserved_by",
+    )
+    list_filter = ("status", "reserved_by", "created_at")
+    search_fields = ("warehouse_item__name", "scheduled_event__work_order__description")
+
+
+@admin.register(SchedulingAnalytics)
+class SchedulingAnalyticsAdmin(HistoryPaginationMixin, admin.ModelAdmin):
+    list_display = (
+        "date",
+        "total_technicians",
+        "active_technicians",
+        "total_scheduled_events",
+        "completed_events",
+        "on_time_completion_rate",
+    )
+    list_filter = ("date",)
+    readonly_fields = ("created_at",)

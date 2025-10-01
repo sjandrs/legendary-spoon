@@ -24,6 +24,7 @@ from .models import (
     Account,
     ActivityLog,
     AnalyticsSnapshot,
+    AppointmentRequest,
     Budget,
     Certification,
     Comment,
@@ -35,9 +36,11 @@ from .models import (
     Deal,
     DealStage,
     DefaultWorkOrderItem,
+    DigitalSignature,
     EnhancedUser,
     Expense,
     Interaction,
+    InventoryReservation,
     Invoice,
     InvoiceItem,
     JournalEntry,
@@ -45,7 +48,9 @@ from .models import (
     LineItem,
     LogEntry,
     Notification,
+    NotificationLog,
     Page,
+    PaperworkTemplate,
     Payment,
     Post,
     Project,
@@ -54,6 +59,8 @@ from .models import (
     Quote,
     QuoteItem,
     RichTextContent,
+    ScheduledEvent,
+    SchedulingAnalytics,
     Tag,
     Technician,
     TechnicianAvailability,
@@ -71,6 +78,7 @@ from .serializers import (
     AccountWithCustomFieldsSerializer,
     ActivityLogSerializer,
     AnalyticsSnapshotSerializer,
+    AppointmentRequestSerializer,
     BudgetSerializer,
     CertificationSerializer,
     CommentSerializer,
@@ -82,17 +90,21 @@ from .serializers import (
     DealSerializer,
     DealStageSerializer,
     DefaultWorkOrderItemSerializer,
+    DigitalSignatureSerializer,
     EnhancedUserSerializer,
     ExpenseSerializer,
     InteractionSerializer,
+    InventoryReservationSerializer,
     InvoiceItemSerializer,
     InvoiceSerializer,
     JournalEntrySerializer,
     LedgerAccountSerializer,
     LineItemSerializer,
     LogEntrySerializer,
+    NotificationLogSerializer,
     NotificationSerializer,
     PageSerializer,
+    PaperworkTemplateSerializer,
     PaymentSerializer,
     PostSerializer,
     ProjectSerializer,
@@ -101,6 +113,8 @@ from .serializers import (
     QuoteItemSerializer,
     QuoteSerializer,
     RichTextContentSerializer,
+    ScheduledEventSerializer,
+    SchedulingAnalyticsSerializer,
     TagSerializer,
     TechnicianAvailabilitySerializer,
     TechnicianCertificationSerializer,
@@ -2444,3 +2458,671 @@ class CommentViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
+
+
+# ============================================================================
+# FIELD SERVICE MANAGEMENT API ENDPOINTS (Phase 1)
+# ============================================================================
+
+
+class ScheduledEventViewSet(viewsets.ModelViewSet):
+    """
+    ViewSet for managing scheduled service events.
+    Supports appointment scheduling, rescheduling, and status management.
+    """
+
+    serializer_class = ScheduledEventSerializer
+    permission_classes = [IsAuthenticated]
+    filter_backends = [
+        DjangoFilterBackend,
+        filters.OrderingFilter,
+        filters.SearchFilter,
+    ]
+    filterset_fields = ["status", "priority", "technician", "work_order"]
+    ordering = ["start_time"]
+    search_fields = [
+        "work_order__description",
+        "technician__first_name",
+        "technician__last_name",
+    ]
+
+    def get_queryset(self):
+        """Filter events based on user permissions"""
+        user = self.request.user
+        if user.groups.filter(name__in=["Sales Manager", "Admin"]).exists():
+            return ScheduledEvent.objects.all().select_related(
+                "work_order", "technician", "work_order__contact"
+            )
+        # Regular users see events for their assigned work orders or as technicians
+        return ScheduledEvent.objects.filter(
+            models.Q(work_order__owner=user) | models.Q(technician__user=user)
+        ).select_related("work_order", "technician", "work_order__contact")
+
+    @action(detail=True, methods=["post"])
+    def reschedule(self, request, pk=None):
+        """Reschedule an appointment with notification handling"""
+        event = self.get_object()
+        new_start_time = request.data.get("start_time")
+        new_end_time = request.data.get("end_time")
+
+        if not new_start_time:
+            return Response(
+                {"error": "start_time is required"}, status=status.HTTP_400_BAD_REQUEST
+            )
+
+        old_start_time = event.start_time
+        event.start_time = new_start_time
+        if new_end_time:
+            event.end_time = new_end_time
+        event.save()
+
+        # Log the reschedule action
+        logger.info(
+            f"Event {event.id} rescheduled from {old_start_time} to "
+            f"{new_start_time} by {request.user}"
+        )
+
+        return Response(
+            {
+                "message": "Appointment rescheduled successfully",
+                "old_time": old_start_time.isoformat(),
+                "new_time": new_start_time,
+            }
+        )
+
+    @action(detail=True, methods=["post"])
+    def complete(self, request, pk=None):
+        """Mark an appointment as completed"""
+        event = self.get_object()
+        event.status = "completed"
+        event.actual_duration = request.data.get(
+            "actual_duration", event.estimated_duration
+        )
+        event.notes = request.data.get("completion_notes", event.notes)
+        event.save()
+
+        return Response(
+            {
+                "message": "Appointment marked as completed",
+                "actual_duration": event.actual_duration,
+            }
+        )
+
+
+class NotificationLogViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    ViewSet for viewing notification logs.
+    Read-only access to track communication history.
+    """
+
+    serializer_class = NotificationLogSerializer
+    permission_classes = [IsAuthenticated]
+    filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
+    filterset_fields = ["notification_type", "channel", "status"]
+    ordering = ["-sent_at"]
+
+    def get_queryset(self):
+        """Filter logs based on user permissions"""
+        user = self.request.user
+        if user.groups.filter(name__in=["Sales Manager", "Admin"]).exists():
+            return NotificationLog.objects.all().select_related("scheduled_event")
+        # Regular users see logs for their events
+        return NotificationLog.objects.filter(
+            scheduled_event__work_order__owner=user
+        ).select_related("scheduled_event")
+
+
+class PaperworkTemplateViewSet(viewsets.ModelViewSet):
+    """
+    ViewSet for managing paperwork templates.
+    Used for generating service completion forms and contracts.
+    """
+
+    serializer_class = PaperworkTemplateSerializer
+    permission_classes = [IsAuthenticated]
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter]
+    filterset_fields = ["template_type", "is_active", "requires_signature"]
+    search_fields = ["name", "description"]
+
+    def get_queryset(self):
+        """Show active templates to regular users, all to managers"""
+        user = self.request.user
+        if user.groups.filter(name__in=["Sales Manager", "Admin"]).exists():
+            return PaperworkTemplate.objects.all()
+        return PaperworkTemplate.objects.filter(is_active=True)
+
+    @action(detail=True, methods=["post"])
+    def generate_document(self, request, pk=None):
+        """Generate a document from the template"""
+        template = self.get_object()
+        work_order_id = request.data.get("work_order_id")
+
+        if not work_order_id:
+            return Response(
+                {"error": "work_order_id is required"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            work_order = WorkOrder.objects.get(id=work_order_id)
+
+            # Import PDF service for document generation
+            from .pdf_service import get_pdf_service
+
+            pdf_service = get_pdf_service()
+
+            # Generate PDF document
+            pdf_data = pdf_service.generate_service_report(
+                work_order, template.template_content, template.name
+            )
+
+            if pdf_data:
+                return Response(
+                    {
+                        "message": "Document generated successfully",
+                        "template_name": template.name,
+                        "work_order": work_order.description,
+                    }
+                )
+            else:
+                return Response(
+                    {"error": "Failed to generate document"},
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                )
+
+        except WorkOrder.DoesNotExist:
+            return Response(
+                {"error": "Work order not found"}, status=status.HTTP_404_NOT_FOUND
+            )
+
+
+class AppointmentRequestViewSet(viewsets.ModelViewSet):
+    """
+    ViewSet for managing customer appointment requests.
+    Allows customers to request appointments and staff to process them.
+    """
+
+    serializer_class = AppointmentRequestSerializer
+    permission_classes = [IsAuthenticated]
+    filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
+    filterset_fields = ["status", "priority", "service_type"]
+    ordering = ["-created_at"]
+
+    def get_queryset(self):
+        """Filter requests based on user permissions"""
+        user = self.request.user
+        if user.groups.filter(name__in=["Sales Manager", "Admin"]).exists():
+            return AppointmentRequest.objects.all().select_related("contact")
+        # Regular users see their own requests
+        return AppointmentRequest.objects.filter(contact__owner=user).select_related(
+            "contact"
+        )
+
+    @action(detail=True, methods=["post"])
+    def approve(self, request, pk=None):
+        """Approve an appointment request"""
+        appointment_request = self.get_object()
+        appointment_request.status = "approved"
+        appointment_request.processed_by = request.user
+        appointment_request.processed_at = timezone.now()
+        appointment_request.save()
+
+        return Response(
+            {
+                "message": "Appointment request approved",
+                "status": appointment_request.status,
+            }
+        )
+
+    @action(detail=True, methods=["post"])
+    def reject(self, request, pk=None):
+        """Reject an appointment request"""
+        appointment_request = self.get_object()
+        appointment_request.status = "rejected"
+        appointment_request.processed_by = request.user
+        appointment_request.processed_at = timezone.now()
+        appointment_request.notes = request.data.get(
+            "rejection_reason", appointment_request.notes
+        )
+        appointment_request.save()
+
+        return Response(
+            {
+                "message": "Appointment request rejected",
+                "status": appointment_request.status,
+            }
+        )
+
+
+class DigitalSignatureViewSet(viewsets.ModelViewSet):
+    """
+    ViewSet for managing digital signatures.
+    Handles signature capture and verification for service completion.
+    """
+
+    serializer_class = DigitalSignatureSerializer
+    permission_classes = [IsAuthenticated]
+    filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
+    filterset_fields = ["work_order", "is_valid"]
+    ordering = ["-signed_at"]
+
+    def get_queryset(self):
+        """Filter signatures based on user permissions"""
+        user = self.request.user
+        if user.groups.filter(name__in=["Sales Manager", "Admin"]).exists():
+            return DigitalSignature.objects.all().select_related("work_order", "signer")
+        # Regular users see signatures for their work orders
+        return DigitalSignature.objects.filter(work_order__owner=user).select_related(
+            "work_order", "signer"
+        )
+
+    @action(detail=True, methods=["post"])
+    def verify(self, request, pk=None):
+        """Verify the integrity of a digital signature"""
+        signature = self.get_object()
+
+        # Simple verification - in production, use proper cryptographic verification
+        is_valid = signature.signature_data and signature.document_hash
+        signature.is_valid = is_valid
+        signature.save()
+
+        return Response(
+            {
+                "signature_id": signature.id,
+                "is_valid": is_valid,
+                "verified_at": timezone.now().isoformat(),
+            }
+        )
+
+
+class InventoryReservationViewSet(viewsets.ModelViewSet):
+    """
+    ViewSet for managing inventory reservations.
+    Handles reserving items for scheduled appointments.
+    """
+
+    serializer_class = InventoryReservationSerializer
+    permission_classes = [IsAuthenticated]
+    filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
+    filterset_fields = ["status", "item", "scheduled_event"]
+    ordering = ["-reserved_at"]
+
+    def get_queryset(self):
+        """Filter reservations based on user permissions"""
+        user = self.request.user
+        if user.groups.filter(name__in=["Sales Manager", "Admin"]).exists():
+            return InventoryReservation.objects.all().select_related(
+                "scheduled_event", "item"
+            )
+        # Regular users see reservations for their events
+        return InventoryReservation.objects.filter(
+            scheduled_event__work_order__owner=user
+        ).select_related("scheduled_event", "item")
+
+    @action(detail=True, methods=["post"])
+    def release(self, request, pk=None):
+        """Release a reservation"""
+        reservation = self.get_object()
+        reservation.status = "released"
+        reservation.released_at = timezone.now()
+        reservation.save()
+
+        # Return inventory to available stock
+        if reservation.item:
+            reservation.item.quantity += reservation.quantity_reserved - (
+                reservation.quantity_used or 0
+            )
+            reservation.item.save()
+
+        return Response(
+            {
+                "message": "Reservation released successfully",
+                "status": reservation.status,
+            }
+        )
+
+    @action(detail=True, methods=["post"])
+    def consume(self, request, pk=None):
+        """Mark items as consumed during service"""
+        reservation = self.get_object()
+        quantity_used = request.data.get("quantity_used", 0)
+
+        if quantity_used > reservation.quantity_reserved:
+            return Response(
+                {"error": "Cannot consume more than reserved"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        reservation.quantity_used = quantity_used
+        reservation.status = "consumed"
+        reservation.save()
+
+        return Response(
+            {"message": "Items marked as consumed", "quantity_used": quantity_used}
+        )
+
+
+class SchedulingAnalyticsViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    ViewSet for viewing scheduling analytics.
+    Provides historical metrics and performance data.
+    """
+
+    serializer_class = SchedulingAnalyticsSerializer
+    permission_classes = [IsAuthenticated]
+    filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
+    filterset_fields = ["date"]
+    ordering = ["-date"]
+
+    def get_queryset(self):
+        """Only managers can view analytics"""
+        user = self.request.user
+        if user.groups.filter(name__in=["Sales Manager", "Admin"]).exists():
+            return SchedulingAnalytics.objects.all()
+        return SchedulingAnalytics.objects.none()
+
+    @action(detail=False, methods=["get"])
+    def summary(self, request):
+        """Get analytics summary for dashboard"""
+        # Get recent analytics data
+        recent_analytics = SchedulingAnalytics.objects.order_by("-date")[:7]
+
+        if not recent_analytics:
+            return Response({"message": "No analytics data available"})
+
+        # Calculate averages
+        avg_completion_rate = sum(a.completion_rate for a in recent_analytics) / len(
+            recent_analytics
+        )
+        avg_utilization = sum(a.technician_utilization for a in recent_analytics) / len(
+            recent_analytics
+        )
+        total_appointments = sum(a.total_appointments for a in recent_analytics)
+
+        return Response(
+            {
+                "period": f"Last {len(recent_analytics)} days",
+                "avg_completion_rate": round(avg_completion_rate, 2),
+                "avg_technician_utilization": round(avg_utilization, 2),
+                "total_appointments": total_appointments,
+                "latest_date": recent_analytics[0].date.isoformat()
+                if recent_analytics
+                else None,
+            }
+        )
+
+
+# ============================================================================
+# FIELD SERVICE MANAGEMENT UTILITY ENDPOINTS
+# ============================================================================
+
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def optimize_technician_routes(request):
+    """
+    Optimize routes for technicians based on scheduled appointments.
+    Uses the MapService for route optimization.
+    """
+    date = request.data.get("date")
+    technician_ids = request.data.get("technician_ids", [])
+
+    if not date:
+        return Response(
+            {"error": "date is required"}, status=status.HTTP_400_BAD_REQUEST
+        )
+
+    try:
+        # Import services
+        from .map_service import get_map_service
+
+        map_service = get_map_service()
+
+        # Get scheduled events for the date and technicians
+        events_query = ScheduledEvent.objects.filter(
+            start_time__date=date, status="scheduled"
+        ).select_related("work_order", "technician")
+
+        if technician_ids:
+            events_query = events_query.filter(technician_id__in=technician_ids)
+
+        events = list(events_query)
+
+        if not events:
+            return Response(
+                {"message": "No scheduled events found for optimization", "date": date}
+            )
+
+        # Group events by technician
+        technician_routes = {}
+        for event in events:
+            tech_id = event.technician.id
+            if tech_id not in technician_routes:
+                technician_routes[tech_id] = {
+                    "technician": {
+                        "id": event.technician.id,
+                        "name": f"{event.technician.first_name} {event.technician.last_name}",
+                    },
+                    "events": [],
+                }
+            technician_routes[tech_id]["events"].append(
+                {
+                    "id": event.id,
+                    "work_order_id": event.work_order.id,
+                    "address": getattr(
+                        event.work_order, "service_address", "No address"
+                    ),
+                    "start_time": event.start_time.isoformat(),
+                    "estimated_duration": float(event.estimated_duration),
+                }
+            )
+
+        # Optimize routes for each technician
+        optimized_routes = {}
+        for tech_id, route_data in technician_routes.items():
+            addresses = [event["address"] for event in route_data["events"]]
+            if len(addresses) > 1:
+                optimized_order = map_service.optimize_route(addresses)
+                route_data["optimized_order"] = optimized_order
+                route_data[
+                    "total_travel_time"
+                ] = map_service.calculate_total_travel_time(addresses)
+            else:
+                route_data["optimized_order"] = [0] if addresses else []
+                route_data["total_travel_time"] = 0
+
+            optimized_routes[tech_id] = route_data
+
+        return Response(
+            {
+                "date": date,
+                "optimized_routes": optimized_routes,
+                "total_technicians": len(optimized_routes),
+                "total_appointments": len(events),
+            }
+        )
+
+    except Exception as e:
+        logger.error(f"Route optimization failed: {str(e)}")
+        return Response(
+            {"error": "Route optimization failed", "details": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
+
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def check_technician_availability(request):
+    """
+    Check technician availability for a specific time slot.
+    """
+    technician_id = request.data.get("technician_id")
+    start_time = request.data.get("start_time")
+    end_time = request.data.get("end_time")
+
+    if not all([technician_id, start_time, end_time]):
+        return Response(
+            {"error": "technician_id, start_time, and end_time are required"},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    try:
+        technician = Technician.objects.get(id=technician_id)
+
+        # Check for conflicting scheduled events
+        conflicts = ScheduledEvent.objects.filter(
+            technician=technician,
+            start_time__lt=end_time,
+            end_time__gt=start_time,
+            status__in=["scheduled", "in_progress"],
+        )
+
+        # Check technician availability schedule
+        availability = TechnicianAvailability.objects.filter(
+            technician=technician,
+            date=start_time.split("T")[0],  # Extract date from ISO string
+            is_available=True,
+        ).first()
+
+        is_available = not conflicts.exists() and availability is not None
+
+        response_data = {
+            "technician_id": technician_id,
+            "technician_name": f"{technician.first_name} {technician.last_name}",
+            "is_available": is_available,
+            "start_time": start_time,
+            "end_time": end_time,
+        }
+
+        if conflicts.exists():
+            response_data["conflicts"] = [
+                {
+                    "id": conflict.id,
+                    "start_time": conflict.start_time.isoformat(),
+                    "end_time": conflict.end_time.isoformat(),
+                    "work_order": conflict.work_order.description,
+                }
+                for conflict in conflicts
+            ]
+
+        if not availability:
+            response_data[
+                "availability_note"
+            ] = "Technician not scheduled to work on this date"
+
+        return Response(response_data)
+
+    except Technician.DoesNotExist:
+        return Response(
+            {"error": "Technician not found"}, status=status.HTTP_404_NOT_FOUND
+        )
+    except Exception as e:
+        logger.error(f"Availability check failed: {str(e)}")
+        return Response(
+            {"error": "Availability check failed", "details": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
+
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def send_appointment_reminder(request):
+    """
+    Send an appointment reminder for a specific scheduled event.
+    """
+    event_id = request.data.get("event_id")
+
+    if not event_id:
+        return Response(
+            {"error": "event_id is required"}, status=status.HTTP_400_BAD_REQUEST
+        )
+
+    try:
+        event = ScheduledEvent.objects.get(id=event_id)
+
+        # Import notification service
+        from .notification_service import get_notification_service
+
+        notification_service = get_notification_service()
+
+        # Send reminder
+        success = notification_service.send_customer_reminder(event)
+
+        if success:
+            return Response(
+                {
+                    "message": "Appointment reminder sent successfully",
+                    "event_id": event_id,
+                    "customer": event.work_order.contact.full_name,
+                    "appointment_time": event.start_time.isoformat(),
+                }
+            )
+        else:
+            return Response(
+                {"error": "Failed to send appointment reminder"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+    except ScheduledEvent.DoesNotExist:
+        return Response(
+            {"error": "Scheduled event not found"}, status=status.HTTP_404_NOT_FOUND
+        )
+    except Exception as e:
+        logger.error(f"Send reminder failed: {str(e)}")
+        return Response(
+            {"error": "Failed to send reminder", "details": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
+
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def send_on_way_notification(request):
+    """
+    Send "on my way" notification to customer.
+    """
+    event_id = request.data.get("event_id")
+    eta_minutes = request.data.get("eta_minutes", 15)
+
+    if not event_id:
+        return Response(
+            {"error": "event_id is required"}, status=status.HTTP_400_BAD_REQUEST
+        )
+
+    try:
+        event = ScheduledEvent.objects.get(id=event_id)
+
+        # Import notification service
+        from .notification_service import get_notification_service
+
+        notification_service = get_notification_service()
+
+        # Send "on my way" notification
+        success = notification_service.send_technician_on_way(event, eta_minutes)
+
+        if success:
+            return Response(
+                {
+                    "message": '"On my way" notification sent successfully',
+                    "event_id": event_id,
+                    "customer": event.work_order.contact.full_name,
+                    "eta_minutes": eta_minutes,
+                    "technician": f"{event.technician.first_name} {event.technician.last_name}",
+                }
+            )
+        else:
+            return Response(
+                {"error": 'Failed to send "on my way" notification'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+    except ScheduledEvent.DoesNotExist:
+        return Response(
+            {"error": "Scheduled event not found"}, status=status.HTTP_404_NOT_FOUND
+        )
+    except Exception as e:
+        logger.error(f"Send on way notification failed: {str(e)}")
+        return Response(
+            {"error": "Failed to send notification", "details": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )

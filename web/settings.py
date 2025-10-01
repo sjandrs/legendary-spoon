@@ -276,3 +276,46 @@ AUTHENTICATION_BACKENDS = [
     "django.contrib.auth.backends.ModelBackend",
     "allauth.account.auth_backends.AuthenticationBackend",
 ]
+
+# ============================================================================
+# CELERY CONFIGURATION (Phase 2: Field Service Management)
+# ============================================================================
+
+# Celery settings
+CELERY_BROKER_URL = os.environ.get("CELERY_BROKER_URL", "redis://localhost:6379/0")
+CELERY_RESULT_BACKEND = os.environ.get(
+    "CELERY_RESULT_BACKEND", "redis://localhost:6379/0"
+)
+CELERY_ACCEPT_CONTENT = ["json"]
+CELERY_TASK_SERIALIZER = "json"
+CELERY_RESULT_SERIALIZER = "json"
+CELERY_TIMEZONE = TIME_ZONE
+
+# Celery Beat Schedule for periodic tasks
+from celery.schedules import crontab
+
+CELERY_BEAT_SCHEDULE = {
+    "send-daily-appointment-reminders": {
+        "task": "main.celery_tasks.send_daily_appointment_reminders",
+        "schedule": crontab(hour=9, minute=0),  # 9:00 AM daily
+    },
+    "process-recurring-appointments": {
+        "task": "main.celery_tasks.process_recurring_appointments",
+        "schedule": crontab(hour=1, minute=0),  # 1:00 AM daily
+    },
+    "generate-daily-analytics-snapshot": {
+        "task": "main.celery_tasks.generate_daily_analytics_snapshot",
+        "schedule": crontab(hour=23, minute=30),  # 11:30 PM daily
+    },
+    "cleanup-old-notification-logs": {
+        "task": "main.celery_tasks.cleanup_old_notification_logs",
+        "schedule": crontab(hour=2, minute=0, day_of_week=0),  # 2:00 AM every Sunday
+    },
+}
+
+# External Service API Keys (Phase 2: Field Service Management)
+# These should be set as environment variables in production
+GOOGLE_MAPS_API_KEY = os.environ.get("GOOGLE_MAPS_API_KEY", "")
+TWILIO_ACCOUNT_SID = os.environ.get("TWILIO_ACCOUNT_SID", "")
+TWILIO_AUTH_TOKEN = os.environ.get("TWILIO_AUTH_TOKEN", "")
+TWILIO_PHONE_NUMBER = os.environ.get("TWILIO_PHONE_NUMBER", "")

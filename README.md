@@ -18,6 +18,7 @@ Built with a robust **Django** backend and a dynamic **React** frontend, Converg
 *   **Contact Management:** A centralized database for all your customer and lead information.
 *   **Deal Tracking:** A visual pipeline to manage sales opportunities from prospecting to close.
 *   **Task Management:** Create, assign, and track tasks related to contacts, deals, or internal projects.
+*   **Field Service Management:** Advanced scheduling, route optimization, digital signatures, and customer self-service portal.
 *   **Clickable Charts:** Interactive dashboard charts that allow you to click through to filtered data views.
 *   **Knowledge Base:** An internal documentation system for storing articles, guides, and changelogs.
 *   **User Roles & Permissions:** Manage user access with roles like "Sales Rep" and "Sales Manager".
@@ -27,6 +28,7 @@ Built with a robust **Django** backend and a dynamic **React** frontend, Converg
 *   **[Testing Automation Guide](docs/TESTING_AUTOMATION.md)**: Comprehensive documentation for automated testing, CI/CD, and quality assurance
 *   **[API Documentation](docs/API.md)**: REST API endpoints and usage examples
 *   **[Development Guide](docs/DEVELOPMENT.md)**: Setup, conventions, and development workflows
+*   **[Field Service Management](docs/FIELD_SERVICE_MANAGEMENT.md)**: Complete guide to advanced scheduling and service management features
 
 ## �🛠️ Tech Stack
 

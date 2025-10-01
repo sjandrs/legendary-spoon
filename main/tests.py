@@ -2429,3 +2429,16 @@ class UserStoryCoverageReport(TestCase):
                     expiration_date=timezone.now().date()
                     + timezone.timedelta(days=365),
                 )
+
+
+# ============================================================================
+# IMPORT PHASE 2 TESTS
+# ============================================================================
+
+# Import Phase 2 test classes to include them in the test suite
+from .test_phase2 import (
+    Phase2CeleryTaskTests,
+    Phase2ManagementCommandTests,
+    Phase2ServiceIntegrationTests,
+    Phase2SignalIntegrationTests,
+)

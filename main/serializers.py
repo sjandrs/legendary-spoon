@@ -7,6 +7,7 @@ from .models import (
     Account,
     ActivityLog,
     AnalyticsSnapshot,
+    AppointmentRequest,
     Budget,
     Category,
     Certification,
@@ -21,9 +22,11 @@ from .models import (
     DealPrediction,
     DealStage,
     DefaultWorkOrderItem,
+    DigitalSignature,
     EnhancedUser,
     Expense,
     Interaction,
+    InventoryReservation,
     Invoice,
     InvoiceItem,
     JournalEntry,
@@ -31,7 +34,9 @@ from .models import (
     LineItem,
     LogEntry,
     Notification,
+    NotificationLog,
     Page,
+    PaperworkTemplate,
     Payment,
     Post,
     Project,
@@ -41,6 +46,8 @@ from .models import (
     QuoteItem,
     RevenueForecast,
     RichTextContent,
+    ScheduledEvent,
+    SchedulingAnalytics,
     Tag,
     Technician,
     TechnicianAvailability,
@@ -1315,3 +1322,194 @@ class PageSerializer(serializers.ModelSerializer):
             "author",
         ]
         read_only_fields = ["created_at", "updated_at"]
+
+
+# ============================================================================
+# FIELD SERVICE MANAGEMENT SERIALIZERS (Phase 1)
+# ============================================================================
+
+
+class ScheduledEventSerializer(serializers.ModelSerializer):
+    """Serializer for scheduled service events"""
+
+    technician_name = serializers.CharField(
+        source="technician.full_name", read_only=True
+    )
+    work_order_description = serializers.CharField(
+        source="work_order.description", read_only=True
+    )
+    customer_name = serializers.CharField(
+        source="work_order.contact.full_name", read_only=True
+    )
+
+    class Meta:
+        model = ScheduledEvent
+        fields = [
+            "id",
+            "work_order",
+            "technician",
+            "start_time",
+            "end_time",
+            "status",
+            "priority",
+            "estimated_duration",
+            "actual_duration",
+            "notes",
+            "created_at",
+            "updated_at",
+            "recurrence_pattern",
+            "recurrence_end_date",
+            "parent_event",
+            # Read-only fields
+            "technician_name",
+            "work_order_description",
+            "customer_name",
+        ]
+        read_only_fields = ["created_at", "updated_at"]
+
+
+class NotificationLogSerializer(serializers.ModelSerializer):
+    """Serializer for notification logs"""
+
+    scheduled_event_info = serializers.CharField(
+        source="scheduled_event.__str__", read_only=True
+    )
+
+    class Meta:
+        model = NotificationLog
+        fields = [
+            "id",
+            "scheduled_event",
+            "notification_type",
+            "channel",
+            "recipient",
+            "message",
+            "status",
+            "sent_at",
+            "error_message",
+            # Read-only fields
+            "scheduled_event_info",
+        ]
+        read_only_fields = ["sent_at"]
+
+
+class PaperworkTemplateSerializer(serializers.ModelSerializer):
+    """Serializer for paperwork templates"""
+
+    class Meta:
+        model = PaperworkTemplate
+        fields = [
+            "id",
+            "name",
+            "description",
+            "template_content",
+            "template_type",
+            "is_active",
+            "requires_signature",
+            "created_at",
+            "updated_at",
+        ]
+        read_only_fields = ["created_at", "updated_at"]
+
+
+class AppointmentRequestSerializer(serializers.ModelSerializer):
+    """Serializer for customer appointment requests"""
+
+    contact_name = serializers.CharField(source="contact.full_name", read_only=True)
+
+    class Meta:
+        model = AppointmentRequest
+        fields = [
+            "id",
+            "contact",
+            "preferred_date",
+            "preferred_time_start",
+            "preferred_time_end",
+            "service_type",
+            "description",
+            "priority",
+            "status",
+            "notes",
+            "created_at",
+            "processed_at",
+            "processed_by",
+            # Read-only fields
+            "contact_name",
+        ]
+        read_only_fields = ["created_at", "processed_at"]
+
+
+class DigitalSignatureSerializer(serializers.ModelSerializer):
+    """Serializer for digital signatures"""
+
+    work_order_description = serializers.CharField(
+        source="work_order.description", read_only=True
+    )
+    signer_name = serializers.CharField(source="signer.full_name", read_only=True)
+
+    class Meta:
+        model = DigitalSignature
+        fields = [
+            "id",
+            "work_order",
+            "signer",
+            "signature_data",
+            "document_hash",
+            "signed_at",
+            "ip_address",
+            "is_valid",
+            # Read-only fields
+            "work_order_description",
+            "signer_name",
+        ]
+        read_only_fields = ["signed_at", "document_hash", "is_valid"]
+
+
+class InventoryReservationSerializer(serializers.ModelSerializer):
+    """Serializer for inventory reservations"""
+
+    scheduled_event_info = serializers.CharField(
+        source="scheduled_event.__str__", read_only=True
+    )
+    item_name = serializers.CharField(source="item.name", read_only=True)
+
+    class Meta:
+        model = InventoryReservation
+        fields = [
+            "id",
+            "scheduled_event",
+            "item",
+            "quantity_reserved",
+            "quantity_used",
+            "status",
+            "reserved_at",
+            "released_at",
+            "notes",
+            # Read-only fields
+            "scheduled_event_info",
+            "item_name",
+        ]
+        read_only_fields = ["reserved_at", "released_at"]
+
+
+class SchedulingAnalyticsSerializer(serializers.ModelSerializer):
+    """Serializer for scheduling analytics snapshots"""
+
+    class Meta:
+        model = SchedulingAnalytics
+        fields = [
+            "id",
+            "date",
+            "total_appointments",
+            "completed_appointments",
+            "cancelled_appointments",
+            "completion_rate",
+            "total_work_orders",
+            "active_technicians",
+            "technician_utilization",
+            "avg_appointment_duration",
+            "notifications_sent",
+            "urgent_appointments",
+            "created_at",
+        ]
+        read_only_fields = ["created_at"]

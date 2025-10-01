@@ -49,6 +49,12 @@ import TaxReport from './components/TaxReport';
 import TimeTracking from './components/TimeTracking';
 import EmailCommunication from './components/EmailCommunication';
 import AnalyticsDashboard from './components/AnalyticsDashboard';
+import SchedulePage from './components/SchedulePage';
+import PaperworkTemplateManager from './components/PaperworkTemplateManager';
+import CustomerPortal from './components/CustomerPortal';
+import AppointmentRequestQueue from './components/AppointmentRequestQueue';
+import DigitalSignaturePad from './components/DigitalSignaturePad';
+import SchedulingDashboard from './components/SchedulingDashboard';
 import TechnicianManagement from './components/TechnicianManagement';
 
 // This component contains the main application layout with navigation
@@ -58,6 +64,7 @@ const MainLayout = () => {
   const [resourcesMenuOpen, setResourcesMenuOpen] = useState(false);
   const [tasksMenuOpen, setTasksMenuOpen] = useState(false);
   const [staffMenuOpen, setStaffMenuOpen] = useState(false);
+  const [fieldServiceMenuOpen, setFieldServiceMenuOpen] = useState(false);
 
   const handleLogout = () => {
     // We can get logout from context now, but this is also fine
@@ -114,6 +121,22 @@ const MainLayout = () => {
                 <div className="dropdown-menu-content">
                   <Link to="/staff">User Management</Link>
                   <Link to="/technicians">Technicians</Link>
+                </div>
+              )}
+            </li>
+            <li className="dropdown-menu"
+                onMouseEnter={() => setFieldServiceMenuOpen(true)}
+                onMouseLeave={() => setFieldServiceMenuOpen(false)}
+            >
+              <button className="dropdown-button">Field Service</button>
+              {fieldServiceMenuOpen && (
+                <div className="dropdown-menu-content">
+                  <Link to="/schedule">Schedule</Link>
+                  <Link to="/paperwork-templates">Paperwork Templates</Link>
+                  <Link to="/customer-portal">Customer Portal</Link>
+                  <Link to="/appointment-requests">Appointment Requests</Link>
+                  <Link to="/digital-signature">Digital Signature</Link>
+                  <Link to="/scheduling-dashboard">Scheduling Dashboard</Link>
                 </div>
               )}
             </li>
@@ -209,6 +232,14 @@ function App() {
           <Route path="/payments/new" element={<PaymentForm />} />
           <Route path="/reports" element={<Reports />} />
           <Route path="/email-communication" element={<EmailCommunication />} />
+
+          {/* Field Service Management Routes */}
+          <Route path="/schedule" element={<SchedulePage />} />
+          <Route path="/paperwork-templates" element={<PaperworkTemplateManager />} />
+          <Route path="/customer-portal" element={<CustomerPortal />} />
+          <Route path="/appointment-requests" element={<AppointmentRequestQueue />} />
+          <Route path="/digital-signature" element={<DigitalSignaturePad />} />
+          <Route path="/scheduling-dashboard" element={<SchedulingDashboard />} />
           <Route path="/expenses" element={<ExpenseList />} />
           <Route path="/expenses/new" element={<ExpenseForm />} />
           <Route path="/expenses/:id/edit" element={<ExpenseForm />} />
@@ -216,6 +247,14 @@ function App() {
           <Route path="/budgets/new" element={<BudgetForm />} />
           <Route path="/budgets/:id/edit" element={<BudgetForm />} />
           <Route path="/tax-report" element={<TaxReport />} />
+
+          {/* Field Service Management Routes */}
+          <Route path="/scheduling" element={<SchedulePage />} />
+          <Route path="/scheduling/dashboard" element={<SchedulingDashboard />} />
+          <Route path="/paperwork-templates" element={<PaperworkTemplateManager />} />
+          <Route path="/appointment-requests" element={<AppointmentRequestQueue />} />
+          <Route path="/field-service" element={<SchedulingDashboard />} />
+          <Route path="/digital-signature/:workOrderId" element={<DigitalSignaturePad />} />
         </Route>
       </Route>
 

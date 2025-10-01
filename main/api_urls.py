@@ -84,6 +84,39 @@ router.register(
     basename="workordercertrequirement",
 )
 
+# Phase 5: Field Service Management APIs
+router.register(
+    r"scheduled-events", api_views.ScheduledEventViewSet, basename="scheduledevent"
+)
+router.register(
+    r"notification-logs", api_views.NotificationLogViewSet, basename="notificationlog"
+)
+router.register(
+    r"paperwork-templates",
+    api_views.PaperworkTemplateViewSet,
+    basename="paperworktemplate",
+)
+router.register(
+    r"appointment-requests",
+    api_views.AppointmentRequestViewSet,
+    basename="appointmentrequest",
+)
+router.register(
+    r"digital-signatures",
+    api_views.DigitalSignatureViewSet,
+    basename="digitalsignature",
+)
+router.register(
+    r"inventory-reservations",
+    api_views.InventoryReservationViewSet,
+    basename="inventoryreservation",
+)
+router.register(
+    r"scheduling-analytics",
+    api_views.SchedulingAnalyticsViewSet,
+    basename="schedulinganalytics",
+)
+
 # Infrastructure APIs
 router.register(
     r"notifications", api_views.NotificationViewSet, basename="notification"
@@ -193,5 +226,26 @@ urlpatterns = [
         "technicians/<int:technician_id>/payroll/",
         api_views.technician_payroll_report,
         name="technician-payroll-report",
+    ),
+    # Phase 5: Field Service Management endpoints
+    path(
+        "scheduling/route-optimization/",
+        api_views.optimize_technician_routes,
+        name="optimize-technician-routes",
+    ),
+    path(
+        "scheduling/availability-check/",
+        api_views.check_technician_availability,
+        name="check-technician-availability",
+    ),
+    path(
+        "notifications/send-reminder/",
+        api_views.send_appointment_reminder,
+        name="send-appointment-reminder",
+    ),
+    path(
+        "notifications/send-on-way/",
+        api_views.send_on_way_notification,
+        name="send-on-way-notification",
     ),
 ]

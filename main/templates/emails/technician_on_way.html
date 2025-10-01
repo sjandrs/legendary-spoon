@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Your Technician is On the Way</title>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background-color: #007bff; color: white; padding: 20px; text-align: center; }
+        .content { background-color: #f8f9fa; padding: 20px; }
+        .eta-info { background-color: #d4edda; padding: 15px; margin: 15px 0; border-left: 4px solid #28a745; text-align: center; }
+        .technician-info { background-color: white; padding: 15px; margin: 15px 0; border-left: 4px solid #007bff; }
+        .field { margin: 10px 0; }
+        .label { font-weight: bold; display: inline-block; width: 120px; }
+        .footer { text-align: center; color: #666; font-size: 12px; margin-top: 20px; }
+        .contact-info { background-color: #e3f2fd; padding: 15px; border-radius: 5px; margin: 15px 0; }
+        .eta-time { font-size: 24px; font-weight: bold; color: #28a745; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚗 Your Technician is On the Way!</h1>
+            <p>{{ company_name }}</p>
+        </div>
+
+        <div class="content">
+            <p>Hello {{ contact.first_name }},</p>
+
+            <p>Great news! Your technician is currently en route to your location.</p>
+
+            <div class="eta-info">
+                <h2>Estimated Arrival Time</h2>
+                <div class="eta-time">{{ eta_time|time:"g:i A" }}</div>
+                <p>{{ eta_minutes }} minutes from now</p>
+            </div>
+
+            <div class="technician-info">
+                <h3>Your Technician</h3>
+                <div class="field">
+                    <span class="label">Name:</span>
+                    {{ technician.first_name }} {{ technician.last_name }}
+                </div>
+                <div class="field">
+                    <span class="label">Phone:</span>
+                    {{ technician.phone }}
+                </div>
+                {% if technician.vehicle_info %}
+                <div class="field">
+                    <span class="label">Vehicle:</span>
+                    {{ technician.vehicle_info }}
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="contact-info">
+                <h3>Service Details</h3>
+                <div class="field">
+                    <span class="label">Appointment:</span>
+                    {{ scheduled_event.start_time|date:"F j, Y" }} at {{ scheduled_event.start_time|time:"g:i A" }}
+                </div>
+                <div class="field">
+                    <span class="label">Service:</span>
+                    {{ work_order.description }}
+                </div>
+                <div class="field">
+                    <span class="label">Address:</span>
+                    {{ work_order.service_address|default:contact.address }}
+                </div>
+            </div>
+
+            <div style="background-color: #fff3cd; padding: 15px; border: 1px solid #ffeaa7; border-radius: 5px; margin: 15px 0;">
+                <h3>Please Be Ready</h3>
+                <ul>
+                    <li>Ensure clear access to the work area</li>
+                    <li>Have any relevant documentation ready</li>
+                    <li>Someone should be available to greet the technician</li>
+                    <li>If you have pets, please secure them for safety</li>
+                </ul>
+            </div>
+
+            <p>Your technician will call you when they arrive. If you have any questions or concerns, please don't hesitate to contact them directly.</p>
+
+            <p>Thank you for choosing {{ company_name }}!</p>
+
+            <p>Best regards,<br>
+            The {{ company_name }} Team</p>
+        </div>
+
+        <div class="footer">
+            <p>This is an automated notification from {{ company_name }}.</p>
+            <p>For immediate assistance, contact {{ technician.first_name }} at {{ technician.phone }}.</p>
+        </div>
+    </div>
+</body>
+</html>

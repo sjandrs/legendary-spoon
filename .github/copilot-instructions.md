@@ -228,6 +228,25 @@ CustomUser → Account.owner (Sales territory assignment)
   - Technician performance metrics and efficiency tracking
   - API endpoints: `/api/technicians/{id}/payroll/`, `/api/technicians/available/`
 
+### Phase 5: Advanced Field Service Management Module (2025-09-30) ✅ COMPLETE
+- **REQ-501-516: Field Service Scheduling & Automation**
+  - Complete field service management with intelligent scheduling
+  - `ScheduledEvent`, `NotificationLog`, `PaperworkTemplate`, `AppointmentRequest`, `DigitalSignature` models
+  - Multi-channel notifications (Email/SMS) with automated workflows
+  - Route optimization and ETA calculations with mapping service integration
+  - Customer self-service portal and manager approval workflows
+  - API endpoints: `/api/scheduled-events/`, `/api/paperwork-templates/`, `/api/appointment-requests/`, `/api/digital-signatures/`
+
+- **REQ-517-529: React Frontend for Field Service Management**
+  - **SchedulePage.jsx**: Advanced calendar interface with FullCalendar integration, drag-and-drop scheduling, route optimization
+  - **PaperworkTemplateManager.jsx**: Template creation system with conditional logic and variable insertion
+  - **CustomerPortal.jsx**: Self-service customer booking interface with time slot selection
+  - **AppointmentRequestQueue.jsx**: Manager interface for appointment approval workflow
+  - **DigitalSignaturePad.jsx**: Legal signature capture system with react-signature-canvas
+  - **SchedulingDashboard.jsx**: Analytics dashboard with Chart.js integration and performance metrics
+  - Enhanced **WorkOrderList.jsx**: "On My Way" notification functionality with real-time customer communication
+  - Complete navigation integration in **App.jsx** with Field Service dropdown menu and routing
+
 ### Phase 4A: React Frontend for Technician & User Management (2025-09-30) 📋 SPECIFICATION READY
 - **REQ-4A01-4A05: Frontend Architecture**
   - React components following established Converge design patterns
@@ -460,8 +479,14 @@ frontend/src/
 │   ├── UserRoleManagement.jsx  # User role management
 │   ├── Warehouse.jsx           # Inventory management (Phase 2)
 │   ├── WorkOrderForm.jsx       # Work order forms
-│   ├── WorkOrderList.jsx        # Work order listing
-│   └── WorkOrders.jsx          # Work order management
+│   ├── WorkOrderList.jsx        # Work order listing (Enhanced with "On My Way")
+│   ├── WorkOrders.jsx          # Work order management
+│   ├── SchedulePage.jsx        # Field service scheduling with FullCalendar (Phase 5)
+│   ├── PaperworkTemplateManager.jsx # Template creation and management (Phase 5)
+│   ├── CustomerPortal.jsx      # Self-service customer booking (Phase 5)
+│   ├── AppointmentRequestQueue.jsx # Manager appointment approval (Phase 5)
+│   ├── DigitalSignaturePad.jsx # Legal signature capture (Phase 5)
+│   └── SchedulingDashboard.jsx # Field service analytics (Phase 5)
 │   └── *.css                   # Component-specific styles
 ├── contexts/          # React Context providers
 │   └── AuthContext.jsx

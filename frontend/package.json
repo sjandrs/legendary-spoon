@@ -13,6 +13,10 @@
     "test:coverage": "jest --coverage"
   },
   "dependencies": {
+    "@fullcalendar/daygrid": "^6.1.19",
+    "@fullcalendar/interaction": "^6.1.19",
+    "@fullcalendar/react": "^6.1.19",
+    "@fullcalendar/timegrid": "^6.1.19",
     "@headlessui/react": "^2.2.9",
     "@hello-pangea/dnd": "^18.0.1",
     "@react-spring/web": "^10.0.3",
@@ -30,6 +34,7 @@
     "react-hook-form": "^7.63.0",
     "react-markdown": "^10.1.0",
     "react-router-dom": "^7.9.2",
+    "react-signature-canvas": "^1.1.0-alpha.2",
     "react-window": "^2.1.2",
     "recharts": "^3.2.1",
     "remark-gfm": "^4.0.1"
