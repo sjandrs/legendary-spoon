@@ -15,10 +15,11 @@ const ExpenseList = () => {
     try {
       setLoading(true);
       const response = await api.get('/api/expenses/');
-      setExpenses(response.data);
+      setExpenses(response.data || []);
     } catch (err) {
       setError('Failed to load expenses');
       console.error('Error fetching expenses:', err);
+      setExpenses([]);
     } finally {
       setLoading(false);
     }
@@ -63,7 +64,7 @@ const ExpenseList = () => {
           </tr>
         </thead>
         <tbody>
-          {expenses.map(expense => (
+          {expenses && expenses.map(expense => (
             <tr key={expense.id}>
               <td>{expense.date}</td>
               <td>{expense.category.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}</td>
@@ -71,12 +72,12 @@ const ExpenseList = () => {
               <td>{expense.vendor || '-'}</td>
               <td className="text-right">{formatCurrency(expense.amount)}</td>
               <td>
-                <span className={`status ${expense.approved ? 'approved' : 'pending'}`}>
-                  {expense.approved ? 'Approved' : 'Pending'}
+                <span className={`status ${expense.status || (expense.approved ? 'approved' : 'pending')}`}>
+                  {expense.status ? expense.status : (expense.approved ? 'Approved' : 'Pending')}
                 </span>
               </td>
               <td>
-                {!expense.approved && (
+                {(!expense.approved && expense.status !== 'rejected') && (
                   <button
                     onClick={() => handleApprove(expense.id)}
                     className="btn btn-sm btn-success"

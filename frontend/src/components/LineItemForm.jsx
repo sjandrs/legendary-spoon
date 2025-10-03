@@ -25,11 +25,11 @@ const LineItemForm = ({ onSuccess }) => {
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <input name="work_order" value={form.work_order} onChange={handleChange} placeholder="Work Order ID" required />
-      <input name="description" value={form.description} onChange={handleChange} placeholder="Description" required />
-      <input name="quantity" type="number" value={form.quantity} onChange={handleChange} min="1" required />
-      <input name="unit_price" type="number" value={form.unit_price} onChange={handleChange} min="0" step="0.01" required />
+    <form onSubmit={handleSubmit} role="form">
+      <input name="work_order" value={form.work_order} onChange={handleChange} placeholder="Work Order ID" required aria-label="Work Order ID" />
+      <input name="description" value={form.description} onChange={handleChange} placeholder="Description" required aria-label="Line Item Description" />
+      <input name="quantity" type="number" value={form.quantity} onChange={handleChange} min="1" required aria-label="Quantity" />
+      <input name="unit_price" type="number" value={form.unit_price} onChange={handleChange} min="0" step="0.01" required aria-label="Unit Price" />
       <button type="submit" disabled={loading}>Create</button>
       {error && <div style={{color:'red'}}>{error}</div>}
     </form>

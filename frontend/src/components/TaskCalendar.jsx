@@ -165,8 +165,21 @@ const TaskCalendar = () => {
 };
 
 const TaskModal = ({ task, isEditing, onSave, onClose }) => {
-  const [formData, setFormData] = useState({ ...task });
+  const defaultTask = {
+    title: '',
+    description: '',
+    due_date: new Date().toISOString().split('T')[0],
+    priority: 'medium',
+    status: 'pending',
+    task_type: ''
+  };
+
+  const [formData, setFormData] = useState({ ...defaultTask, ...task });
   const [taskTypes, setTaskTypes] = useState([]);
+
+  useEffect(() => {
+    setFormData({ ...defaultTask, ...task });
+  }, [task]);
 
   useEffect(() => {
     const fetchTaskTypes = async () => {
@@ -202,7 +215,7 @@ const TaskModal = ({ task, isEditing, onSave, onClose }) => {
 
   return (
     <div className="modal-overlay">
-      <div className="modal-content">
+      <div className="modal-content" role="dialog" aria-modal="true">
         <div className="modal-header">
           <h3>{isEditing ? 'Edit Task' : 'Create New Task'}</h3>
           <button onClick={onClose} className="close-btn">&times;</button>
@@ -210,9 +223,10 @@ const TaskModal = ({ task, isEditing, onSave, onClose }) => {
 
         <form onSubmit={handleSubmit} className="task-form">
           <div className="form-group">
-            <label>Title</label>
+            <label htmlFor="task-title">Title</label>
             <input
               type="text"
+              id="task-title"
               name="title"
               value={formData.title}
               onChange={handleChange}
@@ -221,8 +235,9 @@ const TaskModal = ({ task, isEditing, onSave, onClose }) => {
           </div>
 
           <div className="form-group">
-            <label>Description</label>
+            <label htmlFor="task-description">Description</label>
             <textarea
+              id="task-description"
               name="description"
               value={formData.description || ''}
               onChange={handleChange}
@@ -232,9 +247,10 @@ const TaskModal = ({ task, isEditing, onSave, onClose }) => {
 
           <div className="form-row">
             <div className="form-group">
-              <label>Due Date</label>
+              <label htmlFor="task-due-date">Due Date</label>
               <input
                 type="date"
+                id="task-due-date"
                 name="due_date"
                 value={formData.due_date}
                 onChange={handleChange}
@@ -243,8 +259,8 @@ const TaskModal = ({ task, isEditing, onSave, onClose }) => {
             </div>
 
             <div className="form-group">
-              <label>Priority</label>
-              <select name="priority" value={formData.priority} onChange={handleChange}>
+              <label htmlFor="task-priority">Priority</label>
+              <select id="task-priority" name="priority" value={formData.priority || 'medium'} onChange={handleChange}>
                 <option value="low">Low</option>
                 <option value="medium">Medium</option>
                 <option value="high">High</option>
@@ -255,8 +271,8 @@ const TaskModal = ({ task, isEditing, onSave, onClose }) => {
 
           <div className="form-row">
             <div className="form-group">
-              <label>Type</label>
-              <select name="task_type" value={formData.task_type} onChange={handleChange} required>
+              <label htmlFor="task-type">Type</label>
+              <select id="task-type" name="task_type" value={formData.task_type} onChange={handleChange} required>
                 <option value="">Select a Type</option>
                 {taskTypes.map(type => (
                     <option key={type.id} value={type.id}>
@@ -267,8 +283,8 @@ const TaskModal = ({ task, isEditing, onSave, onClose }) => {
             </div>
 
             <div className="form-group">
-              <label>Status</label>
-              <select name="status" value={formData.status} onChange={handleChange}>
+              <label htmlFor="task-status">Status</label>
+              <select id="task-status" name="status" value={formData.status || 'pending'} onChange={handleChange}>
                 <option value="pending">Pending</option>
                 <option value="in_progress">In Progress</option>
                 <option value="completed">Completed</option>

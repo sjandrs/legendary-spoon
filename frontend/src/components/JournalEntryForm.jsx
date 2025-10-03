@@ -31,12 +31,12 @@ const JournalEntryForm = ({ onSuccess }) => {
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <input name="date" type="date" value={form.date} onChange={handleChange} required />
-      <input name="description" value={form.description} onChange={handleChange} placeholder="Description" required />
-      <input name="debit_account" value={form.debit_account} onChange={handleChange} placeholder="Debit Account ID" required />
-      <input name="credit_account" value={form.credit_account} onChange={handleChange} placeholder="Credit Account ID" required />
-      <input name="amount" type="number" value={form.amount} onChange={handleChange} placeholder="Amount" required />
+    <form onSubmit={handleSubmit} role="form">
+      <input name="date" type="date" value={form.date} onChange={handleChange} required aria-label="Date" />
+      <input name="description" value={form.description} onChange={handleChange} placeholder="Description" required aria-label="Description" />
+      <input name="debit_account" value={form.debit_account} onChange={handleChange} placeholder="Debit Account ID" required aria-label="Debit Account" />
+      <input name="credit_account" value={form.credit_account} onChange={handleChange} placeholder="Credit Account ID" required aria-label="Credit Account" />
+      <input name="amount" type="number" value={form.amount} onChange={handleChange} placeholder="Amount" required aria-label="Amount" />
       <button type="submit" disabled={loading}>Create</button>
       {error && <div style={{color:'red'}}>{error}</div>}
     </form>

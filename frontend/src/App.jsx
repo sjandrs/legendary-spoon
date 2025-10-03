@@ -77,14 +77,14 @@ const MainLayout = () => {
       <nav>
         <ul>
           <div className="nav-links">
-            <li><Link to="/dashboard">Dashboard</Link></li>
-            <li><Link to="/analytics">Analytics</Link></li>
+            <li><Link to="/dashboard" data-testid="nav-dashboard">Dashboard</Link></li>
+            <li><Link to="/analytics" data-testid="nav-analytics">Analytics</Link></li>
             <li
               className="dropdown-menu"
               onMouseEnter={() => setResourcesMenuOpen(true)}
               onMouseLeave={() => setResourcesMenuOpen(false)}
             >
-              <button className="dropdown-button">Resources</button>
+              <button className="dropdown-button" data-testid="nav-resources">Resources</button>
               {resourcesMenuOpen && (
                 <div className="dropdown-menu-content">
                   <Link to="/resources">Company Resources</Link>
@@ -92,8 +92,8 @@ const MainLayout = () => {
                 </div>
               )}
             </li>
-            <li><Link to="/contacts">Contacts</Link></li>
-            <li><Link to="/deals">Deals</Link></li>
+            <li><Link to="/contacts" data-testid="nav-contacts">Contacts</Link></li>
+            <li><Link to="/deals" data-testid="nav-deals">Deals</Link></li>
             <li
               className="dropdown-menu"
               onMouseEnter={() => setTasksMenuOpen(true)}
@@ -161,7 +161,7 @@ const MainLayout = () => {
               )}
             </li>
           </div>
-          <li><button onClick={handleLogout} className="logout-button">Logout</button></li>
+          <li><button onClick={handleLogout} className="logout-button" data-testid="logout-button">Logout</button></li>
         </ul>
       </nav>
       <main>

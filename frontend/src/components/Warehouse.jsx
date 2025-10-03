@@ -243,8 +243,9 @@ const Warehouse = () => {
               <form onSubmit={handleItemSubmit}>
                 <div className="form-row">
                   <div className="form-group">
-                    <label>Name:</label>
+                    <label htmlFor="item-name">Name:</label>
                     <input
+                      id="item-name"
                       type="text"
                       value={itemFormData.name}
                       onChange={(e) => setItemFormData({...itemFormData, name: e.target.value})}
@@ -252,8 +253,9 @@ const Warehouse = () => {
                     />
                   </div>
                   <div className="form-group">
-                    <label>SKU:</label>
+                    <label htmlFor="item-sku">SKU:</label>
                     <input
+                      id="item-sku"
                       type="text"
                       value={itemFormData.sku}
                       onChange={(e) => setItemFormData({...itemFormData, sku: e.target.value})}
@@ -263,8 +265,9 @@ const Warehouse = () => {
                 </div>
 
                 <div className="form-group">
-                  <label>Description:</label>
+                  <label htmlFor="item-description">Description:</label>
                   <textarea
+                    id="item-description"
                     value={itemFormData.description}
                     onChange={(e) => setItemFormData({...itemFormData, description: e.target.value})}
                   />
@@ -272,8 +275,9 @@ const Warehouse = () => {
 
                 <div className="form-row">
                   <div className="form-group">
-                    <label>Quantity:</label>
+                    <label htmlFor="item-quantity">Quantity:</label>
                     <input
+                      id="item-quantity"
                       type="number"
                       min="0"
                       value={itemFormData.quantity}
@@ -282,8 +286,9 @@ const Warehouse = () => {
                     />
                   </div>
                   <div className="form-group">
-                    <label>Minimum Stock:</label>
+                    <label htmlFor="item-min-stock">Minimum Stock:</label>
                     <input
+                      id="item-min-stock"
                       type="number"
                       min="0"
                       value={itemFormData.minimum_stock}
@@ -292,8 +297,9 @@ const Warehouse = () => {
                     />
                   </div>
                   <div className="form-group">
-                    <label>Unit Cost:</label>
+                    <label htmlFor="item-unit-cost">Unit Cost:</label>
                     <input
+                      id="item-unit-cost"
                       type="number"
                       step="0.01"
                       min="0"
@@ -305,8 +311,9 @@ const Warehouse = () => {
                 </div>
 
                 <div className="form-group">
-                  <label>Warehouse:</label>
+                  <label htmlFor="warehouse-select">Warehouse:</label>
                   <select
+                    id="warehouse-select"
                     value={itemFormData.warehouse}
                     onChange={(e) => setItemFormData({...itemFormData, warehouse: e.target.value})}
                     required
@@ -411,8 +418,9 @@ const Warehouse = () => {
               <form onSubmit={handleWarehouseSubmit}>
                 <div className="form-row">
                   <div className="form-group">
-                    <label>Name:</label>
+                    <label htmlFor="warehouse-name">Name:</label>
                     <input
+                      id="warehouse-name"
                       type="text"
                       value={warehouseFormData.name}
                       onChange={(e) => setWarehouseFormData({...warehouseFormData, name: e.target.value})}
@@ -420,8 +428,9 @@ const Warehouse = () => {
                     />
                   </div>
                   <div className="form-group">
-                    <label>Location:</label>
+                    <label htmlFor="warehouse-location">Location:</label>
                     <input
+                      id="warehouse-location"
                       type="text"
                       value={warehouseFormData.location}
                       onChange={(e) => setWarehouseFormData({...warehouseFormData, location: e.target.value})}
@@ -431,8 +440,9 @@ const Warehouse = () => {
                 </div>
 
                 <div className="form-group">
-                  <label>Description:</label>
+                  <label htmlFor="warehouse-description">Description:</label>
                   <textarea
+                    id="warehouse-description"
                     value={warehouseFormData.description}
                     onChange={(e) => setWarehouseFormData({...warehouseFormData, description: e.target.value})}
                   />

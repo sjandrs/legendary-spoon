@@ -6,4 +6,18 @@ export default defineConfig({
   plugins: [react({
     jsxRuntime: 'automatic'
   })],
+  optimizeDeps: {
+    exclude: [
+      '@fullcalendar/core',
+      '@fullcalendar/daygrid',
+      '@fullcalendar/timegrid',
+      '@fullcalendar/interaction',
+      '@fullcalendar/react'
+    ]
+  },
+  build: {
+    commonjsOptions: {
+      include: [/node_modules/]
+    }
+  }
 })

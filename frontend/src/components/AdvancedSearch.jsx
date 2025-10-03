@@ -3,12 +3,33 @@ import { useSearchParams } from 'react-router-dom';
 import { get, post } from '../api';
 import './AdvancedSearch.css';
 
+// Add screen reader only CSS if not already defined
+if (typeof document !== 'undefined' && !document.querySelector('#sr-only-styles')) {
+  const style = document.createElement('style');
+  style.id = 'sr-only-styles';
+  style.textContent = `
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+  `;
+  document.head.appendChild(style);
+}
+
 const AdvancedSearch = ({ onSearch, onSaveSearch }) => {
   const [searchParams] = useSearchParams();
 
   const [searchQuery, setSearchQuery] = useState(searchParams.get('q') || '');
   const [searchType, setSearchType] = useState(searchParams.get('type') || 'global');
 
+  // Initialize filters from URL params but don't add default status filter
   const initialFilters = {};
   for (const [key, value] of searchParams.entries()) {
     if (key.startsWith('filter_')) {
@@ -47,7 +68,7 @@ const AdvancedSearch = ({ onSearch, onSaveSearch }) => {
     }
   };
 
-  const triggerSearch = (offset = 0) => {
+  const triggerSearch = async (offset = 0) => {
     const searchPayload = {
         q: searchQuery,
         type: searchType,
@@ -58,7 +79,14 @@ const AdvancedSearch = ({ onSearch, onSaveSearch }) => {
         limit: 50
     };
     if (onSearch) {
-        onSearch(searchPayload);
+        setLoading(true);
+        try {
+            await onSearch(searchPayload);
+        } catch (error) {
+            console.error('Search error:', error);
+        } finally {
+            setLoading(false);
+        }
     }
   };
 
@@ -242,7 +270,7 @@ const AdvancedSearch = ({ onSearch, onSaveSearch }) => {
           <button
             onClick={() => setShowSaveModal(true)}
             className="btn-save"
-            disabled={!searchQuery && Object.keys(filters).length === 0}
+            disabled={!searchQuery.trim() && Object.keys(filters).length === 0}
           >
             Save Search
           </button>
@@ -255,9 +283,12 @@ const AdvancedSearch = ({ onSearch, onSaveSearch }) => {
       <div className="search-form">
         <div className="search-main">
           <div className="search-type-selector">
+            <label htmlFor="search-type-select" className="sr-only">Search Type</label>
             <select
+              id="search-type-select"
               value={searchType}
               onChange={(e) => setSearchType(e.target.value)}
+              aria-label="Search type selector"
             >
               <option value="global">Global Search</option>
               <option value="accounts">Accounts</option>
@@ -270,12 +301,15 @@ const AdvancedSearch = ({ onSearch, onSaveSearch }) => {
           </div>
 
           <div className="search-input-container">
+            <label htmlFor="search-input" className="sr-only">Search terms</label>
             <input
+              id="search-input"
               type="text"
               value={searchQuery}
               onChange={handleQueryChange}
               placeholder="Enter search terms..."
               className="search-input"
+              aria-label="Enter search terms"
               onFocus={() => setShowSuggestions(suggestions.length > 0)}
               onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
             />
@@ -395,17 +429,18 @@ const SaveSearchModal = ({ onSave, onClose }) => {
   };
 
   return (
-    <div className="modal-overlay">
+    <div className="modal-overlay" role="dialog" aria-labelledby="save-search-title" aria-modal="true">
       <div className="modal-content">
         <div className="modal-header">
-          <h3>Save Search</h3>
-          <button onClick={onClose} className="close-btn">&times;</button>
+          <h3 id="save-search-title">Save Search</h3>
+          <button onClick={onClose} className="close-btn" aria-label="Close modal">&times;</button>
         </div>
 
         <form onSubmit={handleSubmit} className="save-search-form">
           <div className="form-group">
-            <label>Name *</label>
+            <label htmlFor="search-name">Name *</label>
             <input
+              id="search-name"
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
@@ -415,8 +450,9 @@ const SaveSearchModal = ({ onSave, onClose }) => {
           </div>
 
           <div className="form-group">
-            <label>Description</label>
+            <label htmlFor="search-description">Description</label>
             <textarea
+              id="search-description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Describe this search (optional)"
@@ -439,7 +475,7 @@ const SaveSearchModal = ({ onSave, onClose }) => {
             <button type="button" onClick={onClose} className="btn-cancel">
               Cancel
             </button>
-            <button type="submit" className="btn-save">
+            <button type="submit" className="btn-save" data-testid="save-search-submit">
               Save Search
             </button>
           </div>

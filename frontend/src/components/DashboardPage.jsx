@@ -27,19 +27,19 @@ const DashboardPage = () => {
     }, []);
 
     if (loading) {
-        return <div>Loading dashboard...</div>;
+        return <div data-testid="loading">Loading dashboard...</div>;
     }
 
     if (error) {
-        return <div>{error}</div>;
+        return <div data-testid="error-message">{error}</div>;
     }
 
     if (!analytics) {
-        return <div>No analytics data available.</div>;
+        return <div data-testid="no-data">No analytics data available.</div>;
     }
 
     return (
-        <div className="dashboard-page">
+        <div className="dashboard-page" data-testid="dashboard-page">
             <div className="dashboard-header">
                 <h1>Business Dashboard</h1>
                 <div className="date-range">

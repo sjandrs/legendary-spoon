@@ -19,15 +19,6 @@ const ContactDetail = () => {
                 // Use the serializer that includes custom fields and tags
                 const contactResponse = await api.get(`/api/contacts/${id}/`);
                 setContact(contactResponse.data);
-
-                // Fetch interactions separately
-                const interactionsResponse = await api.get(`/api/interactions/?contact=${id}`);
-                // The response might be paginated, so check for a 'results' property
-                const interactionData = Array.isArray(interactionsResponse.data.results)
-                    ? interactionsResponse.data.results
-                    : (Array.isArray(interactionsResponse.data) ? interactionsResponse.data : []);
-                setInteractions(interactionData);
-
                 setError(null);
             } catch (err) {
                 console.error('There was an error fetching the contact details!', err);
@@ -37,7 +28,24 @@ const ContactDetail = () => {
             }
         };
 
+        const fetchInteractions = async () => {
+            try {
+                // Fetch interactions separately
+                const interactionsResponse = await api.get(`/api/interactions/?contact=${id}`);
+                // The response might be paginated, so check for a 'results' property
+                const interactionData = Array.isArray(interactionsResponse.data.results)
+                    ? interactionsResponse.data.results
+                    : (Array.isArray(interactionsResponse.data) ? interactionsResponse.data : []);
+                setInteractions(interactionData);
+            } catch (err) {
+                console.error('There was an error fetching the contact details!', err);
+                // Don't set main error for interaction failures - let InteractionHistory handle this
+                setInteractions([]);
+            }
+        };
+
         fetchContactDetails();
+        fetchInteractions();
     }, [id]);
 
     const handleTagsUpdate = (updatedTags) => {

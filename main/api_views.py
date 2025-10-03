@@ -130,6 +130,20 @@ from .serializers import (
 logger = logging.getLogger(__name__)
 
 
+# Health check endpoint for E2E testing
+@api_view(["GET"])
+@permission_classes([])  # No authentication required for health check
+def health_check(request):
+    """Simple health check endpoint for CI/CD pipeline"""
+    return Response(
+        {
+            "status": "healthy",
+            "timestamp": timezone.now().isoformat(),
+            "service": "converge-crm-api",
+        }
+    )
+
+
 class TagViewSet(viewsets.ModelViewSet):
     queryset = Tag.objects.all().order_by("name")
     serializer_class = TagSerializer

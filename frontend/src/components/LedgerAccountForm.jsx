@@ -25,10 +25,10 @@ const LedgerAccountForm = ({ onSuccess }) => {
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <input name="name" value={form.name} onChange={handleChange} placeholder="Name" required />
-      <input name="code" value={form.code} onChange={handleChange} placeholder="Code" required />
-      <select name="account_type" value={form.account_type} onChange={handleChange}>
+    <form onSubmit={handleSubmit} role="form">
+      <input name="name" type="text" value={form.name} onChange={handleChange} placeholder="Name" required aria-label="Account Name" />
+      <input name="code" type="text" value={form.code} onChange={handleChange} placeholder="Code" required aria-label="Account Code" />
+      <select name="account_type" value={form.account_type} onChange={handleChange} aria-label="Account Type">
         <option value="asset">Asset</option>
         <option value="liability">Liability</option>
         <option value="equity">Equity</option>

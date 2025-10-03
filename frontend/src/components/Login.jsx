@@ -22,19 +22,35 @@ const Login = () => {
     };
 
     return (
-        <div>
+        <div data-testid="login-page">
             <h2>Login</h2>
             <form onSubmit={handleLogin}>
                 <div>
-                    <label>Username:</label>
-                    <input type="text" value={username} onChange={(e) => setUsername(e.target.value)} required />
+                    <label htmlFor="username">Username:</label>
+                    <input
+                        id="username"
+                        data-testid="username-input"
+                        type="text"
+                        value={username}
+                        onChange={(e) => setUsername(e.target.value)}
+                        required
+                        aria-label="Username"
+                    />
                 </div>
                 <div>
-                    <label>Password:</label>
-                    <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+                    <label htmlFor="password">Password:</label>
+                    <input
+                        id="password"
+                        data-testid="password-input"
+                        type="password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        required
+                        aria-label="Password"
+                    />
                 </div>
-                {error && <p style={{ color: 'red' }}>{error}</p>}
-                <button type="submit">Login</button>
+                {error && <p data-testid="error-message" style={{ color: 'red' }}>{error}</p>}
+                <button data-testid="login-button" type="submit">Login</button>
             </form>
         </div>
     );

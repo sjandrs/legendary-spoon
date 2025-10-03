@@ -343,8 +343,9 @@ const AppointmentRequestQueue = () => {
 
             <form onSubmit={handleConfirmSchedule}>
               <div className="form-group">
-                <label>Assigned Technician</label>
+                <label htmlFor="assigned-technician">Assigned Technician</label>
                 <select
+                  id="assigned-technician"
                   value={scheduleForm.technician}
                   onChange={(e) => setScheduleForm({...scheduleForm, technician: e.target.value})}
                   required
@@ -359,8 +360,9 @@ const AppointmentRequestQueue = () => {
               </div>
 
               <div className="form-group">
-                <label>Scheduled Date & Time</label>
+                <label htmlFor="scheduled-date-time">Scheduled Date & Time</label>
                 <input
+                  id="scheduled-date-time"
                   type="datetime-local"
                   value={scheduleForm.scheduled_date}
                   onChange={(e) => setScheduleForm({...scheduleForm, scheduled_date: e.target.value})}
@@ -369,8 +371,9 @@ const AppointmentRequestQueue = () => {
               </div>
 
               <div className="form-group">
-                <label>Estimated Duration (minutes)</label>
+                <label htmlFor="estimated-duration">Estimated Duration (minutes)</label>
                 <select
+                  id="estimated-duration"
                   value={scheduleForm.estimated_duration}
                   onChange={(e) => setScheduleForm({...scheduleForm, estimated_duration: e.target.value})}
                 >
@@ -384,8 +387,9 @@ const AppointmentRequestQueue = () => {
               </div>
 
               <div className="form-group">
-                <label>Scheduling Notes</label>
+                <label htmlFor="scheduling-notes">Scheduling Notes</label>
                 <textarea
+                  id="scheduling-notes"
                   value={scheduleForm.notes}
                   onChange={(e) => setScheduleForm({...scheduleForm, notes: e.target.value})}
                   rows="3"

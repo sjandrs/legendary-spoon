@@ -145,8 +145,9 @@ const CustomerPortal = () => {
           <h3>Contact Information</h3>
           <div className="form-row">
             <div className="form-group">
-              <label>Full Name *</label>
+              <label htmlFor="customer-name">Full Name *</label>
               <input
+                id="customer-name"
                 type="text"
                 value={appointmentRequest.customer_name}
                 onChange={(e) => setAppointmentRequest({...appointmentRequest, customer_name: e.target.value})}
@@ -154,8 +155,9 @@ const CustomerPortal = () => {
               />
             </div>
             <div className="form-group">
-              <label>Email Address *</label>
+              <label htmlFor="customer-email">Email Address *</label>
               <input
+                id="customer-email"
                 type="email"
                 value={appointmentRequest.customer_email}
                 onChange={(e) => setAppointmentRequest({...appointmentRequest, customer_email: e.target.value})}
@@ -165,8 +167,9 @@ const CustomerPortal = () => {
           </div>
           <div className="form-row">
             <div className="form-group">
-              <label>Phone Number *</label>
+              <label htmlFor="customer-phone">Phone Number *</label>
               <input
+                id="customer-phone"
                 type="tel"
                 value={appointmentRequest.customer_phone}
                 onChange={(e) => setAppointmentRequest({...appointmentRequest, customer_phone: e.target.value})}
@@ -174,8 +177,9 @@ const CustomerPortal = () => {
               />
             </div>
             <div className="form-group">
-              <label>Service Address *</label>
+              <label htmlFor="service-address">Service Address *</label>
               <input
+                id="service-address"
                 type="text"
                 value={appointmentRequest.customer_address}
                 onChange={(e) => setAppointmentRequest({...appointmentRequest, customer_address: e.target.value})}
@@ -190,8 +194,9 @@ const CustomerPortal = () => {
           <h3>Service Details</h3>
           <div className="form-row">
             <div className="form-group">
-              <label>Service Type *</label>
+              <label htmlFor="service-type">Service Type *</label>
               <select
+                id="service-type"
                 value={appointmentRequest.service_type}
                 onChange={(e) => setAppointmentRequest({...appointmentRequest, service_type: e.target.value})}
                 required
@@ -205,8 +210,9 @@ const CustomerPortal = () => {
               </select>
             </div>
             <div className="form-group">
-              <label>Urgency Level</label>
+              <label htmlFor="urgency-level">Urgency Level</label>
               <select
+                id="urgency-level"
                 value={appointmentRequest.urgency_level}
                 onChange={(e) => setAppointmentRequest({...appointmentRequest, urgency_level: e.target.value})}
               >
@@ -219,8 +225,9 @@ const CustomerPortal = () => {
           </div>
 
           <div className="form-group">
-            <label>Problem Description *</label>
+            <label htmlFor="problem-description">Problem Description *</label>
             <textarea
+              id="problem-description"
               value={appointmentRequest.description}
               onChange={(e) => setAppointmentRequest({...appointmentRequest, description: e.target.value})}
               rows="4"
@@ -230,8 +237,9 @@ const CustomerPortal = () => {
           </div>
 
           <div className="form-group">
-            <label>Additional Notes</label>
+            <label htmlFor="additional-notes">Additional Notes</label>
             <textarea
+              id="additional-notes"
               value={appointmentRequest.additional_notes}
               onChange={(e) => setAppointmentRequest({...appointmentRequest, additional_notes: e.target.value})}
               rows="3"

@@ -6,10 +6,21 @@ const LineItemList = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    getLineItems().then(res => {
-      setItems(res.data.results || res.data);
-      setLoading(false);
-    });
+    getLineItems()
+      .then(res => {
+        const data = res.data;
+        if (data && typeof data === 'object') {
+          setItems(data.results || data || []);
+        } else {
+          setItems([]);
+        }
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error('Failed to fetch line items:', err);
+        setItems([]);
+        setLoading(false);
+      });
   }, []);
 
   if (loading) return <div>Loading...</div>;

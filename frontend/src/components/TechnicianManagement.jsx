@@ -28,8 +28,8 @@ const TechnicianManagement = () => {
   useEffect(() => {
     if (techniciansData) {
       setTechnicians(techniciansData);
-      setLoading(isLoading);
     }
+    setLoading(isLoading);
     setError(isError ? 'Failed to load technicians' : null);
   }, [techniciansData, isLoading, isError]);
 

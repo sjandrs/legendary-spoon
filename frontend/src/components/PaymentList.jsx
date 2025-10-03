@@ -7,7 +7,12 @@ const PaymentList = () => {
 
   useEffect(() => {
     getPayments().then(res => {
-      setPayments(res.data.results || res.data);
+      const paymentsData = res.data.results || res.data || [];
+      setPayments(Array.isArray(paymentsData) ? paymentsData : []);
+      setLoading(false);
+    }).catch(err => {
+      console.error('Error fetching payments:', err);
+      setPayments([]);
       setLoading(false);
     });
   }, []);

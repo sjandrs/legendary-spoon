@@ -6,10 +6,22 @@ const LedgerAccountList = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    getLedgerAccounts().then(res => {
-      setAccounts(res.data.results || res.data);
-      setLoading(false);
-    });
+    getLedgerAccounts()
+      .then(res => {
+        const data = res.data;
+        if (data && typeof data === 'object') {
+          const accountsData = data.results || data || [];
+          setAccounts(Array.isArray(accountsData) ? accountsData : []);
+        } else {
+          setAccounts([]);
+        }
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error('Failed to fetch ledger accounts:', err);
+        setAccounts([]);
+        setLoading(false);
+      });
   }, []);
 
   if (loading) return <div>Loading...</div>;

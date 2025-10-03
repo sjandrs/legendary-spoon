@@ -56,6 +56,13 @@ const Reports = () => {
     window.print(); // Simple print-to-PDF functionality
   };
 
+  const formatCurrency = (amount) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD'
+    }).format(amount);
+  };
+
   const generateCSVData = (reportType) => {
     let csv = "Category,Amount\n";
     if (reportType === 'balance-sheet' && balanceSheet) {

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import AdvancedSearch from './AdvancedSearch';
 import SearchResults from './SearchResults';
-import { get } from '../api';
+import { get, post } from '../api';
 import './SearchPage.css';
 
 const SearchPage = () => {

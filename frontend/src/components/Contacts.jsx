@@ -12,7 +12,7 @@ const Contacts = () => {
         const fetchContacts = async () => {
             try {
                 const response = await api.get('/api/contacts/');
-                setContacts(response.data.results);
+                setContacts(response.data.results || response.data || []);
                 setLoading(false);
             } catch (err) {
                 setError('Failed to fetch contacts.');
@@ -41,7 +41,7 @@ const Contacts = () => {
                 <Link to="/contacts/new" className="btn btn-primary">Create New Contact</Link>
             </div>
 
-            {contacts.length > 0 ? (
+            {contacts && contacts.length > 0 ? (
                 <table className="contacts-table striped-table">
                     <thead>
                         <tr>

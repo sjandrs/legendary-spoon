@@ -6,10 +6,21 @@ const JournalEntryList = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    getJournalEntries().then(res => {
-      setEntries(res.data.results || res.data);
-      setLoading(false);
-    });
+    getJournalEntries()
+      .then(res => {
+        const data = res.data;
+        if (data && typeof data === 'object') {
+          setEntries(data.results || data || []);
+        } else {
+          setEntries([]);
+        }
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error('Failed to fetch journal entries:', err);
+        setEntries([]);
+        setLoading(false);
+      });
   }, []);
 
   if (loading) return <div>Loading...</div>;

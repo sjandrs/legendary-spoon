@@ -1,5 +1,14 @@
 import '@testing-library/jest-dom';
 
+// Mock API module
+jest.mock('./api', () => ({
+  get: jest.fn(),
+  post: jest.fn(),
+  put: jest.fn(),
+  delete: jest.fn(),
+  patch: jest.fn(),
+}));
+
 // Mock axios for API calls
 import axios from 'axios';
 jest.mock('axios');
@@ -19,14 +28,23 @@ jest.mock('remark-gfm', () => ({
   default: () => ({}),
 }));
 
-// Mock localStorage
-const localStorageMock = {
-  getItem: jest.fn(),
-  setItem: jest.fn(),
-  removeItem: jest.fn(),
-  clear: jest.fn(),
+// Mock IntersectionObserver
+global.IntersectionObserver = class IntersectionObserver {
+  constructor() {}
+  observe() {}
+  disconnect() {}
+  unobserve() {}
 };
-global.localStorage = localStorageMock;
+
+// Mock ResizeObserver
+global.ResizeObserver = class ResizeObserver {
+  constructor(cb) {
+    this.cb = cb;
+  }
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+};
 
 // Mock window.matchMedia
 Object.defineProperty(window, 'matchMedia', {
@@ -35,29 +53,131 @@ Object.defineProperty(window, 'matchMedia', {
     matches: false,
     media: query,
     onchange: null,
-    addListener: jest.fn(), // deprecated
-    removeListener: jest.fn(), // deprecated
+    addListener: jest.fn(),
+    removeListener: jest.fn(),
     addEventListener: jest.fn(),
     removeEventListener: jest.fn(),
     dispatchEvent: jest.fn(),
   })),
 });
 
-// Mock IntersectionObserver
-global.IntersectionObserver = class IntersectionObserver {
-  constructor() {}
-  observe() {
-    return null;
-  }
-  disconnect() {
-    return null;
-  }
-  unobserve() {
-    return null;
-  }
+// Mock scrollTo
+Object.defineProperty(window, 'scrollTo', {
+  writable: true,
+  value: jest.fn(),
+});
+
+// Mock localStorage with actual storage
+const localStorageMock = (() => {
+  let store = {};
+  return {
+    getItem: jest.fn((key) => store[key] || null),
+    setItem: jest.fn((key, value) => {
+      store[key] = value.toString();
+    }),
+    removeItem: jest.fn((key) => {
+      delete store[key];
+    }),
+    clear: jest.fn(() => {
+      store = {};
+    }),
+  };
+})();
+Object.defineProperty(window, 'localStorage', {
+  value: localStorageMock,
+});
+
+// Mock sessionStorage
+const sessionStorageMock = {
+  getItem: jest.fn(),
+  setItem: jest.fn(),
+  removeItem: jest.fn(),
+  clear: jest.fn(),
 };
+Object.defineProperty(window, 'sessionStorage', {
+  value: sessionStorageMock,
+});
+
+// Global test timeout
+jest.setTimeout(10000);
+
+// Suppress console.error for known React warnings in tests
+const originalError = console.error;
+beforeAll(() => {
+  console.error = (...args) => {
+    if (
+      typeof args[0] === 'string' &&
+      args[0].includes('Warning: ReactDOM.render is deprecated')
+    ) {
+      return;
+    }
+    originalError.call(console, ...args);
+  };
+});
+
+afterAll(() => {
+  console.error = originalError;
+});
+
+// MSW setup for API mocking in tests (temporarily disabled for immediate component fixes)
+// TODO: Complete MSW v2 integration in next phase
+// import { startMswServer } from './__tests__/utils/msw-server';
+// startMswServer();
 
 // Polyfills for jsdom
 import { TextEncoder, TextDecoder } from 'util';
 global.TextEncoder = TextEncoder;
 global.TextDecoder = TextDecoder;
+
+// MSW polyfills for Jest environment
+import { fetch, Headers, Request, Response } from 'cross-fetch';
+global.fetch = fetch;
+global.Headers = Headers;
+global.Request = Request;
+global.Response = Response;
+
+// Polyfill for BroadcastChannel (needed for MSW v2)
+global.BroadcastChannel = class BroadcastChannel {
+  constructor(name) {
+    this.name = name;
+  }
+  postMessage() {}
+  close() {}
+  addEventListener() {}
+  removeEventListener() {}
+};
+
+// Mock FullCalendar components that cause Jest ES6 module issues
+jest.mock('@fullcalendar/react', () => {
+  const React = require('react');
+  return {
+    __esModule: true,
+    default: React.forwardRef((props, ref) =>
+      React.createElement('div', {
+        'data-testid': 'fullcalendar-mock',
+        ref,
+        ...props
+      }, 'FullCalendar Mock')
+    ),
+  };
+});
+
+jest.mock('@fullcalendar/daygrid', () => ({
+  __esModule: true,
+  default: {},
+}));
+
+jest.mock('@fullcalendar/timegrid', () => ({
+  __esModule: true,
+  default: {},
+}));
+
+jest.mock('@fullcalendar/interaction', () => ({
+  __esModule: true,
+  default: {},
+}));
+
+// Remove AuthContext global mock - we'll handle it in test-utils instead
+// This allows test-utils to have full control over AuthContext behavior
+
+// ProtectedRoute will be handled by individual test files as needed

@@ -244,18 +244,21 @@ const SchedulePage = () => {
 
             <form onSubmit={handleSaveEvent}>
               <div className="form-group">
-                <label>Title</label>
+                <label htmlFor="event-title">Title</label>
                 <input
+                  id="event-title"
                   type="text"
                   value={eventForm.title}
                   onChange={(e) => setEventForm({...eventForm, title: e.target.value})}
                   required
+                  autoFocus
                 />
               </div>
 
               <div className="form-group">
-                <label>Description</label>
+                <label htmlFor="event-description">Description</label>
                 <textarea
+                  id="event-description"
                   value={eventForm.description}
                   onChange={(e) => setEventForm({...eventForm, description: e.target.value})}
                   rows="3"
@@ -264,8 +267,9 @@ const SchedulePage = () => {
 
               <div className="form-row">
                 <div className="form-group">
-                  <label>Start Date/Time</label>
+                  <label htmlFor="event-start">Start Date/Time</label>
                   <input
+                    id="event-start"
                     type="datetime-local"
                     value={eventForm.start}
                     onChange={(e) => setEventForm({...eventForm, start: e.target.value})}
@@ -273,8 +277,9 @@ const SchedulePage = () => {
                   />
                 </div>
                 <div className="form-group">
-                  <label>End Date/Time</label>
+                  <label htmlFor="event-end">End Date/Time</label>
                   <input
+                    id="event-end"
                     type="datetime-local"
                     value={eventForm.end}
                     onChange={(e) => setEventForm({...eventForm, end: e.target.value})}
@@ -284,8 +289,9 @@ const SchedulePage = () => {
 
               <div className="form-row">
                 <div className="form-group">
-                  <label>Technician</label>
+                  <label htmlFor="event-technician">Technician</label>
                   <select
+                    id="event-technician"
                     value={eventForm.technician}
                     onChange={(e) => setEventForm({...eventForm, technician: e.target.value})}
                   >
@@ -298,8 +304,9 @@ const SchedulePage = () => {
                   </select>
                 </div>
                 <div className="form-group">
-                  <label>Work Order</label>
+                  <label htmlFor="event-workorder">Work Order</label>
                   <select
+                    id="event-workorder"
                     value={eventForm.workOrder}
                     onChange={(e) => setEventForm({...eventForm, workOrder: e.target.value})}
                   >
@@ -314,8 +321,9 @@ const SchedulePage = () => {
               </div>
 
               <div className="form-group">
-                <label>Recurrence Rule (RRULE format)</label>
+                <label htmlFor="event-recurrence">Recurrence Rule (RRULE format)</label>
                 <input
+                  id="event-recurrence"
                   type="text"
                   value={eventForm.recurrenceRule}
                   onChange={(e) => setEventForm({...eventForm, recurrenceRule: e.target.value})}

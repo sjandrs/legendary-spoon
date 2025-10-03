@@ -131,6 +131,8 @@ router.register(r"comments", api_views.CommentViewSet, basename="comment")
 # The API URLs are now determined automatically by the router.
 urlpatterns = [
     path("", include(router.urls)),
+    # Health check endpoint for E2E testing
+    path("health/", api_views.health_check, name="health-check"),
     path(
         "dashboard-stats/",
         api_views.DashboardStatsView.as_view(),

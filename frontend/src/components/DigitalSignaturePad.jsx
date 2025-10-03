@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useState } from 'react';
 import SignatureCanvas from 'react-signature-canvas';
-import api from '../api';
+import { post, get } from '../api';
 import './DigitalSignaturePad.css';
 
 const DigitalSignaturePad = ({ workOrderId, onSignatureComplete, onCancel }) => {
@@ -12,10 +12,12 @@ const DigitalSignaturePad = ({ workOrderId, onSignatureComplete, onCancel }) => 
   const [message, setMessage] = useState('');
 
   useEffect(() => {
-    // Clear signature when component mounts
+    // Clear signature when workOrderId changes
     if (sigCanvas.current) {
       sigCanvas.current.clear();
     }
+    setSignatureData(null);
+    setMessage('');
   }, [workOrderId]);
 
   const handleClear = () => {
@@ -53,7 +55,7 @@ const DigitalSignaturePad = ({ workOrderId, onSignatureComplete, onCancel }) => 
         ip_address: await getClientIP()
       };
 
-      const response = await api.post('/api/digital-signatures/', signatureData);
+      const response = await post('/api/digital-signatures/', signatureData);
 
       if (response.status === 201) {
         setMessage('Signature saved successfully!');
@@ -97,7 +99,7 @@ const DigitalSignaturePad = ({ workOrderId, onSignatureComplete, onCancel }) => 
     if (!signatureData) return;
 
     try {
-      const response = await api.get(`/api/digital-signatures/${signatureData.id}/pdf/`, {
+      const response = await get(`/api/digital-signatures/${signatureData.id}/pdf/`, {
         responseType: 'blob'
       });
 
@@ -128,8 +130,9 @@ const DigitalSignaturePad = ({ workOrderId, onSignatureComplete, onCancel }) => 
           <div className="signer-info">
             <div className="form-row">
               <div className="form-group">
-                <label>Signer Name *</label>
+                <label htmlFor="signer-name">Signer Name *</label>
                 <input
+                  id="signer-name"
                   type="text"
                   value={signerName}
                   onChange={(e) => setSignerName(e.target.value)}
@@ -138,8 +141,9 @@ const DigitalSignaturePad = ({ workOrderId, onSignatureComplete, onCancel }) => 
                 />
               </div>
               <div className="form-group">
-                <label>Title/Position</label>
+                <label htmlFor="signer-title">Title/Position</label>
                 <input
+                  id="signer-title"
                   type="text"
                   value={signerTitle}
                   onChange={(e) => setSignerTitle(e.target.value)}
