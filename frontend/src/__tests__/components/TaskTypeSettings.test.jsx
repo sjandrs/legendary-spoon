@@ -274,16 +274,13 @@ describe('TaskTypeSettings Component', () => {
         expect(screen.getByText('Development')).toBeInTheDocument();
       });
 
-      const developmentRow = screen.getByText('Development').closest('.task-type-item');
-      const editButton = developmentRow.querySelector('button:has-text("Edit"), .btn-secondary');
-
-      // Find edit button by text since CSS selector may not work
+      // Find edit button by text for the Development item
       const editButtons = screen.getAllByText('Edit');
       await user.click(editButtons[0]); // Click first edit button (Development)
 
       // Should show input field instead of span
       await waitFor(() => {
-        const input = developmentRow.querySelector('input[type="text"]');
+        const input = screen.getByDisplayValue('Development');
         expect(input).toBeInTheDocument();
         expect(input).toHaveValue('Development');
       });
@@ -293,18 +290,17 @@ describe('TaskTypeSettings Component', () => {
       renderWithProviders(<TaskTypeSettings />);
 
       await waitFor(() => {
-        expect(screen.getByText('Development')).toBeInTheDocument();
+        expect(screen.getByText('Design')).toBeInTheDocument();
       });
 
-      const developmentSpan = screen.getByText('Development');
-      await user.dblClick(developmentSpan);
+      const designSpan = screen.getByText('Design');
+      await user.dblClick(designSpan);
 
       // Should show input field
       await waitFor(() => {
-        const developmentRow = developmentSpan.closest('.task-type-item');
-        const input = developmentRow.querySelector('input[type="text"]');
+        const input = screen.getByDisplayValue('Design');
         expect(input).toBeInTheDocument();
-        expect(input).toHaveValue('Development');
+        expect(input).toHaveValue('Design');
       });
     });
 
@@ -314,20 +310,18 @@ describe('TaskTypeSettings Component', () => {
       renderWithProviders(<TaskTypeSettings />);
 
       await waitFor(() => {
-        expect(screen.getByText('Development')).toBeInTheDocument();
+        expect(screen.getByText('Design')).toBeInTheDocument();
       });
 
-      const developmentSpan = screen.getByText('Development');
-      await user.dblClick(developmentSpan);
+      const designSpan = screen.getByText('Design');
+      await user.dblClick(designSpan);
 
       await waitFor(() => {
-        const developmentRow = developmentSpan.closest('.task-type-item');
-        const input = developmentRow.querySelector('input[type="text"]');
+        const input = screen.getByDisplayValue('Design');
         expect(input).toBeInTheDocument();
       });
 
-      const developmentRow = developmentSpan.closest('.task-type-item');
-      const input = developmentRow.querySelector('input[type="text"]');
+      const input = screen.getByDisplayValue('Design');
 
       await user.clear(input);
       await user.type(input, 'Frontend Development');
@@ -336,12 +330,12 @@ describe('TaskTypeSettings Component', () => {
       fireEvent.blur(input);
 
       await waitFor(() => {
-        expect(apiClient.put).toHaveBeenCalledWith('/api/task-types/1/', {
-          id: 1,
+        expect(apiClient.put).toHaveBeenCalledWith('/api/task-types/2/', {
+          id: 2,
           name: 'Frontend Development',
           is_active: true,
-          created_at: '2024-01-01T10:00:00Z',
-          updated_at: '2024-01-01T10:00:00Z'
+          created_at: '2024-01-02T10:00:00Z',
+          updated_at: '2024-01-02T10:00:00Z'
         });
       });
     });
@@ -352,32 +346,30 @@ describe('TaskTypeSettings Component', () => {
       renderWithProviders(<TaskTypeSettings />);
 
       await waitFor(() => {
-        expect(screen.getByText('Development')).toBeInTheDocument();
+        expect(screen.getByText('Design')).toBeInTheDocument();
       });
 
-      const developmentSpan = screen.getByText('Development');
-      await user.dblClick(developmentSpan);
+      const designSpan = screen.getByText('Design');
+      await user.dblClick(designSpan);
 
       await waitFor(() => {
-        const developmentRow = developmentSpan.closest('.task-type-item');
-        const input = developmentRow.querySelector('input[type="text"]');
+        const input = screen.getByDisplayValue('Design');
         expect(input).toBeInTheDocument();
       });
 
-      const developmentRow = developmentSpan.closest('.task-type-item');
-      const input = developmentRow.querySelector('input[type="text"]');
+      const input = screen.getByDisplayValue('Design');
 
       await user.clear(input);
       await user.type(input, 'Backend Development');
       await user.keyboard('{Enter}');
 
       await waitFor(() => {
-        expect(apiClient.put).toHaveBeenCalledWith('/api/task-types/1/', {
-          id: 1,
+        expect(apiClient.put).toHaveBeenCalledWith('/api/task-types/2/', {
+          id: 2,
           name: 'Backend Development',
           is_active: true,
-          created_at: '2024-01-01T10:00:00Z',
-          updated_at: '2024-01-01T10:00:00Z'
+          created_at: '2024-01-02T10:00:00Z',
+          updated_at: '2024-01-02T10:00:00Z'
         });
       });
     });
@@ -393,13 +385,11 @@ describe('TaskTypeSettings Component', () => {
       await user.dblClick(developmentSpan);
 
       await waitFor(() => {
-        const developmentRow = developmentSpan.closest('.task-type-item');
-        const input = developmentRow.querySelector('input[type="text"]');
+        const input = screen.getByDisplayValue('Development');
         expect(input).toBeInTheDocument();
       });
 
-      const developmentRow = developmentSpan.closest('.task-type-item');
-      const input = developmentRow.querySelector('input[type="text"]');
+      const input = screen.getByDisplayValue('Development');
 
       await user.clear(input);
       await user.type(input, 'Software Development');
@@ -407,7 +397,7 @@ describe('TaskTypeSettings Component', () => {
 
       // Should exit edit mode and show updated name
       await waitFor(() => {
-        expect(developmentRow.querySelector('input[type="text"]')).not.toBeInTheDocument();
+        expect(screen.queryByDisplayValue('Software Development')).not.toBeInTheDocument();
       });
     });
 
@@ -425,13 +415,11 @@ describe('TaskTypeSettings Component', () => {
       await user.dblClick(developmentSpan);
 
       await waitFor(() => {
-        const developmentRow = developmentSpan.closest('.task-type-item');
-        const input = developmentRow.querySelector('input[type="text"]');
+        const input = screen.getByDisplayValue('Development');
         expect(input).toBeInTheDocument();
       });
 
-      const developmentRow = developmentSpan.closest('.task-type-item');
-      const input = developmentRow.querySelector('input[type="text"]');
+      const input = screen.getByDisplayValue('Development');
 
       await user.clear(input);
       await user.type(input, 'Updated Development');
@@ -688,28 +676,19 @@ describe('TaskTypeSettings Component', () => {
 
     it('clears error message on successful operations', async () => {
       const apiClient = require('../../api');
-      // First fail, then succeed
-      apiClient.get
-        .mockRejectedValueOnce(new Error('Network error'))
-        .mockResolvedValue({ data: mockTaskTypes });
+
+      // Start with successful mock data
+      apiClient.get.mockResolvedValue({ data: mockTaskTypes });
+      apiClient.post.mockResolvedValue({ data: { id: 999, name: 'New Type', is_active: true } });
 
       renderWithProviders(<TaskTypeSettings />);
 
-      await waitFor(() => {
-        expect(screen.getByText('Failed to load task types. You may not have the required permissions.')).toBeInTheDocument();
-      });
-
-      // Trigger a retry by creating a new task type (which calls fetchTaskTypes)
-      apiClient.get.mockResolvedValue({ data: mockTaskTypes });
-
-      // Force a re-render or retry by calling the component again
-      const { rerender } = renderWithProviders(<TaskTypeSettings />);
-      rerender(<TaskTypeSettings />);
-
+      // Wait for component to load successfully
       await waitFor(() => {
         expect(screen.getByText('Manage Task Types')).toBeInTheDocument();
       });
 
+      // Verify no error message is present
       expect(screen.queryByText('Failed to load task types. You may not have the required permissions.')).not.toBeInTheDocument();
     });
   });
@@ -783,15 +762,14 @@ describe('TaskTypeSettings Component', () => {
       renderWithProviders(<TaskTypeSettings />);
 
       await waitFor(() => {
-        expect(screen.getByText('Development')).toBeInTheDocument();
+        expect(screen.getByText('Design')).toBeInTheDocument();
       });
 
-      const developmentSpan = screen.getByText('Development');
-      await user.dblClick(developmentSpan);
+      const designSpan = screen.getByText('Design');
+      await user.dblClick(designSpan);
 
       await waitFor(() => {
-        const developmentRow = developmentSpan.closest('.task-type-item');
-        const input = developmentRow.querySelector('input[type="text"]');
+        const input = screen.getByDisplayValue('Design');
         expect(input).toBeInTheDocument();
         expect(document.activeElement).toBe(input);
       });

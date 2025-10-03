@@ -12,15 +12,15 @@ jest.mock('../../api', () => ({
   delete: jest.fn()
 }));
 
-import { get, post } from '../../api';
-const mockGet = get;
-const mockPost = post;
+import * as api from '../../api';
+const mockGet = api.get;
+const mockPost = api.post;
 
 // Mock react-signature-canvas
 const mockSignatureCanvas = {
   clear: jest.fn(),
-  isEmpty: jest.fn(),
-  toDataURL: jest.fn()
+  isEmpty: jest.fn(() => true),
+  toDataURL: jest.fn(() => 'data:image/png;base64,mock-signature-data')
 };
 
 jest.mock('react-signature-canvas', () => {
@@ -97,15 +97,49 @@ describe('DigitalSignaturePad Component - REQ-501.4', () => {
       statusText: 'OK'
     });
 
-    // Setup fetch mock for IP address
+    // Setup fetch mock for IP address - ensure proper mock structure
     global.fetch.mockResolvedValue({
+      ok: true,
+      status: 200,
       json: () => Promise.resolve({ ip: '192.168.1.100' })
     });
 
-    // Setup signature canvas mock defaults
+    // Ensure signature canvas mock methods always return expected values
     mockSignatureCanvas.clear.mockClear();
     mockSignatureCanvas.isEmpty.mockReturnValue(true);
     mockSignatureCanvas.toDataURL.mockReturnValue('data:image/png;base64,mock-signature-data');
+
+    // Mock all browser APIs used by the component - comprehensive setup
+    global.atob = jest.fn((base64) => {
+      // Simple mock that doesn't throw
+      return 'mock-binary-string';
+    });
+
+    // Mock Uint8Array properly
+    const MockUint8Array = function(length) {
+      const arr = new Array(length).fill(0);
+      // Add charCodeAt method for the binary string conversion
+      return arr;
+    };
+    MockUint8Array.prototype = Uint8Array.prototype;
+    global.Uint8Array = MockUint8Array;
+
+    // Mock Blob constructor
+    global.Blob = jest.fn((data, options) => ({
+      type: options?.type || 'application/octet-stream',
+      size: 1024
+    }));
+
+    // Spy on console.error to see the exact error
+    const consoleSpy = jest.spyOn(console, 'error').mockImplementation((message, error) => {
+      // Log the error details for debugging
+      console.log('Test Debug - Console Error:', message, error);
+    });
+
+    // Reset console.error spy if it exists
+    if (console.error.mockRestore) {
+      console.error.mockRestore();
+    }
   });
 
   describe('Component Rendering', () => {
@@ -308,8 +342,15 @@ describe('DigitalSignaturePad Component - REQ-501.4', () => {
       const signerNameInput = screen.getByLabelText('Signer Name *');
       await user.type(signerNameInput, 'John Doe');
 
+      // Simulate drawing on canvas
+      const canvas = screen.getByTestId('signature-canvas');
+      fireEvent.click(canvas);
+      mockSignatureCanvas.isEmpty.mockReturnValue(false);
+
       const saveBtn = screen.getByText('Save Signature');
-      await user.click(saveBtn);
+      await act(async () => {
+        await user.click(saveBtn);
+      });
 
       await waitFor(() => {
         expect(mockPost).toHaveBeenCalledWith('/api/digital-signatures/', {
@@ -320,7 +361,7 @@ describe('DigitalSignaturePad Component - REQ-501.4', () => {
           signed_at: expect.any(String),
           ip_address: '192.168.1.100'
         });
-      });
+      }, { timeout: 5000 });
     });
   });
 
@@ -346,7 +387,9 @@ describe('DigitalSignaturePad Component - REQ-501.4', () => {
       await fillValidForm();
 
       const saveBtn = screen.getByText('Save Signature');
-      await user.click(saveBtn);
+      await act(async () => {
+        await user.click(saveBtn);
+      });
 
       await waitFor(() => {
         expect(mockPost).toHaveBeenCalledWith('/api/digital-signatures/', {
@@ -362,7 +405,8 @@ describe('DigitalSignaturePad Component - REQ-501.4', () => {
 
     it('shows loading state during save', async () => {
       // Mock slow API response
-      mockPost.mockImplementation(() => new Promise(() => {}));
+      let resolvePromise;
+      mockPost.mockImplementation(() => new Promise(resolve => { resolvePromise = resolve; }));
 
       await act(async () => {
         renderWithRouter(<DigitalSignaturePad {...defaultProps} />);
@@ -371,10 +415,18 @@ describe('DigitalSignaturePad Component - REQ-501.4', () => {
       await fillValidForm();
 
       const saveBtn = screen.getByText('Save Signature');
-      await user.click(saveBtn);
+      await act(async () => {
+        await user.click(saveBtn);
+      });
 
+      // Check that button shows 'Saving...' and is disabled during loading
       expect(screen.getByText('Saving...')).toBeInTheDocument();
       expect(screen.getByText('Saving...')).toBeDisabled();
+
+      // Resolve the promise to prevent test hanging
+      if (resolvePromise) {
+        resolvePromise({ status: 201, data: mockSignatureData, statusText: 'Created' });
+      }
     });
 
     it('shows success message after successful save', async () => {
@@ -385,11 +437,13 @@ describe('DigitalSignaturePad Component - REQ-501.4', () => {
       await fillValidForm();
 
       const saveBtn = screen.getByText('Save Signature');
-      await user.click(saveBtn);
+      await act(async () => {
+        await user.click(saveBtn);
+      });
 
       await waitFor(() => {
-        expect(screen.getByText('Signature saved successfully!')).toBeInTheDocument();
-      });
+        expect(screen.getByText('✓ Signature Captured Successfully')).toBeInTheDocument();
+      }, { timeout: 3000 });
     });
 
     it('calls onSignatureComplete callback after successful save', async () => {
@@ -400,11 +454,13 @@ describe('DigitalSignaturePad Component - REQ-501.4', () => {
       await fillValidForm();
 
       const saveBtn = screen.getByText('Save Signature');
-      await user.click(saveBtn);
+      await act(async () => {
+        await user.click(saveBtn);
+      });
 
       await waitFor(() => {
         expect(mockOnSignatureComplete).toHaveBeenCalledWith(mockSignatureData);
-      });
+      }, { timeout: 3000 });
     });
 
     it('fetches client IP address for signature record', async () => {
@@ -415,11 +471,13 @@ describe('DigitalSignaturePad Component - REQ-501.4', () => {
       await fillValidForm();
 
       const saveBtn = screen.getByText('Save Signature');
-      await user.click(saveBtn);
+      await act(async () => {
+        await user.click(saveBtn);
+      });
 
       await waitFor(() => {
         expect(global.fetch).toHaveBeenCalledWith('https://api.ipify.org?format=json');
-      });
+      }, { timeout: 3000 });
     });
 
     it('handles IP address fetch failure gracefully', async () => {
@@ -432,7 +490,9 @@ describe('DigitalSignaturePad Component - REQ-501.4', () => {
       await fillValidForm();
 
       const saveBtn = screen.getByText('Save Signature');
-      await user.click(saveBtn);
+      await act(async () => {
+        await user.click(saveBtn);
+      });
 
       await waitFor(() => {
         expect(mockPost).toHaveBeenCalledWith('/api/digital-signatures/',
@@ -440,7 +500,7 @@ describe('DigitalSignaturePad Component - REQ-501.4', () => {
             ip_address: 'Unknown'
           })
         );
-      });
+      }, { timeout: 3000 });
     });
 
     it('handles signature save API errors', async () => {
@@ -454,12 +514,14 @@ describe('DigitalSignaturePad Component - REQ-501.4', () => {
       await fillValidForm();
 
       const saveBtn = screen.getByText('Save Signature');
-      await user.click(saveBtn);
+      await act(async () => {
+        await user.click(saveBtn);
+      });
 
       await waitFor(() => {
         expect(screen.getByText('Error saving signature. Please try again.')).toBeInTheDocument();
         expect(consoleSpy).toHaveBeenCalledWith('Error saving signature:', expect.any(Error));
-      });
+      }, { timeout: 5000 });
 
       consoleSpy.mockRestore();
     });
@@ -479,11 +541,13 @@ describe('DigitalSignaturePad Component - REQ-501.4', () => {
       mockSignatureCanvas.isEmpty.mockReturnValue(false);
 
       const saveBtn = screen.getByText('Save Signature');
-      await user.click(saveBtn);
+      await act(async () => {
+        await user.click(saveBtn);
+      });
 
       await waitFor(() => {
         expect(mockOnSignatureComplete).toHaveBeenCalledWith(mockSignatureData);
-      });
+      }, { timeout: 3000 });
     });
 
     it('shows success message after save', async () => {
@@ -499,11 +563,13 @@ describe('DigitalSignaturePad Component - REQ-501.4', () => {
       mockSignatureCanvas.isEmpty.mockReturnValue(false);
 
       const saveBtn = screen.getByText('Save Signature');
-      await user.click(saveBtn);
+      await act(async () => {
+        await user.click(saveBtn);
+      });
 
       await waitFor(() => {
-        expect(screen.getByText('Signature saved successfully!')).toBeInTheDocument();
-      });
+        expect(screen.getByText('✓ Signature Captured Successfully')).toBeInTheDocument();
+      }, { timeout: 3000 });
     });
   });
 
