@@ -99,10 +99,17 @@ nav a:hover, nav a.active {
   cursor: pointer;
   font-size: 1rem;
   font-family: inherit;
+  transition: color 0.2s ease-in-out;
 }
 
 .dropdown-button:hover {
   color: var(--primary-color);
+}
+
+/* TASK-081: Keyboard navigation focus styles */
+.dropdown-button:focus {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
 }
 
 .dropdown-menu-content {
@@ -123,11 +130,26 @@ nav a:hover, nav a.active {
   text-decoration: none;
   display: block;
   border-bottom: none;
+  transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
 }
 
 .dropdown-menu-content a:hover {
   background-color: #ddd;
   border-bottom: none;
+}
+
+/* TASK-082: Active route highlighting */
+.dropdown-menu-content a.active {
+  background-color: var(--primary-color);
+  color: white;
+  font-weight: 600;
+}
+
+/* TASK-081: Keyboard navigation focus styles for dropdown links */
+.dropdown-menu-content a:focus {
+  outline: 2px solid var(--primary-color);
+  outline-offset: -2px;
+  background-color: #e9ecef;
 }
 
 main {

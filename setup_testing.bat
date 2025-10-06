@@ -4,7 +4,7 @@ echo Setting up automated testing environment...
 
 REM Install Python testing dependencies
 echo Installing Python testing tools...
-pip install -r requirements.txt
+.\venv\Scripts\pip.exe install -r requirements.txt
 
 REM Install frontend testing dependencies
 echo Installing frontend testing tools...
@@ -18,7 +18,7 @@ pre-commit install
 
 REM Run initial test suite
 echo Running initial test suite...
-python manage.py test
+.\venv\Scripts\python.exe manage.py test
 
 echo.
 echo Automated testing setup complete!
@@ -31,7 +31,7 @@ echo   - run-tests-frontend: Run React tests
 echo   - run-quality-check: Run linting and tests
 echo.
 echo - Manual commands:
-echo   - python manage.py test: Run Django tests
+echo   - .\venv\Scripts\python.exe manage.py test: Run Django tests
 echo   - cd frontend && npm test: Run React tests
 echo   - pre-commit run --all-files: Run all pre-commit checks
 echo.

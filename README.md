@@ -17,8 +17,12 @@ Built with a robust **Django** backend and a dynamic **React** frontend, Converg
 *   **Dashboard:** An interactive, at-a-glance overview of your business, including sales performance and deals by stage.
 *   **Contact Management:** A centralized database for all your customer and lead information.
 *   **Deal Tracking:** A visual pipeline to manage sales opportunities from prospecting to close.
-*   **Task Management:** Create, assign, and track tasks related to contacts, deals, or internal projects.
+*   **Task Management:** Create, assign, and track tasks related to contacts, deals, or internal projects with calendar view.
 *   **Field Service Management:** Advanced scheduling, route optimization, digital signatures, and customer self-service portal.
+*   **Accounting & Financial Management:** Complete financial reporting, invoicing, budgets, expenses, and ledger accounting.
+*   **Warehouse & Inventory:** Comprehensive inventory management with stock tracking and alerts.
+*   **Advanced Analytics:** AI-powered predictions, customer lifetime value, and revenue forecasting.
+*   **Utility Navigation:** Global search, notifications center, chat access, and quick profile settings.
 *   **Clickable Charts:** Interactive dashboard charts that allow you to click through to filtered data views.
 *   **Knowledge Base:** An internal documentation system for storing articles, guides, and changelogs.
 *   **User Roles & Permissions:** Manage user access with roles like "Sales Rep" and "Sales Manager".

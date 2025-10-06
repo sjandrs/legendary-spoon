@@ -20,7 +20,12 @@
     "test:all": "npm run test:ci && npm run test:e2e",
     "test:component": "cypress run --component",
     "test:a11y": "cypress run --spec 'cypress/e2e/**/*a11y*'",
-    "test:performance": "lighthouse-ci autorun"
+    "test:performance": "lighthouse-ci autorun",
+    "test:cross-browser": "npm run test:chrome && npm run test:firefox && npm run test:edge",
+    "test:chrome": "cypress run --browser chrome",
+    "test:firefox": "cypress run --browser firefox",
+    "test:edge": "cypress run --browser edge",
+    "test:safari": "playwright test --project=webkit"
   },
   "dependencies": {
     "@fullcalendar/core": "^6.1.19",

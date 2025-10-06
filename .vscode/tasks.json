@@ -4,7 +4,7 @@
 		{
 			"label": "start-backend",
 			"type": "shell",
-			"command": ".\\venv\\Scripts\\Activate.ps1; python manage.py runserver",
+			"command": ".\\venv\\Scripts\\python.exe manage.py runserver",
 			"problemMatcher": [],
 			"presentation": {
 				"group": "dev",
@@ -42,7 +42,7 @@
 		{
 			"label": "run-tests",
 			"type": "shell",
-			"command": ".\\venv\\Scripts\\Activate.ps1; python manage.py test",
+			"command": ".\\venv\\Scripts\\python.exe manage.py test",
 			"group": {
 				"kind": "test",
 				"isDefault": true
@@ -60,7 +60,7 @@
 		{
 			"label": "run-tests-backend",
 			"type": "shell",
-			"command": ".\\venv\\Scripts\\Activate.ps1; python manage.py test main.tests",
+			"command": ".\\venv\\Scripts\\python.exe manage.py test main.tests",
 			"group": "test",
 			"presentation": {
 				"echo": true,
@@ -75,7 +75,7 @@
 		{
 			"label": "run-tests-coverage",
 			"type": "shell",
-			"command": ".\\venv\\Scripts\\Activate.ps1; python -m coverage run manage.py test && python -m coverage report",
+			"command": ".\\venv\\Scripts\\python.exe -m coverage run manage.py test && .\\venv\\Scripts\\python.exe -m coverage report",
 			"group": "test",
 			"presentation": {
 				"echo": true,
@@ -126,7 +126,7 @@
 		{
 			"label": "run-lint-backend",
 			"type": "shell",
-			"command": ".\\venv\\Scripts\\Activate.ps1; python -m flake8 main web --max-line-length=100",
+			"command": ".\\venv\\Scripts\\python.exe -m flake8 main web --max-line-length=100",
 			"group": "test",
 			"presentation": {
 				"echo": true,

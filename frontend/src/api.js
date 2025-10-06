@@ -107,4 +107,33 @@ export const calculateCustomerLifetimeValue = (contactId) => apiClient.post(`/ap
 export const predictDealOutcome = (dealId) => apiClient.post(`/api/analytics/predict/${dealId}/`);
 export const generateRevenueForecast = (data) => apiClient.post('/api/analytics/forecast/', data);
 
+// --- Phase 2: Core CRM Features ---
+// Accounts Management
+export const getAccounts = (params) => apiClient.get('/api/accounts/', { params });
+export const getAccount = (id) => apiClient.get(`/api/accounts/${id}/`);
+export const createAccount = (data) => apiClient.post('/api/accounts/', data);
+export const updateAccount = (id, data) => apiClient.put(`/api/accounts/${id}/`, data);
+export const deleteAccount = (id) => apiClient.delete(`/api/accounts/${id}/`);
+
+// Quotes Management
+export const getQuotes = (params) => apiClient.get('/api/quotes/', { params });
+export const getQuote = (id) => apiClient.get(`/api/quotes/${id}/`);
+export const createQuote = (data) => apiClient.post('/api/quotes/', data);
+export const updateQuote = (id, data) => apiClient.put(`/api/quotes/${id}/`, data);
+export const deleteQuote = (id) => apiClient.delete(`/api/quotes/${id}/`);
+export const convertQuoteToDeal = (id) => apiClient.post(`/api/quotes/${id}/convert-to-deal/`);
+
+// Interactions Management
+export const getInteractions = (params) => apiClient.get('/api/interactions/', { params });
+export const createInteraction = (data) => apiClient.post('/api/interactions/', data);
+
+// Project Templates
+export const getProjectTemplates = () => apiClient.get('/api/project-templates/');
+export const createProjectTemplate = (data) => apiClient.post('/api/project-templates/', data);
+export const updateProjectTemplate = (id, data) => apiClient.put(`/api/project-templates/${id}/`, data);
+
+// Certifications
+export const getCertifications = () => apiClient.get('/api/certifications/');
+export const createCertification = (data) => apiClient.post('/api/certifications/', data);
+
 export default apiClient;
