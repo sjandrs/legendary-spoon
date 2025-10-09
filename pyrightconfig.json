@@ -1,0 +1,22 @@
+{
+  "$schema": "https://raw.githubusercontent.com/microsoft/pyright/main/packages/vscode-pyright/schemas/pyrightconfig.schema.json",
+  "typeCheckingMode": "basic",
+  "reportMissingTypeStubs": "none",
+  "reportUnknownMemberType": "none",
+  "reportUnknownVariableType": "none",
+  "reportUnknownParameterType": "none",
+  "reportIncompatibleMethodOverride": "none",
+  "reportArgumentType": "warning",
+  "reportAttributeAccessIssue": "warning",
+  "venvPath": ".",
+  "venv": "venv",
+  "exclude": [
+    "**/.venv",
+    "**/venv",
+    "**/__pycache__",
+    "**/.pytest_cache",
+    "**/.mypy_cache",
+    "main/migrations",
+    "main/models.py" // noisy dynamic Django models; rely on tests
+  ]
+}
