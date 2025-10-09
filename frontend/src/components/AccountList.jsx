@@ -67,6 +67,8 @@ const AccountList = () => {
         <div className="account-list-header">
           <h1>Accounts</h1>
         </div>
+        {/* Accessible loading announcement for tests and screen readers */}
+        <p style={{position:'absolute', left:'-10000px'}} aria-live="polite">Loading accounts...</p>
         <LoadingSkeleton variant="table" count={5} />
       </div>
     );
@@ -140,7 +142,11 @@ const AccountList = () => {
                       </a>
                     ) : '-'}
                   </td>
-                  <td>{account.owner_name || account.owner}</td>
+                  <td>{
+                    typeof account.owner_name === 'string' ? account.owner_name :
+                    (typeof account.owner === 'string' ? account.owner :
+                      (account.owner && account.owner.username) ? account.owner.username : '-')
+                  }</td>
                   <td>{account.contact_count || 0}</td>
                   <td>{new Date(account.created_at).toLocaleDateString()}</td>
                   <td>

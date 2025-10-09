@@ -131,13 +131,21 @@ global.TextDecoder = TextDecoder;
 
 // Polyfill TransformStream required by @mswjs/interceptors for fetch interception
 if (typeof global.TransformStream === 'undefined') {
-  class SimpleTransformStream {
-    constructor() {
-      this.readable = new ReadableStream({ start() {} });
-      this.writable = new WritableStream({ write() {} });
-    }
+  // Use web-streams-polyfill implementation
+  // eslint-disable-next-line import/no-extraneous-dependencies
+  const { TransformStream } = require('web-streams-polyfill/dist/ponyfill.js');
+  global.TransformStream = TransformStream;
+}
+
+// Polyfill WebSocket (used indirectly by msw in some environments) if missing
+if (typeof global.WebSocket === 'undefined') {
+  try {
+    // eslint-disable-next-line import/no-extraneous-dependencies
+    const WebSocket = require('ws');
+    global.WebSocket = WebSocket;
+  } catch (e) {
+    // Ignore if ws not available; tests that require it will fail loudly
   }
-  global.TransformStream = SimpleTransformStream;
 }
 
 // MSW polyfills for Jest environment

@@ -1,5 +1,5 @@
 import re
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List, Tuple, cast
 
 from django.db.models import Q
 
@@ -28,22 +28,28 @@ class SearchService:
         sort_order: str = "desc",
         offset: int = 0,
         limit: int = 50,
-    ) -> Tuple[List, int]:
+    ) -> Tuple[list, int]:
         """
         Perform advanced search on a specific entity type by delegating to the
         configured search provider.
         """
-        return self.provider.advanced_search(
-            entity_type, query, filters, sort_by, sort_order, offset, limit
+        return cast(
+            Tuple[list, int],
+            self.provider.advanced_search(
+                entity_type, query, filters, sort_by, sort_order, offset, limit
+            ),
         )
 
     def get_search_suggestions(
-        self, query: str, entity_type: str = None, limit: int = 10
-    ) -> List[Dict]:
+        self, query: str, entity_type: str | None = None, limit: int = 10
+    ) -> list[dict]:
         """
         Get search suggestions by delegating to the configured search provider.
         """
-        return self.provider.get_search_suggestions(query, entity_type, limit)
+        return cast(
+            list[dict],
+            self.provider.get_search_suggestions(query, entity_type, limit),
+        )
 
     def save_search(
         self,
@@ -51,8 +57,8 @@ class SearchService:
         description: str,
         search_type: str,
         query: str = "",
-        filters: Dict[str, Any] = None,
-        sort_by: str = None,
+        filters: Dict[str, Any] | None = None,
+        sort_by: str | None = None,
         sort_order: str = "desc",
         is_public: bool = False,
     ) -> SavedSearch:
@@ -77,7 +83,7 @@ class SearchService:
 
     def execute_saved_search(
         self, saved_search_id: int, offset: int = 0, limit: int = 50
-    ) -> Tuple[List, int]:
+    ) -> Tuple[list, int]:
         """Execute a saved search"""
 
         saved_search_temp = SavedSearch.objects.get(id=saved_search_id)
@@ -109,8 +115,8 @@ class SearchService:
             )
 
     def global_search(
-        self, query: str, filters: Dict[str, Any] = None, limit: int = 50
-    ) -> Dict[str, List]:
+        self, query: str, filters: Dict[str, Any] | None = None, limit: int = 50
+    ) -> dict[str, list]:
         """Perform global search across all entities"""
         results = {}
 

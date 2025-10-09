@@ -37,7 +37,11 @@ class GlobalSearchTests(TestCase):
         from django.urls import resolve
 
         # Prefer our GlobalSearchView if available at a well-known path
-        path_candidates = ["/api/global-search/", "/api/globalsearch/", "/api/search/"]
+        path_candidates = [
+            "/api/global-search/",
+            "/api/globalsearch/",
+            "/api/search/",
+        ]
         hit_path = None
         for p in path_candidates:
             try:

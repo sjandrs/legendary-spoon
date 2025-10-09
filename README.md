@@ -33,6 +33,22 @@ Built with a robust **Django** backend and a dynamic **React** frontend, Converg
 *   **[API Documentation](docs/API.md)**: REST API endpoints and usage examples
 *   **[Development Guide](docs/DEVELOPMENT.md)**: Setup, conventions, and development workflows
 *   **[Field Service Management](docs/FIELD_SERVICE_MANAGEMENT.md)**: Complete guide to advanced scheduling and service management features
+*   **[Status Report (2025-10-09)](docs/STATUS_2025-10-09.md)**: Current progress, quality gates, risks, and next steps
+*   **[ADR-001 Migration Checklist](docs/ADR-001-migration-checklist.md)**: Operational plan to consolidate EnhancedUser → CustomUser
+
+### Architecture Decision Records
+
+- ADR-001: User Model Consolidation — `docs/ADR-001-user-model-consolidation.md` outlines merging EnhancedUser capabilities into CustomUser, including migration and rollback plans.
+    - See also: `docs/ADR-001-migration-checklist.md` for the phased rollout, data migration, and rollback procedure.
+
+### Developer Tips
+
+- Use the `log_activity` helper (defined in `main/api_views.py`) for audit logging on state-changing actions. It standardizes entries and prevents failures from impacting primary flows.
+
+- Permission coverage examples live in:
+    - `main/tests/test_permissions_minimal.py`
+    - `main/tests/test_permissions_deeper.py`
+    - `main/tests/test_permissions_payments_journal.py`
 
 ## �🛠️ Tech Stack
 

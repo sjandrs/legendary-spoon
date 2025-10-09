@@ -1881,6 +1881,15 @@ class DigitalSignature(models.Model):
     ip_address = models.GenericIPAddressField()
     user_agent = models.TextField(blank=True)
     signed_at = models.DateTimeField(auto_now_add=True)
+    # Added fields to support verification persistence (Issue 09 remediation)
+    is_valid = models.BooleanField(
+        default=False, help_text="Result of integrity verification"
+    )
+    document_hash = models.CharField(
+        max_length=128,
+        blank=True,
+        help_text="Hash of canonicalized document content for tamper detection",
+    )
 
     def __str__(self):
         return f"Signature by {self.signer_name} on {self.document_name}"

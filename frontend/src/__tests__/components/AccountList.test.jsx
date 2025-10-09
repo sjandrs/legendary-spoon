@@ -9,8 +9,15 @@ import { render, screen, waitFor, within } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import userEvent from '@testing-library/user-event';
 // TODO: Re-enable real MSW server once polyfills for WebSocket/TransformStream are stabilized in Jest env.
-import axios from 'axios';
-jest.mock('axios');
+// Hybrid fallback: directly mock API client instead of MSW server
+import { get, del as apiDelete } from '../../api';
+jest.mock('../../api', () => ({
+  get: jest.fn(),
+  post: jest.fn(),
+  put: jest.fn(),
+  patch: jest.fn(),
+  del: jest.fn(),
+}));
 import AccountList from '../../components/AccountList';
 
 // Shared mock data
@@ -36,10 +43,8 @@ const mockAccounts = [
     created_at: '2025-01-02T00:00:00Z'
   }
 ];
-
 beforeEach(() => {
-  axios.get.mockResolvedValue({ data: mockAccounts });
-  axios.delete.mockResolvedValue({ status: 204 });
+  get.mockResolvedValue({ data: { results: mockAccounts, count: mockAccounts.length } });
 });
 afterEach(() => {
   jest.clearAllMocks();
@@ -52,7 +57,7 @@ const renderWithRouter = (component) => {
 describe('AccountList Component - TASK-029', () => {
   describe('Loading State', () => {
     it('should display loading spinner while fetching accounts', () => {
-      axios.get.mockImplementationOnce(() => new Promise(resolve => setTimeout(() => resolve({ data: [] }), 100)));
+      get.mockImplementationOnce(() => new Promise(resolve => setTimeout(() => resolve({ data: { results: [], count: 0 } }), 100)));
 
       renderWithRouter(<AccountList />);
       expect(screen.getByText(/loading accounts/i)).toBeInTheDocument();
@@ -61,7 +66,7 @@ describe('AccountList Component - TASK-029', () => {
 
   describe('Empty State', () => {
     it('should display empty state message when no accounts exist', async () => {
-      axios.get.mockResolvedValueOnce({ data: [] });
+      get.mockResolvedValueOnce({ data: { results: [], count: 0 } });
 
       renderWithRouter(<AccountList />);
 
@@ -73,7 +78,7 @@ describe('AccountList Component - TASK-029', () => {
 
   describe('Error State', () => {
     it('should handle API errors gracefully', async () => {
-      axios.get.mockRejectedValueOnce(new Error('Server error'));
+      get.mockRejectedValueOnce(new Error('Server error'));
 
       const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
       renderWithRouter(<AccountList />);
@@ -86,7 +91,7 @@ describe('AccountList Component - TASK-029', () => {
     });
 
     it('should handle network errors', async () => {
-      axios.get.mockRejectedValueOnce(new Error('Network error'));
+      get.mockRejectedValueOnce(new Error('Network error'));
 
       const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
       renderWithRouter(<AccountList />);
@@ -248,9 +253,11 @@ describe('AccountList Component - TASK-029', () => {
       const user = userEvent.setup();
       const confirmSpy = jest.spyOn(window, 'confirm').mockReturnValue(true);
 
-      axios.delete.mockResolvedValueOnce({ status: 204 });
-      // After deletion return only the second account
-      axios.get.mockResolvedValueOnce({ data: mockAccounts }).mockResolvedValueOnce({ data: [mockAccounts[1]] });
+      apiDelete.mockResolvedValueOnce({ status: 204 });
+      // After delete call, next list fetch returns one account
+      get
+        .mockResolvedValueOnce({ data: { results: mockAccounts, count: mockAccounts.length } })
+        .mockResolvedValueOnce({ data: { results: [mockAccounts[1]], count: 1 } });
 
       renderWithRouter(<AccountList />);
 

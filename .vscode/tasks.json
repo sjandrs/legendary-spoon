@@ -126,7 +126,7 @@
 		{
 			"label": "run-lint-backend",
 			"type": "shell",
-			"command": ".\\venv\\Scripts\\python.exe -m flake8 main web --max-line-length=100",
+			"command": ".\\venv\\Scripts\\python.exe -m flake8",
 			"group": "test",
 			"presentation": {
 				"echo": true,
@@ -136,7 +136,7 @@
 				"showReuseMessage": true,
 				"clear": false
 			},
-			"detail": "Runs Python linting on backend code."
+			"detail": "Runs Python linting using .flake8 config (respects excludes)."
 		},
 		{
 			"label": "run-lint-frontend",

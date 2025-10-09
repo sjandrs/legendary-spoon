@@ -6,10 +6,10 @@ from rest_framework.permissions import SAFE_METHODS, BasePermission
 
 
 def _is_authenticated(request: Any) -> bool:
-    """Runtime-safe authentication check with permissive typing for Pyright.
+    """Runtime-safe auth check with permissive typing.
 
-    DRF's Request.user is dynamically typed based on AUTH_USER_MODEL. We avoid
-    strict typing here to keep permissions generic across CustomUser variants.
+    DRF's Request.user is dynamic per AUTH_USER_MODEL. We avoid strict typing
+    to keep permissions generic across CustomUser variants.
     """
     user: Any = getattr(request, "user", None)
     return bool(user and getattr(user, "is_authenticated", False))
@@ -38,7 +38,8 @@ class IsManager(BasePermission):
     def has_permission(self, request: Any, view: Any) -> bool:  # type: ignore[override]
         if not _is_authenticated(request):
             return False
-        return _in_groups(getattr(request, "user", None), self.manager_groups)
+        user = getattr(request, "user", None)
+        return _in_groups(user, self.manager_groups)
 
 
 class IsOwnerOrManager(BasePermission):
@@ -75,8 +76,7 @@ class FinancialDataPermission(BasePermission):
             return False
         # Read-only for owners not allowed; only managers
         user = getattr(request, "user", None)
-        manager_groups = ["Sales Manager", "Admin"]
-        return _in_groups(user, manager_groups)
+        return _in_groups(user, ["Sales Manager", "Admin"])
 
 
 class CustomFieldValuePermission(BasePermission):

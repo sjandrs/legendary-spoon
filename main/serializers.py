@@ -1440,76 +1440,64 @@ class AppointmentRequestSerializer(serializers.ModelSerializer):
 
 
 class DigitalSignatureSerializer(serializers.ModelSerializer):
-    """Serializer for digital signatures"""
-
-    work_order_description = serializers.CharField(
-        source="work_order.description", read_only=True
-    )
-    signer_name = serializers.CharField(source="signer.full_name", read_only=True)
+    """Serializer for digital signatures (generic relation exposure minimized)."""
 
     class Meta:
         model = DigitalSignature
         fields = [
             "id",
-            "work_order",
-            "signer",
+            "content_type",
+            "object_id",
             "signature_data",
+            "signer_name",
+            "signer_email",
+            "document_name",
+            "paperwork_template",
             "document_hash",
             "signed_at",
             "ip_address",
+            "user_agent",
             "is_valid",
-            # Read-only fields
-            "work_order_description",
-            "signer_name",
         ]
         read_only_fields = ["signed_at", "document_hash", "is_valid"]
 
 
 class InventoryReservationSerializer(serializers.ModelSerializer):
-    """Serializer for inventory reservations"""
-
-    scheduled_event_info = serializers.CharField(
-        source="scheduled_event.__str__", read_only=True
-    )
-    item_name = serializers.CharField(source="item.name", read_only=True)
+    """Serializer for inventory reservations (aligned with model fields)."""
 
     class Meta:
         model = InventoryReservation
         fields = [
             "id",
             "scheduled_event",
-            "item",
+            "warehouse_item",
             "quantity_reserved",
-            "quantity_used",
+            "quantity_consumed",
             "status",
-            "reserved_at",
-            "released_at",
-            "notes",
-            # Read-only fields
-            "scheduled_event_info",
-            "item_name",
+            "created_at",
+            "updated_at",
         ]
-        read_only_fields = ["reserved_at", "released_at"]
+        read_only_fields = ["created_at", "updated_at"]
 
 
 class SchedulingAnalyticsSerializer(serializers.ModelSerializer):
-    """Serializer for scheduling analytics snapshots"""
+    """Serializer for scheduling analytics snapshots (using existing model fields)."""
 
     class Meta:
         model = SchedulingAnalytics
         fields = [
             "id",
             "date",
-            "total_appointments",
-            "completed_appointments",
-            "cancelled_appointments",
-            "completion_rate",
-            "total_work_orders",
+            "total_technicians",
             "active_technicians",
-            "technician_utilization",
-            "avg_appointment_duration",
-            "notifications_sent",
-            "urgent_appointments",
+            "average_utilization_rate",
+            "total_scheduled_events",
+            "completed_events",
+            "cancelled_events",
+            "rescheduled_events",
+            "on_time_completion_rate",
+            "average_travel_time_minutes",
+            "customer_satisfaction_score",
             "created_at",
         ]
         read_only_fields = ["created_at"]

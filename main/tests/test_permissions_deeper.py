@@ -71,9 +71,8 @@ class DeeperPermissionTests(APITestCase):
 
         # As owner (rep)
         resp_owner_detail = self._client_for(self.rep).get(detail_url)
-        self.assertIn(
-            getattr(resp_owner_detail, "status_code", 0), (200, 404)
-        )  # 404 if view filters out; accept 200 as allowed
+        code = getattr(resp_owner_detail, "status_code", 0)
+        self.assertIn(code, (200, 404))  # 404 if filtered; accept 200 as allowed
 
         # As manager
         resp_mgr_detail = self._client_for(self.mgr).get(detail_url)
@@ -91,9 +90,8 @@ class DeeperPermissionTests(APITestCase):
         resp_create_rep = self._client_for(self.rep).post(
             list_url, payload, format="json"
         )
-        self.assertIn(
-            getattr(resp_create_rep, "status_code", 0), (403, 400)
-        )  # Permission class or validation may block
+        # Permission class or validation may block
+        self.assertIn(getattr(resp_create_rep, "status_code", 0), (403, 400))
 
         # Create as manager (allowed)
         resp_create_mgr = self._client_for(self.mgr).post(

@@ -28,9 +28,7 @@ class DatabaseSearchProvider(BaseSearchProvider):
     def advanced_search(
         self, entity_type, query, filters, sort_by, sort_order, offset, limit
     ) -> Tuple[List[Dict[str, Any]], int]:
-        """
-        Perform a search against the database, applying filters and sorting.
-        """
+        """Perform a search against the database with filters/sorting."""
         if entity_type not in self.SEARCHABLE_MODELS:
             raise ValueError(f"Entity type '{entity_type}' not supported")
 
@@ -52,13 +50,11 @@ class DatabaseSearchProvider(BaseSearchProvider):
 
         results = queryset[offset : offset + limit]
 
-        # Serialize results
         serialized_results = [self._serialize_result(obj) for obj in results]
-
         return serialized_results, total_count
 
     def get_search_suggestions(
-        self, query: str, entity_type: str = None, limit: int = 10
+        self, query: str, entity_type: str | None = None, limit: int = 10
     ) -> List[Dict[str, Any]]:
         """Get search suggestions from the database."""
         if len(query.strip()) < 2:
