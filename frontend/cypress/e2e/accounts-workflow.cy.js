@@ -174,7 +174,7 @@ describe('Accounts Workflow', () => {
 
         // Click delete button and confirm
         cy.contains('Test Corporation Inc').parents('tr').find('button').contains('Delete').click();
-        
+
         // Confirm deletion in dialog
         cy.on('window:confirm', () => true);
 

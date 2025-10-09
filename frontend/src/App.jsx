@@ -127,16 +127,16 @@ const MainLayout = () => {
   const [advancedMenuOpen, setAdvancedMenuOpen] = useState(false);
   const [salesMarketingMenuOpen, setSalesMarketingMenuOpen] = useState(false);
   const [operationsMenuOpen, setOperationsMenuOpen] = useState(false);
-  
+
   // TASK-081: Keyboard navigation support
   const [focusedMenuIndex, setFocusedMenuIndex] = useState(-1);
   const menuRefs = useRef([]);
-  
+
   // Helper function to check if route is active - TASK-082
   const isRouteActive = (path) => {
     return location.pathname === path || location.pathname.startsWith(path + '/');
   };
-  
+
   // TASK-081: Handle keyboard navigation
   const handleKeyDown = (e, menuSetter, isOpen, menuLinks) => {
     switch (e.key) {
@@ -180,14 +180,14 @@ const MainLayout = () => {
         break;
     }
   };
-  
+
   // TASK-081: Handle keyboard navigation within dropdown menus
   const handleDropdownKeyDown = (e, menuSetter) => {
     const currentLink = e.currentTarget;
     const dropdown = currentLink.parentElement;
     const links = Array.from(dropdown.querySelectorAll('a'));
     const currentIndex = links.indexOf(currentLink);
-    
+
     switch (e.key) {
       case 'Escape':
         e.preventDefault();
@@ -231,14 +231,14 @@ const MainLayout = () => {
     <div className="container">
       {/* Utility Navigation Bar - Phase 1 TASK-003 */}
       <UtilityNavigation />
-      
+
       <nav>
         <ul>
           <div className="nav-links">
             {/* Core Navigation */}
             <li><Link to="/dashboard" data-testid="nav-dashboard">Dashboard</Link></li>
             <li><Link to="/analytics" data-testid="nav-analytics">Analytics</Link></li>
-            
+
             {/* Advanced Analytics Dropdown */}
             <li
               className="dropdown-menu"
@@ -255,15 +255,15 @@ const MainLayout = () => {
                 </div>
               )}
             </li>
-            
+
             {/* CRM Dropdown - TASK-081 (keyboard nav), TASK-082 (active highlighting) */}
             <li
               className="dropdown-menu"
               onMouseEnter={() => setCrmMenuOpen(true)}
               onMouseLeave={() => setCrmMenuOpen(false)}
             >
-              <button 
-                className="dropdown-button" 
+              <button
+                className="dropdown-button"
                 data-testid="nav-crm"
                 onKeyDown={(e) => handleKeyDown(e, setCrmMenuOpen, crmMenuOpen)}
                 aria-haspopup="true"
@@ -273,15 +273,15 @@ const MainLayout = () => {
               </button>
               {crmMenuOpen && (
                 <div className="dropdown-menu-content" role="menu">
-                  <Link 
-                    to="/accounts" 
+                  <Link
+                    to="/accounts"
                     className={isRouteActive('/accounts') ? 'active' : ''}
                     onKeyDown={(e) => handleDropdownKeyDown(e, setCrmMenuOpen)}
                     role="menuitem"
                   >
                     Accounts
                   </Link>
-                  <Link 
+                  <Link
                     to="/contacts"
                     className={isRouteActive('/contacts') ? 'active' : ''}
                     onKeyDown={(e) => handleDropdownKeyDown(e, setCrmMenuOpen)}
@@ -289,7 +289,7 @@ const MainLayout = () => {
                   >
                     Contacts
                   </Link>
-                  <Link 
+                  <Link
                     to="/deals"
                     className={isRouteActive('/deals') ? 'active' : ''}
                     onKeyDown={(e) => handleDropdownKeyDown(e, setCrmMenuOpen)}
@@ -297,7 +297,7 @@ const MainLayout = () => {
                   >
                     Deals
                   </Link>
-                  <Link 
+                  <Link
                     to="/quotes"
                     className={isRouteActive('/quotes') ? 'active' : ''}
                     onKeyDown={(e) => handleDropdownKeyDown(e, setCrmMenuOpen)}
@@ -305,7 +305,7 @@ const MainLayout = () => {
                   >
                     Quotes
                   </Link>
-                  <Link 
+                  <Link
                     to="/interactions"
                     className={isRouteActive('/interactions') ? 'active' : ''}
                     onKeyDown={(e) => handleDropdownKeyDown(e, setCrmMenuOpen)}
@@ -313,7 +313,7 @@ const MainLayout = () => {
                   >
                     Interactions
                   </Link>
-                  <Link 
+                  <Link
                     to="/activity-timeline"
                     className={isRouteActive('/activity-timeline') ? 'active' : ''}
                     onKeyDown={(e) => handleDropdownKeyDown(e, setCrmMenuOpen)}
@@ -324,7 +324,7 @@ const MainLayout = () => {
                 </div>
               )}
             </li>
-            
+
             {/* Sales & Marketing Dropdown - TASK-061, 062 */}
             <li
               className="dropdown-menu"
@@ -340,7 +340,7 @@ const MainLayout = () => {
                 </div>
               )}
             </li>
-            
+
             {/* Projects & Tasks Dropdown - TASK-078 (renamed from "Tasks") */}
             <li
               className="dropdown-menu"
@@ -359,7 +359,7 @@ const MainLayout = () => {
                 </div>
               )}
             </li>
-            
+
             {/* Operations Dropdown - TASK-080 (consolidates Orders, Invoices, Work Orders, Warehouse) */}
             <li
               className="dropdown-menu"
@@ -376,7 +376,7 @@ const MainLayout = () => {
                 </div>
               )}
             </li>
-            
+
             {/* Staff & Resources Dropdown - TASK-079 (renamed from "Staff") */}
             <li
               className="dropdown-menu"
@@ -396,7 +396,7 @@ const MainLayout = () => {
                 </div>
               )}
             </li>
-            
+
             {/* Field Service Dropdown */}
             <li className="dropdown-menu"
                 onMouseEnter={() => setFieldServiceMenuOpen(true)}
@@ -414,7 +414,7 @@ const MainLayout = () => {
                 </div>
               )}
             </li>
-            
+
             {/* Accounting Dropdown */}
             <li className="dropdown-menu"
                 onMouseEnter={() => setAccountingMenuOpen(true)}
@@ -435,7 +435,7 @@ const MainLayout = () => {
                 </div>
               )}
             </li>
-            
+
             {/* Settings Dropdown - TASK-075, 076 (enhanced with admin tools) */}
             <li className="dropdown-menu"
                 onMouseEnter={() => setSettingsMenuOpen(true)}
@@ -497,26 +497,26 @@ function App() {
           <Route path="/contacts/new" element={<ContactForm />} />
           <Route path="/contacts/:id" element={<ContactDetail />} />
           <Route path="/contacts/:id/edit" element={<ContactForm />} />
-          
+
           {/* Account Management Routes - Phase 2 */}
           <Route path="/accounts" element={<AccountList />} />
           <Route path="/accounts/new" element={<AccountForm />} />
           <Route path="/accounts/:id" element={<AccountDetail />} />
           <Route path="/accounts/:id/edit" element={<AccountForm />} />
-          
+
           {/* Quote Management Routes - Phase 2 */}
           <Route path="/quotes" element={<QuoteList />} />
           <Route path="/quotes/new" element={<QuoteForm />} />
           <Route path="/quotes/:id" element={<QuoteDetail />} />
           <Route path="/quotes/:id/edit" element={<QuoteForm />} />
-          
+
           {/* Interaction Management Routes - Phase 2 */}
           <Route path="/interactions" element={<InteractionList />} />
           <Route path="/interactions/new" element={<InteractionForm />} />
-          
+
           {/* Activity Timeline Route - Phase 2 */}
           <Route path="/activity-timeline" element={<ActivityTimelinePage />} />
-          
+
           {/* AI/Analytics Routes - Phase 3 */}
           <Route path="/analytics/deal-predictions" element={<DealPredictions />} />
           <Route path="/analytics/deal-predictions/:dealId" element={<DealPredictions />} />
@@ -524,12 +524,12 @@ function App() {
           <Route path="/analytics/customer-lifetime-value/:contactId" element={<CustomerLifetimeValue />} />
           <Route path="/analytics/revenue-forecast" element={<RevenueForecast />} />
           <Route path="/analytics/snapshots" element={<AnalyticsSnapshots />} />
-          
+
           {/* Project Templates Routes - Phase 3 */}
           <Route path="/project-templates" element={<ProjectTemplateList />} />
           <Route path="/project-templates/new" element={<ProjectTemplateForm />} />
           <Route path="/project-templates/:id/edit" element={<ProjectTemplateForm />} />
-          
+
           <Route path="/deals/:id" element={<DealDetail />} />
           <Route path="/deals" element={<Deals />} />
           <Route path="/work-orders" element={<WorkOrders />} />
@@ -564,7 +564,7 @@ function App() {
           <Route path="/payments/new" element={<PaymentForm />} />
           <Route path="/reports" element={<Reports />} />
           <Route path="/email-communication" element={<EmailCommunication />} />
-          
+
           {/* Expense & Budget Management */}
           <Route path="/expenses" element={<ExpenseList />} />
           <Route path="/expenses/new" element={<ExpenseForm />} />
@@ -582,28 +582,28 @@ function App() {
           <Route path="/appointment-requests" element={<AppointmentRequestQueue />} />
           <Route path="/digital-signature" element={<DigitalSignaturePad />} />
           <Route path="/digital-signature/:workOrderId" element={<DigitalSignaturePad />} />
-          
+
           {/* Phase 4: Blog CMS Routes - TASK-060 */}
           <Route path="/blog" element={<BlogPostList />} />
           <Route path="/blog/new" element={<BlogPostForm />} />
           <Route path="/blog/:id" element={<PostDetail />} />
           <Route path="/blog/:id/edit" element={<BlogPostForm />} />
-          
+
           {/* Phase 4: CMS Pages Routes - TASK-065, 066 */}
           <Route path="/pages" element={<PageList />} />
           <Route path="/pages/new" element={<PageForm />} />
           <Route path="/pages/:id/edit" element={<PageForm />} />
-          
+
           {/* Phase 4: Tags Route - TASK-068 */}
           <Route path="/tags" element={<TagManagerPage />} />
-          
+
           {/* Phase 4: Notifications Route - TASK-070 */}
           <Route path="/notifications" element={<NotificationCenter />} />
-          
+
           {/* Phase 4: Admin Routes - TASK-072, 074 */}
           <Route path="/admin/activity-logs" element={<ActivityLogList />} />
           <Route path="/admin/system-logs" element={<SystemLogsList />} />
-          
+
           {/* Route Redirects for Backward Compatibility - TASK-009 */}
           <Route path="/scheduling" element={<SchedulePage />} />
           <Route path="/field-service" element={<SchedulingDashboard />} />

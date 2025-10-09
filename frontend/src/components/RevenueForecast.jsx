@@ -57,10 +57,10 @@ function RevenueForecast() {
 
     const forecast = forecastData.forecast;
     const historical = forecastData.historical || [];
-    
+
     const allData = [...historical, ...forecast];
     const labels = allData.map(item => item.period);
-    
+
     const data = {
       labels: labels,
       datasets: [
@@ -171,7 +171,7 @@ function RevenueForecast() {
     if (!forecastData?.forecast) return null;
 
     const forecast = forecastData.forecast;
-    
+
     const data = {
       labels: forecast.map(item => item.period),
       datasets: [

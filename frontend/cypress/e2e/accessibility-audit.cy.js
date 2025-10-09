@@ -1,7 +1,7 @@
 /**
  * Comprehensive Accessibility Audit using cypress-axe
  * Tests WCAG 2.1 AA compliance across all new CMS and Admin pages
- * 
+ *
  * TASK-086: Accessibility audit with axe-core on all new pages
  */
 

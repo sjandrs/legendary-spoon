@@ -135,7 +135,7 @@ function InteractionForm() {
       <form onSubmit={handleSubmit} className="interaction-form">
         <div className="form-section">
           <h2>Interaction Details</h2>
-          
+
           <div className="form-grid">
             <div className="form-group">
               <label htmlFor="interaction_type">

@@ -49,7 +49,7 @@ const UtilityNavigation = () => {
               aria-label="Submit search"
               data-testid="global-search-submit"
             >
-              
+
             </button>
           </form>
         </div>
@@ -65,7 +65,7 @@ const UtilityNavigation = () => {
               aria-expanded={showNotifications}
               data-testid="notifications-button"
             >
-              
+
               <span className="notification-badge">3</span>
             </button>
             {showNotifications && (
@@ -104,7 +104,7 @@ const UtilityNavigation = () => {
             aria-label="Chat"
             data-testid="chat-button"
           >
-            
+
           </Link>
 
           {/* Profile/User Menu */}
@@ -114,7 +114,7 @@ const UtilityNavigation = () => {
             aria-label="User profile and settings"
             data-testid="profile-button"
           >
-            
+
           </Link>
         </div>
       </div>

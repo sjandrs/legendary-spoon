@@ -14,7 +14,7 @@ function TagManagerPage() {
           ← Back to Blog
         </button>
       </div>
-      
+
       <div className="page-content">
         <div className="info-box">
           <p>Organize your content with tags. Tags help users discover related posts and improve SEO.</p>

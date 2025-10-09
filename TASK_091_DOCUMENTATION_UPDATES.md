@@ -221,7 +221,7 @@ import ComponentList from './ComponentList';
 describe('ComponentList', () => {
   it('should display items after loading', async () => {
     renderWithProviders(<ComponentList />);
-    
+
     await waitFor(() => {
       expect(screen.getByText('Item 1')).toBeInTheDocument();
     });

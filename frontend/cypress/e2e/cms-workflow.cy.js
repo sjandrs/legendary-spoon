@@ -1,7 +1,7 @@
 /**
  * Comprehensive CMS Workflow E2E Tests
  * TASK-088: Complete user journeys for Content Management System
- * 
+ *
  * Tests: Blog post creation → Publishing → Editing → Deletion
  *        Page creation → Publishing → SEO optimization
  *        Tag management → Assignment → Filtering
@@ -40,7 +40,7 @@ describe('CMS Workflow - Complete User Journeys', () => {
 
       cy.get('[data-testid="title-input"]').type(postTitle);
       cy.get('[data-testid="slug-input"]').should('have.value', postSlug);
-      
+
       // Rich text editor
       cy.get('[data-testid="content-editor"]').type('# Introduction\n\nThis is a test blog post created by E2E tests.\n\n## Features\n\n- Feature 1\n- Feature 2\n- Feature 3\n\n**This is bold text** and *this is italic*.');
 

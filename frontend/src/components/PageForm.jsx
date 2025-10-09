@@ -124,7 +124,7 @@ function PageForm() {
       <form onSubmit={handleSubmit} className="form-container">
         <div className="form-section">
           <h2>Basic Information</h2>
-          
+
           <div className="form-group">
             <label htmlFor="title">Title *</label>
             <input

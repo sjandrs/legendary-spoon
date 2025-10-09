@@ -26,18 +26,18 @@ const AccountList = () => {
       setLoading(true);
       const offset = (currentPage - 1) * itemsPerPage;
       let url = `/api/accounts/?limit=${itemsPerPage}&offset=${offset}`;
-      
+
       if (searchQuery) {
         url += `&search=${encodeURIComponent(searchQuery)}`;
       }
 
       const response = await get(url);
       setAccounts(response.data.results || response.data);
-      
+
       if (response.data.count) {
         setTotalPages(Math.ceil(response.data.count / itemsPerPage));
       }
-      
+
       setError(null);
     } catch (err) {
       setError('Failed to load accounts. Please try again.');

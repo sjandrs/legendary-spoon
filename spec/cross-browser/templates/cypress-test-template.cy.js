@@ -1,9 +1,9 @@
 ﻿/**
  * Cypress Test Template for Cross-Browser Testing
- * 
+ *
  * This template provides a standardized structure for Cypress E2E tests
  * that will run across Chrome, Firefox, and Edge browsers.
- * 
+ *
  * Usage:
  * 1. Copy this template to cypress/e2e/
  * 2. Rename to describe your test (e.g., crm-account-creation.cy.js)
@@ -249,7 +249,7 @@ describe('Feature Name - Cross-Browser Test Suite', () => {
 
 /**
  * Custom Commands (add to cypress/support/commands.js)
- * 
+ *
  * Cypress.Commands.add('login', (email, password) => {
  *   cy.visit('/login');
  *   cy.get('[data-testid="email-input"]').type(email);
@@ -257,7 +257,7 @@ describe('Feature Name - Cross-Browser Test Suite', () => {
  *   cy.get('[data-testid="login-button"]').click();
  *   cy.url().should('include', '/dashboard');
  * });
- * 
+ *
  * Cypress.Commands.add('tab', { prevSubject: 'optional' }, (subject) => {
  *   cy.wrap(subject).trigger('keydown', { keyCode: 9, which: 9 });
  * });

@@ -187,7 +187,7 @@ describe('Quotes Workflow', () => {
 
       // Click PDF button (will trigger download or open in new tab)
       cy.contains('QT-').parents('tr').find('button').contains(/PDF/i).click();
-      
+
       // Note: Actual PDF download validation would require additional setup
       // This test verifies the button is clickable
     });
@@ -200,7 +200,7 @@ describe('Quotes Workflow', () => {
 
       // Find a draft quote and change status
       cy.get('tbody tr').contains('draft').parents('tr').find('button').contains('Edit').click();
-      
+
       cy.get('select[name="status"]').select('sent');
       cy.get('button[type="submit"]').click();
 
@@ -214,7 +214,7 @@ describe('Quotes Workflow', () => {
       cy.contains('Quotes').click();
 
       cy.get('tbody tr').contains('sent').parents('tr').find('button').contains('Edit').click();
-      
+
       cy.get('select[name="status"]').select('accepted');
       cy.get('button[type="submit"]').click();
 
@@ -227,7 +227,7 @@ describe('Quotes Workflow', () => {
       cy.contains('Quotes').click();
 
       cy.get('tbody tr').first().find('button').contains('Edit').click();
-      
+
       cy.get('select[name="status"]').select('rejected');
       cy.get('button[type="submit"]').click();
 

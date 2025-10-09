@@ -82,7 +82,7 @@ function BlogPostList() {
           onChange={(e) => setSearchTerm(e.target.value)}
           className="search-input"
         />
-        
+
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
@@ -134,7 +134,7 @@ function BlogPostList() {
                     </span>
                   </td>
                   <td>
-                    {post.published_at 
+                    {post.published_at
                       ? new Date(post.published_at).toLocaleDateString()
                       : 'Not published'}
                   </td>
@@ -164,8 +164,8 @@ function BlogPostList() {
                       <Link to={`/blog/${post.id}/edit`} className="action-btn edit-btn" title="Edit">
                         ✏️
                       </Link>
-                      <button 
-                        onClick={() => handleDelete(post.id)} 
+                      <button
+                        onClick={() => handleDelete(post.id)}
                         className="action-btn delete-btn"
                         title="Delete"
                       >

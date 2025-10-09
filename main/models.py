@@ -1982,7 +1982,9 @@ class SchedulingAnalytics(models.Model):
     @classmethod
     def create_daily_snapshot(cls):
         """Create daily scheduling analytics snapshot"""
-        from django.db.models import Avg, Count, Q
+        # Removed unused imports (Avg, Count, Q) to satisfy flake8 F401; currently this
+        # snapshot calculation uses simple counts without aggregation helpers. Re-add
+        # targeted imports if future enhancements require annotated queries.
         from django.utils import timezone
 
         today = timezone.now().date()

@@ -84,7 +84,7 @@ const handleDropdownKeyDown = (e, menuSetter) => {
   const dropdown = currentLink.parentElement;
   const links = Array.from(dropdown.querySelectorAll('a'));
   const currentIndex = links.indexOf(currentLink);
-  
+
   switch (e.key) {
     case 'Escape':
       menuSetter(false);
@@ -101,8 +101,8 @@ const handleDropdownKeyDown = (e, menuSetter) => {
 
 #### **ARIA Attributes Added**
 ```jsx
-<button 
-  className="dropdown-button" 
+<button
+  className="dropdown-button"
   onKeyDown={(e) => handleKeyDown(e, setCrmMenuOpen, crmMenuOpen)}
   aria-haspopup="true"
   aria-expanded={crmMenuOpen}
@@ -153,10 +153,10 @@ import { useLocation } from 'react-router-dom';
 
 const MainLayout = () => {
   const location = useLocation();
-  
+
   // Helper function to check if route is active
   const isRouteActive = (path) => {
-    return location.pathname === path || 
+    return location.pathname === path ||
            location.pathname.startsWith(path + '/');
   };
 };
@@ -164,8 +164,8 @@ const MainLayout = () => {
 
 #### **Active Link Rendering**
 ```jsx
-<Link 
-  to="/accounts" 
+<Link
+  to="/accounts"
   className={isRouteActive('/accounts') ? 'active' : ''}
   role="menuitem"
 >
@@ -210,7 +210,7 @@ Created a reusable `LoadingSkeleton` component that replaces generic loading spi
 
 **Component API:**
 ```javascript
-<LoadingSkeleton 
+<LoadingSkeleton
   variant="text|title|avatar|rectangle|table|card|list"
   count={number}
   width="custom width"
@@ -424,7 +424,7 @@ if (loading && interactions.length === 0) {
 **Route Matching Logic:**
 ```javascript
 // Exact match or child route match
-return location.pathname === path || 
+return location.pathname === path ||
        location.pathname.startsWith(path + '/');
 ```
 

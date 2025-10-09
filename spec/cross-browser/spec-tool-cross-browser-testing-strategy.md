@@ -348,7 +348,7 @@ export default defineConfig({
     viewportHeight: 720,
     video: false,
     screenshotOnRunFailure: true,
-    
+
     setupNodeEvents(on, config) {
       // Browser-specific configuration
       on('before:browser:launch', (browser, launchOptions) => {
@@ -356,12 +356,12 @@ export default defineConfig({
           // Firefox-specific flags
           launchOptions.preferences['network.cookie.sameSite.laxByDefault'] = false;
         }
-        
+
         if (browser.name === 'chrome') {
           // Chrome-specific flags
           launchOptions.args.push('--disable-web-security');
         }
-        
+
         return launchOptions;
       });
     },
@@ -408,16 +408,16 @@ export function checkBrowserSupport() {
     intersectionObserver: 'IntersectionObserver' in window,
     resizeObserver: 'ResizeObserver' in window,
   };
-  
+
   const unsupportedFeatures = Object.entries(features)
     .filter(([_, supported]) => !supported)
     .map(([feature]) => feature);
-  
+
   if (unsupportedFeatures.length > 0) {
     console.warn('Unsupported features:', unsupportedFeatures);
     // Show user-friendly message or load polyfills
   }
-  
+
   return unsupportedFeatures.length === 0;
 }
 \\\

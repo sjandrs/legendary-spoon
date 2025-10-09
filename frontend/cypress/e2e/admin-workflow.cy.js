@@ -1,7 +1,7 @@
 /**
  * Comprehensive Admin Workflow E2E Tests
  * TASK-088: Complete user journeys for Admin features
- * 
+ *
  * Tests: Activity logs monitoring → System logs review → Notifications management
  *        Role-based access control → Security audits
  */

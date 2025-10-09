@@ -125,7 +125,7 @@ const items = within(timeline).getAllByRole('listitem');
 expect(items).toHaveLength(3);
 
 // Chronological ordering
-const dates = items.map(item => 
+const dates = items.map(item =>
   within(item).getByText(/\d{4}-\d{2}-\d{2}/).textContent
 );
 expect(dates).toEqual(['2025-01-17', '2025-01-16', '2025-01-15']);
@@ -161,15 +161,15 @@ describe('Complete Workflow', () => {
     cy.contains('Create Account').click();
     cy.get('input[name="name"]').type('E2E Test Corp');
     cy.get('button[type="submit"]').click();
-    
+
     // View details
     cy.contains('E2E Test Corp').click();
-    
+
     // Edit account
     cy.contains('button', 'Edit').click();
     cy.get('input[name="name"]').clear().type('Updated Corp');
     cy.get('button[type="submit"]').click();
-    
+
     // Delete account
     cy.contains('button', 'Delete').click();
     cy.on('window:confirm', () => true);
@@ -207,26 +207,26 @@ describe('Complete Workflow', () => {
     cy.contains('Create Quote').click();
     cy.get('select[name="contact"]').select(1);
     cy.get('button[type="submit"]').click();
-    
+
     // Step 2: View details
     cy.get('tbody tr').first().find('button').contains('View').click();
-    
+
     // Step 3: Edit quote
     cy.contains('button', 'Edit').click();
     cy.get('textarea[name="notes"]').type('E2E workflow test');
     cy.get('button[type="submit"]').click();
-    
+
     // Step 4: Change to sent
     cy.get('select[name="status"]').select('sent');
     cy.get('button[type="submit"]').click();
-    
+
     // Step 5: Generate PDF
     cy.contains('button', /PDF/i).click();
-    
+
     // Step 6: Accept quote
     cy.get('select[name="status"]').select('accepted');
     cy.get('button[type="submit"]').click();
-    
+
     // Step 7: Clean up
     cy.contains('button', 'Delete').click();
     cy.on('window:confirm', () => true);
@@ -264,31 +264,31 @@ describe('Complete Workflow', () => {
     cy.get('select[name="type"]').select('call');
     cy.get('input[name="subject"]').type('Initial Contact');
     cy.get('button[type="submit"]').click();
-    
+
     // Step 2: Log email
     cy.contains('Log Interaction').click();
     cy.get('select[name="type"]').select('email');
     cy.get('input[name="subject"]').type('Follow-up Email');
     cy.get('button[type="submit"]').click();
-    
+
     // Step 3: Log meeting
     cy.contains('Log Interaction').click();
     cy.get('select[name="type"]').select('meeting');
     cy.get('input[name="subject"]').type('Contract Meeting');
     cy.get('button[type="submit"]').click();
-    
+
     // Step 4: View timeline
     cy.contains('E2E Test').should('be.visible');
-    
+
     // Step 5: Filter by type
     cy.get('select').first().select('call');
     cy.contains('Initial Contact').should('be.visible');
-    
+
     // Step 6: Edit interaction
     cy.contains('button', 'Edit').click();
     cy.get('textarea[name="notes"]').clear().type('Updated notes');
     cy.get('button[type="submit"]').click();
-    
+
     // Step 7: Clean up
     cy.contains('button', 'Delete').click();
     cy.on('window:confirm', () => true);

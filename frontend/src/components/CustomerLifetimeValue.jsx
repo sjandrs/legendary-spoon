@@ -70,7 +70,7 @@ function CustomerLifetimeValue() {
     if (!clvData?.revenue_history) return null;
 
     const history = clvData.revenue_history;
-    
+
     const data = {
       labels: history.map(item => item.period),
       datasets: [

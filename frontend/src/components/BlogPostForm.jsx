@@ -38,7 +38,7 @@ function BlogPostForm() {
         excerpt: post.excerpt || '',
         status: post.status || 'draft',
         published_at: post.published_at || '',
-        tags: Array.isArray(post.tags) 
+        tags: Array.isArray(post.tags)
           ? post.tags.map(t => typeof t === 'string' ? t : t.name).join(', ')
           : '',
         meta_description: post.meta_description || '',
@@ -75,7 +75,7 @@ function BlogPostForm() {
       } else {
         await api.post('/api/posts/', payload);
       }
-      
+
       navigate('/blog');
     } catch (err) {
       setError(err.response?.data?.detail || 'Failed to save blog post');
@@ -110,7 +110,7 @@ function BlogPostForm() {
       <form onSubmit={handleSubmit} className="post-form">
         <div className="form-section">
           <h2>Post Content</h2>
-          
+
           <div className="form-group">
             <label htmlFor="title">Title *</label>
             <input
@@ -154,7 +154,7 @@ function BlogPostForm() {
 
         <div className="form-section">
           <h2>Publishing Options</h2>
-          
+
           <div className="form-row">
             <div className="form-group">
               <label htmlFor="status">Status</label>
@@ -198,7 +198,7 @@ function BlogPostForm() {
 
         <div className="form-section">
           <h2>SEO & Media</h2>
-          
+
           <div className="form-group">
             <label htmlFor="featured_image_url">Featured Image URL</label>
             <input

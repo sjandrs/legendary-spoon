@@ -22,11 +22,11 @@ function QuoteDetail() {
       setLoading(true);
       const response = await api.get(`/api/quotes/${id}/`);
       setQuote(response.data);
-      
+
       // Fetch line items
       const itemsResponse = await api.get(`/api/quotes/${id}/items/`);
       setLineItems(itemsResponse.data);
-      
+
       setError(null);
     } catch (err) {
       console.error('Error fetching quote details:', err);
@@ -49,7 +49,7 @@ function QuoteDetail() {
 
   const handleConvertToDeal = async () => {
     if (converting) return;
-    
+
     try {
       setConverting(true);
       const response = await api.post(`/api/quotes/${id}/convert-to-deal/`);

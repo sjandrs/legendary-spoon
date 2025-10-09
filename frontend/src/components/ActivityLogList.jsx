@@ -60,7 +60,7 @@ function ActivityLogList() {
           onChange={(e) => setSearchTerm(e.target.value)}
           className="search-input"
         />
-        
+
         <select
           value={filter}
           onChange={(e) => setFilter(e.target.value)}

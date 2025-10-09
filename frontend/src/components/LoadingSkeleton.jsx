@@ -4,19 +4,19 @@ import './LoadingSkeleton.css';
 /**
  * LoadingSkeleton Component - TASK-083
  * Provides skeleton screens for better perceived performance during loading states
- * 
+ *
  * @param {string} variant - Type of skeleton: 'text', 'title', 'avatar', 'rectangle', 'table', 'card', 'list'
  * @param {number} count - Number of skeleton elements to render (default: 1)
  * @param {string} width - Custom width (default: 100%)
  * @param {string} height - Custom height (default: varies by variant)
  * @param {string} className - Additional CSS classes
  */
-const LoadingSkeleton = ({ 
-  variant = 'text', 
-  count = 1, 
-  width, 
-  height, 
-  className = '' 
+const LoadingSkeleton = ({
+  variant = 'text',
+  count = 1,
+  width,
+  height,
+  className = ''
 }) => {
   const getSkeletonClass = () => {
     const baseClass = 'skeleton';

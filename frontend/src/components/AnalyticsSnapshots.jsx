@@ -59,15 +59,15 @@ function AnalyticsSnapshots() {
 
   const calculateTrend = (metric) => {
     if (snapshots.length < 2) return { value: 0, direction: 'neutral' };
-    
+
     const latest = snapshots[snapshots.length - 1][metric];
     const previous = snapshots[snapshots.length - 2][metric];
-    
+
     if (!latest || !previous) return { value: 0, direction: 'neutral' };
-    
+
     const change = ((latest - previous) / previous) * 100;
     const direction = change > 0 ? 'up' : change < 0 ? 'down' : 'neutral';
-    
+
     return { value: Math.abs(change), direction };
   };
 

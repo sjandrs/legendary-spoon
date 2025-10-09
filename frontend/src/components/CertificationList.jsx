@@ -48,7 +48,7 @@ function CertificationList() {
     const today = new Date();
     const expDate = new Date(expirationDate);
     const daysUntilExpiration = Math.floor((expDate - today) / (1000 * 60 * 60 * 24));
-    
+
     if (daysUntilExpiration < 0) return 'expired';
     if (daysUntilExpiration <= 30) return 'expiring-soon';
     return 'valid';
@@ -92,7 +92,7 @@ function CertificationList() {
           onChange={(e) => setSearchTerm(e.target.value)}
           className="search-input"
         />
-        
+
         <select
           value={filterStatus}
           onChange={(e) => setFilterStatus(e.target.value)}
@@ -146,7 +146,7 @@ function CertificationList() {
                       <span className="value">{cert.issuing_organization}</span>
                     </div>
                   )}
-                  
+
                   {cert.expiration_date && (
                     <div className="detail-row">
                       <span className="label">Expires:</span>
@@ -155,7 +155,7 @@ function CertificationList() {
                       </span>
                     </div>
                   )}
-                  
+
                   {cert.renewal_required && (
                     <div className="detail-row">
                       <span className="badge renewal-badge">🔄 Renewal Required</span>

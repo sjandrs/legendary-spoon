@@ -123,7 +123,7 @@ describe('Interactions Workflow', () => {
 
       // Get all date elements and verify they're in order (newest first or oldest first)
       cy.get('li, .timeline-item').should('have.length.at.least', 2);
-      
+
       // Visual verification that dates are present
       cy.contains(/\d{4}-\d{2}-\d{2}|\w+ \d+, \d{4}/).should('be.visible');
     });
@@ -134,7 +134,7 @@ describe('Interactions Workflow', () => {
 
       // Verify subject is visible
       cy.get('li, .timeline-item').first().should('contain.text', /[A-Za-z]/);
-      
+
       // Verify notes or details are present
       cy.get('li, .timeline-item').first().find('p, .notes, .details').should('exist');
     });
@@ -222,7 +222,7 @@ describe('Interactions Workflow', () => {
       cy.contains('Interactions').click();
 
       cy.get('button').contains('Edit').first().click();
-      
+
       // Change type from call to meeting
       cy.get('select[name="type"]').select('meeting');
       cy.get('button[type="submit"]').click();

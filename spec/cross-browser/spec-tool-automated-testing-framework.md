@@ -136,14 +136,14 @@ export default defineConfig({
         if (browser.name === 'firefox') {
           launchOptions.preferences['network.cookie.sameSite.laxByDefault'] = false;
         }
-        
+
         if (browser.name === 'chrome') {
           launchOptions.args.push('--disable-dev-shm-usage');
         }
-        
+
         return launchOptions;
       });
-      
+
       return config;
     },
   },
@@ -275,7 +275,7 @@ jobs:
         with:
           name: cypress-chrome-screenshots
           path: cypress/screenshots
-  
+
   cypress-firefox:
     runs-on: ubuntu-latest
     steps:
@@ -290,7 +290,7 @@ jobs:
         with:
           name: cypress-firefox-screenshots
           path: cypress/screenshots
-  
+
   playwright-webkit:
     runs-on: macos-latest
     steps:
@@ -390,11 +390,11 @@ import { Page } from '@playwright/test';
 
 export class LoginPage {
   constructor(private page: Page) {}
-  
+
   async goto() {
     await this.page.goto('/login');
   }
-  
+
   async login(username: string, password: string) {
     await this.page.fill('[data-testid="username-input"]', username);
     await this.page.fill('[data-testid="password-input"]', password);
@@ -422,13 +422,13 @@ test('user can login', async ({ page }) => {
 describe('Date Picker', () => {
   it('works consistently across browsers', () => {
     cy.visit('/form');
-    
+
     // Use JavaScript to set value (works in all browsers)
     cy.get('input[type="date"]').then( => {
       [0].value = '2025-10-04';
       [0].dispatchEvent(new Event('change', { bubbles: true }));
     });
-    
+
     cy.get('[data-testid="submit-button"]').click();
     cy.contains('Date: 2025-10-04').should('be.visible');
   });

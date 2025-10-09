@@ -925,4 +925,3 @@ npm run test:performance
 ---
 
 *Thank you for using Converge CRM!* 🚀
-

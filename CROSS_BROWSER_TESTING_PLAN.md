@@ -126,7 +126,7 @@ module.exports = defineConfig({
     viewportHeight: 720,
     video: false,
     screenshotOnRunFailure: true,
-    
+
     // Cross-browser testing configuration
     browsers: [
       {

@@ -72,7 +72,7 @@ const AccountDetail = () => {
         <div>
           <h1>{account.name}</h1>
           <p className="account-meta">
-            Created {new Date(account.created_at).toLocaleDateString()} | 
+            Created {new Date(account.created_at).toLocaleDateString()} |
             Owner: {account.owner_name || account.owner}
           </p>
         </div>

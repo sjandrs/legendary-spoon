@@ -26,7 +26,7 @@ function NotificationCenter() {
   const markAsRead = async (id) => {
     try {
       await api.patch(`/api/notifications/${id}/`, { is_read: true });
-      setNotifications(notifications.map(n => 
+      setNotifications(notifications.map(n =>
         n.id === id ? { ...n, is_read: true } : n
       ));
     } catch (err) {
@@ -70,20 +70,20 @@ function NotificationCenter() {
       </div>
 
       <div className="filters">
-        <button 
-          className={filter === 'all' ? 'active' : ''} 
+        <button
+          className={filter === 'all' ? 'active' : ''}
           onClick={() => setFilter('all')}
         >
           All ({notifications.length})
         </button>
-        <button 
-          className={filter === 'unread' ? 'active' : ''} 
+        <button
+          className={filter === 'unread' ? 'active' : ''}
           onClick={() => setFilter('unread')}
         >
           Unread ({notifications.filter(n => !n.is_read).length})
         </button>
-        <button 
-          className={filter === 'read' ? 'active' : ''} 
+        <button
+          className={filter === 'read' ? 'active' : ''}
           onClick={() => setFilter('read')}
         >
           Read ({notifications.filter(n => n.is_read).length})
@@ -97,8 +97,8 @@ function NotificationCenter() {
           </div>
         ) : (
           filteredNotifications.map(notification => (
-            <div 
-              key={notification.id} 
+            <div
+              key={notification.id}
               className={`notification-item ${!notification.is_read ? 'unread' : ''}`}
               onClick={() => !notification.is_read && markAsRead(notification.id)}
             >

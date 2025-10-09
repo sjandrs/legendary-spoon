@@ -21,9 +21,16 @@ class PDFService:
     def __init__(self):
         self.weasyprint_available = False
         try:
-            import weasyprint
+            import weasyprint  # noqa: F401
 
+            # Mark availability and retain a reference so the import has a usage
+            # (avoids flake8 F401) and can be reused if desired instead of
+            # re-importing in each method. We intentionally keep the later
+            # re-imports for defensive loading in long-lived processes where
+            # the library might be lazily installed, but having this attribute
+            # allows future refactors to switch to self._weasyprint.
             self.weasyprint_available = True
+            self._weasyprint = weasyprint
         except ImportError:
             logger.warning("WeasyPrint not installed. PDF generation will be disabled.")
 

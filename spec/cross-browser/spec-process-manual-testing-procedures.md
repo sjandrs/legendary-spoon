@@ -419,9 +419,9 @@ interface CrossBrowserIssue {
 4. Document visual differences (acceptable variance)
 
 **Acceptance:**
-- Functionality works in all browsers 
-- Visual differences documented 
-- No user complaints expected 
+- Functionality works in all browsers
+- Visual differences documented
+- No user complaints expected
 \\\
 
 ## 10. Validation Criteria

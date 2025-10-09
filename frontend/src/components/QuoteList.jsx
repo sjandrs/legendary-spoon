@@ -26,7 +26,7 @@ function QuoteList() {
         status: statusFilter || undefined,
       };
       const response = await api.get('/api/quotes/', { params });
-      
+
       if (response.data.results) {
         setQuotes(response.data.results);
         setTotalPages(Math.ceil(response.data.count / 20));

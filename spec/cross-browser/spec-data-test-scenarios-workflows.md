@@ -539,11 +539,11 @@ Step 4: Enter Post Content
   Data:
     content: |
       # Introduction
-      
+
       Customer relationship management is crucial...
-      
+
       ## Best Practice 1: Data Quality
-      
+
       Maintain clean, accurate customer data...
 
 Step 5: Preview Markdown

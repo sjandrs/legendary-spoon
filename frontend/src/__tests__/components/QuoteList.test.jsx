@@ -304,7 +304,7 @@ describe('QuoteList Component - TASK-029', () => {
     it('should show confirmation dialog on delete', async () => {
       const user = userEvent.setup();
       const confirmSpy = jest.spyOn(window, 'confirm').mockReturnValue(false);
-      
+
       renderWithRouter(<QuoteList />);
 
       await waitFor(() => {
@@ -321,7 +321,7 @@ describe('QuoteList Component - TASK-029', () => {
     it('should delete quote on confirmation', async () => {
       const user = userEvent.setup();
       const confirmSpy = jest.spyOn(window, 'confirm').mockReturnValue(true);
-      
+
       server.use(
         rest.delete('/api/quotes/:id/', (req, res, ctx) => {
           return res(ctx.status(204));

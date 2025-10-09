@@ -120,7 +120,7 @@
   .skeleton-table-row {
     grid-template-columns: repeat(2, 1fr);
   }
-  
+
   .skeleton-avatar {
     width: 32px;
     height: 32px;

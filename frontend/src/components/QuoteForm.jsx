@@ -66,7 +66,7 @@ function QuoteForm() {
       setLoading(true);
       const response = await api.get(`/api/quotes/${id}/`);
       const quote = response.data;
-      
+
       setFormData({
         name: quote.name || '',
         account: quote.account || '',

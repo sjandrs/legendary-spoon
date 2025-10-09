@@ -116,7 +116,7 @@ const AccountForm = () => {
       <form onSubmit={handleSubmit} className="account-form">
         <div className="form-section">
           <h2>Basic Information</h2>
-          
+
           <div className="form-group">
             <label htmlFor="name">
               Account Name <span className="required">*</span>
@@ -193,7 +193,7 @@ const AccountForm = () => {
 
         <div className="form-section">
           <h2>Address Information</h2>
-          
+
           <div className="form-group">
             <label htmlFor="billing_address">Billing Address</label>
             <textarea
@@ -221,7 +221,7 @@ const AccountForm = () => {
 
         <div className="form-section">
           <h2>Additional Information</h2>
-          
+
           <div className="form-group">
             <label htmlFor="description">Description</label>
             <textarea

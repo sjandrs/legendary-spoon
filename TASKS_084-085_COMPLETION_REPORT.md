@@ -566,7 +566,7 @@ const LoadingSkeleton = ({ variant, width, height, count = 1, className = '' }) 
     card: { width: '100%', height: '300px', borderRadius: '12px' },
     list: { width: '100%', height: '60px', borderRadius: '8px' }
   };
-  
+
   // Renders animated skeleton based on variant
   // Used in Suspense fallback for code-split routes
 };
@@ -765,7 +765,7 @@ const LoadingSkeleton = ({ variant, width, height, count = 1, className = '' }) 
 
 7. **Dynamic Import Error Handling**
    ```javascript
-   const Component = React.lazy(() => 
+   const Component = React.lazy(() =>
      import('./Component').catch(() => import('./ComponentFallback'))
    );
    ```

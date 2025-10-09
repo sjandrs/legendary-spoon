@@ -290,7 +290,7 @@ describe('InteractionList Component - TASK-029', () => {
     it('should show confirmation dialog on delete', async () => {
       const user = userEvent.setup();
       const confirmSpy = jest.spyOn(window, 'confirm').mockReturnValue(false);
-      
+
       renderWithRouter(<InteractionList />);
 
       await waitFor(() => {
@@ -307,7 +307,7 @@ describe('InteractionList Component - TASK-029', () => {
     it('should delete interaction on confirmation', async () => {
       const user = userEvent.setup();
       const confirmSpy = jest.spyOn(window, 'confirm').mockReturnValue(true);
-      
+
       server.use(
         rest.delete('/api/interactions/:id/', (req, res, ctx) => {
           return res(ctx.status(204));

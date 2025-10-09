@@ -97,7 +97,7 @@ function CertificationForm() {
       <form onSubmit={handleSubmit} className="cert-form">
         <div className="form-section">
           <h2>Certification Details</h2>
-          
+
           <div className="form-group">
             <label htmlFor="name">Certification Name *</label>
             <input
