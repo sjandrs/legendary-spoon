@@ -1,0 +1,22 @@
+{
+  "timestamp": "2025-10-09T00:00:00Z",
+  "totalProblems": 116,
+  "errors": 102,
+  "warnings": 14,
+  "hookWarnings": [
+    "ActivityTimeline.jsx: loadActivities missing dependency",
+    "AnalyticsSnapshots.jsx: fetchSnapshots missing dependency",
+    "InteractionList.jsx: fetchInteractions missing dependency",
+    "PageForm.jsx: fetchPage & isEdit missing dependencies",
+    "ProjectTemplateForm.jsx: fetchTemplate missing dependency",
+    "TaskAdministration.jsx: formData.default_task_type dependency",
+    "TechnicianPayroll.jsx: fetchPayrollData missing dependency",
+    "CertificationForm.jsx: fetchCertification missing dependency"
+  ],
+  "notableErrorBuckets": {
+    "unusedVarsTests": 40,
+    "unusedVarsComponents": 18,
+    "nodeGlobalsUnavailable": 8,
+    "formDataDependency": 1
+  }
+}

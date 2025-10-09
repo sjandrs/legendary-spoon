@@ -55,6 +55,7 @@ lerna-debug.log*
 frontend/dist/
 frontend/build/
 .vite/
+frontend/jest-results.json
 
 # IDE / Editors
 .vscode/

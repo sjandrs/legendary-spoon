@@ -1,0 +1,21 @@
+from django.db import migrations, models
+
+
+class Migration(migrations.Migration):
+
+    dependencies = [
+        ("main", "0033_add_missing_fields"),
+    ]
+
+    operations = [
+        migrations.AddField(
+            model_name="account",
+            name="phone",
+            field=models.CharField(max_length=20, null=True, blank=True),
+        ),
+        migrations.AddField(
+            model_name="contact",
+            name="phone",
+            field=models.CharField(max_length=20, null=True, blank=True),
+        ),
+    ]
