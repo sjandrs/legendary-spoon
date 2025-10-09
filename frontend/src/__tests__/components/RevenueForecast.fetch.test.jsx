@@ -1,5 +1,6 @@
 
-import { waitFor } from '@testing-library/react';
+import { waitFor, fireEvent } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { renderWithProviders } from '../helpers/test-utils';
 import * as api from '../../api';
 import RevenueForecast from '../../components/RevenueForecast';
@@ -20,8 +21,7 @@ describe('RevenueForecast fetch behavior', () => {
     api.get.mockClear();
 
     const monthsSelect = getByLabelText(/forecast period/i);
-    monthsSelect.value = '12';
-    monthsSelect.dispatchEvent(new Event('change', { bubbles: true }));
+    fireEvent.change(monthsSelect, { target: { value: '12' } });
     await waitFor(() => expect(api.get).toHaveBeenCalledTimes(1));
   });
 });

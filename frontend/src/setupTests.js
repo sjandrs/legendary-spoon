@@ -196,6 +196,24 @@ jest.mock('@fullcalendar/interaction', () => ({
   default: {},
 }));
 
+// Mock react-chartjs-2 charts to avoid Chart.js DOM measurements in jsdom
+jest.mock('react-chartjs-2', () => {
+  const React = require('react');
+  const Mock = ({ 'data-testid': testId = 'chartjs-mock', ...props }) =>
+    React.createElement('div', { 'data-testid': testId, ...props });
+  return {
+    __esModule: true,
+    Line: Mock,
+    Bar: Mock,
+    Doughnut: Mock,
+    Pie: Mock,
+    Radar: Mock,
+    PolarArea: Mock,
+    Bubble: Mock,
+    Scatter: Mock,
+  };
+});
+
 // Remove AuthContext global mock - we'll handle it in test-utils instead
 // This allows test-utils to have full control over AuthContext behavior
 
