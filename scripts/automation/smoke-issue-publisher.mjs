@@ -17,7 +17,7 @@ const root = process.cwd();
 const issuesDir = path.join(root, 'issues-smoke');
 if (!fs.existsSync(issuesDir)) fs.mkdirSync(issuesDir);
 
-const good = `---\ntitle: Good Issue\nlabels: test\n---\n# Good\nBody`; 
+const good = `---\ntitle: Good Issue\nlabels: test\n---\n# Good\nBody`;
 const bad = `---\ntitle: \nlabels: test\n---\n# Bad\nBody`; // empty title triggers validation error
 fs.writeFileSync(path.join(issuesDir, '01-good.md'), good);
 fs.writeFileSync(path.join(issuesDir, '02-bad.md'), bad);
