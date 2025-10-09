@@ -5,7 +5,10 @@ export default {
     '\\.(css|less|scss|sass)$': 'identity-obj-proxy',
     '^@/(.*)$': '<rootDir>/src/$1',
     '@fullcalendar/(.*)': '<rootDir>/node_modules/@fullcalendar/$1',
-  // Removed MSW explicit mappings (hybrid fallback using direct api mocks in component tests)
+    // MSW mappings for Jest CJS resolution
+    '^msw/node$': '<rootDir>/node_modules/msw/lib/node/index.js',
+    '^msw$': '<rootDir>/node_modules/msw/lib/core/index.js',
+    '^@mswjs/interceptors/(.*)$': '<rootDir>/node_modules/@mswjs/interceptors/lib/node/interceptors/$1/index.js',
   },
   transform: {
     '^.+\\.(js|jsx|ts|tsx)$': 'babel-jest',
