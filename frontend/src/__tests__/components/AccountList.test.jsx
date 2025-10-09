@@ -8,43 +8,42 @@ import React from 'react';
 import { render, screen, waitFor, within } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import userEvent from '@testing-library/user-event';
-import { rest } from 'msw';
-import { setupServer } from 'msw/node';
+// TODO: Re-enable real MSW server once polyfills for WebSocket/TransformStream are stabilized in Jest env.
+import axios from 'axios';
+jest.mock('axios');
 import AccountList from '../../components/AccountList';
 
-// Mock server for API calls
-const server = setupServer(
-  rest.get('/api/accounts/', (req, res, ctx) => {
-    return res(
-      ctx.json([
-        {
-          id: 1,
-          name: 'Acme Corporation',
-          industry: 'Technology',
-          owner: { id: 1, username: 'john.doe' },
-          phone: '555-0100',
-          email: 'contact@acme.com',
-          website: 'https://acme.com',
-          created_at: '2025-01-01T00:00:00Z'
-        },
-        {
-          id: 2,
-          name: 'Global Solutions Inc',
-          industry: 'Consulting',
-          owner: { id: 2, username: 'jane.smith' },
-          phone: '555-0200',
-          email: 'info@globalsolutions.com',
-          website: 'https://globalsolutions.com',
-          created_at: '2025-01-02T00:00:00Z'
-        }
-      ])
-    );
-  })
-);
+// Shared mock data
+const mockAccounts = [
+  {
+    id: 1,
+    name: 'Acme Corporation',
+    industry: 'Technology',
+    owner: { id: 1, username: 'john.doe' },
+    phone: '555-0100',
+    email: 'contact@acme.com',
+    website: 'https://acme.com',
+    created_at: '2025-01-01T00:00:00Z'
+  },
+  {
+    id: 2,
+    name: 'Global Solutions Inc',
+    industry: 'Consulting',
+    owner: { id: 2, username: 'jane.smith' },
+    phone: '555-0200',
+    email: 'info@globalsolutions.com',
+    website: 'https://globalsolutions.com',
+    created_at: '2025-01-02T00:00:00Z'
+  }
+];
 
-beforeAll(() => server.listen());
-afterEach(() => server.resetHandlers());
-afterAll(() => server.close());
+beforeEach(() => {
+  axios.get.mockResolvedValue({ data: mockAccounts });
+  axios.delete.mockResolvedValue({ status: 204 });
+});
+afterEach(() => {
+  jest.clearAllMocks();
+});
 
 const renderWithRouter = (component) => {
   return render(<BrowserRouter>{component}</BrowserRouter>);
@@ -53,11 +52,7 @@ const renderWithRouter = (component) => {
 describe('AccountList Component - TASK-029', () => {
   describe('Loading State', () => {
     it('should display loading spinner while fetching accounts', () => {
-      server.use(
-        rest.get('/api/accounts/', (req, res, ctx) => {
-          return res(ctx.delay(100), ctx.json([]));
-        })
-      );
+      axios.get.mockImplementationOnce(() => new Promise(resolve => setTimeout(() => resolve({ data: [] }), 100)));
 
       renderWithRouter(<AccountList />);
       expect(screen.getByText(/loading accounts/i)).toBeInTheDocument();
@@ -66,11 +61,7 @@ describe('AccountList Component - TASK-029', () => {
 
   describe('Empty State', () => {
     it('should display empty state message when no accounts exist', async () => {
-      server.use(
-        rest.get('/api/accounts/', (req, res, ctx) => {
-          return res(ctx.json([]));
-        })
-      );
+      axios.get.mockResolvedValueOnce({ data: [] });
 
       renderWithRouter(<AccountList />);
 
@@ -82,11 +73,7 @@ describe('AccountList Component - TASK-029', () => {
 
   describe('Error State', () => {
     it('should handle API errors gracefully', async () => {
-      server.use(
-        rest.get('/api/accounts/', (req, res, ctx) => {
-          return res(ctx.status(500), ctx.json({ error: 'Server error' }));
-        })
-      );
+      axios.get.mockRejectedValueOnce(new Error('Server error'));
 
       const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
       renderWithRouter(<AccountList />);
@@ -99,11 +86,7 @@ describe('AccountList Component - TASK-029', () => {
     });
 
     it('should handle network errors', async () => {
-      server.use(
-        rest.get('/api/accounts/', (req, res, ctx) => {
-          return res.networkError('Network error');
-        })
-      );
+      axios.get.mockRejectedValueOnce(new Error('Network error'));
 
       const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
       renderWithRouter(<AccountList />);
@@ -265,11 +248,9 @@ describe('AccountList Component - TASK-029', () => {
       const user = userEvent.setup();
       const confirmSpy = jest.spyOn(window, 'confirm').mockReturnValue(true);
 
-      server.use(
-        rest.delete('/api/accounts/:id/', (req, res, ctx) => {
-          return res(ctx.status(204));
-        })
-      );
+      axios.delete.mockResolvedValueOnce({ status: 204 });
+      // After deletion return only the second account
+      axios.get.mockResolvedValueOnce({ data: mockAccounts }).mockResolvedValueOnce({ data: [mockAccounts[1]] });
 
       renderWithRouter(<AccountList />);
 

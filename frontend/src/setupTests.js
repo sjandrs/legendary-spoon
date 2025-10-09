@@ -129,6 +129,17 @@ import { TextEncoder, TextDecoder } from 'util';
 global.TextEncoder = TextEncoder;
 global.TextDecoder = TextDecoder;
 
+// Polyfill TransformStream required by @mswjs/interceptors for fetch interception
+if (typeof global.TransformStream === 'undefined') {
+  class SimpleTransformStream {
+    constructor() {
+      this.readable = new ReadableStream({ start() {} });
+      this.writable = new WritableStream({ write() {} });
+    }
+  }
+  global.TransformStream = SimpleTransformStream;
+}
+
 // MSW polyfills for Jest environment
 import { fetch, Headers, Request, Response } from 'cross-fetch';
 global.fetch = fetch;

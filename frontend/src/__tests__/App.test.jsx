@@ -98,9 +98,10 @@ describe('App Component', () => {
 
     // Should show main navigation and dashboard
     expect(screen.getByTestId('mock-dashboard')).toBeInTheDocument();
+    // Top-level nav buttons (many links now grouped under dropdowns)
     expect(screen.getByText('Dashboard')).toBeInTheDocument();
-    expect(screen.getByText('Contacts')).toBeInTheDocument();
-    expect(screen.getByText('Deals')).toBeInTheDocument();
+    // CRM items are inside a hover dropdown, so just assert the CRM trigger button exists
+    expect(screen.getByTestId('nav-crm')).toBeInTheDocument();
   });
 
   it('navigates between pages when navigation links are clicked', async () => {
@@ -126,8 +127,13 @@ describe('App Component', () => {
     // Should start on dashboard
     expect(screen.getByTestId('mock-dashboard')).toBeInTheDocument();
 
-    // Click on Contacts navigation
-    await user.click(screen.getByText('Contacts'));
+  // Open CRM dropdown then click on Contacts link now nested inside
+    const crmButton = screen.getByTestId('nav-crm');
+    // Prefer keyboard interaction to open dropdown (Enter handled by handleKeyDown)
+    crmButton.focus();
+    await user.keyboard('{Enter}');
+  const contactsLink = await screen.findByText('Contacts');
+  await user.click(contactsLink);
 
     // Should navigate to contacts page
     await waitFor(() => {
@@ -185,7 +191,7 @@ describe('App Component', () => {
     expect(window.localStorage.removeItem).toHaveBeenCalledWith('authToken');
   });
 
-  it('shows Staff navigation for managers', () => {
+  it('shows Staff & Resources navigation for managers', async () => {
     // Mock localStorage to return token
     window.localStorage.getItem.mockImplementation((key) => {
       if (key === 'authToken') return 'mock-token';
@@ -203,12 +209,12 @@ describe('App Component', () => {
       initialEntries: ['/dashboard'],
     });
 
-    // Sales Manager should see Staff dropdown
-    expect(screen.getByText('Staff')).toBeInTheDocument();
+    // Updated label is 'Staff & Resources'
+    expect(screen.getByText('Staff & Resources')).toBeInTheDocument();
     expect(screen.getByText('Accounting')).toBeInTheDocument();
   });
 
-  it('shows basic navigation for all users', () => {
+  it('shows basic navigation for all users (CRM links behind dropdown)', async () => {
     // Mock localStorage to return token
     window.localStorage.getItem.mockImplementation((key) => {
       if (key === 'authToken') return 'mock-token';
@@ -228,8 +234,8 @@ describe('App Component', () => {
 
     // All users should see basic navigation
     expect(screen.getByText('Dashboard')).toBeInTheDocument();
-    expect(screen.getByText('Contacts')).toBeInTheDocument();
-    expect(screen.getByText('Deals')).toBeInTheDocument();
+    // CRM dropdown trigger present
+    expect(screen.getByTestId('nav-crm')).toBeInTheDocument();
   });
 
   it('renders protected content when authenticated', () => {
@@ -252,6 +258,8 @@ describe('App Component', () => {
 
     // Should render protected content
     expect(screen.getByTestId('mock-dashboard')).toBeInTheDocument();
-    expect(screen.getByRole('navigation')).toBeInTheDocument();
+    // There are two nav elements (utility + main); ensure at least one present
+    const navs = screen.getAllByRole('navigation');
+    expect(navs.length).toBeGreaterThanOrEqual(1);
   });
 });
