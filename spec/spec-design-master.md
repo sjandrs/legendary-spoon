@@ -2,6 +2,7 @@
 title: Converge CRM Master Design Specification
 version: 1.0
 date_created: 2025-10-09
+last_updated: 2025-10-09
 owner: Converge Product Team
 tags: [design, architecture, master, backend, frontend]
 ---

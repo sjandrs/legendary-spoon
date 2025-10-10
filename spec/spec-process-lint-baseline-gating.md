@@ -76,13 +76,11 @@ This specification defines the process, tooling, and quality gates for tracking 
 
 ```json
 {
-  "generatedAt": "YYYY-MM-DDTHH:MM:SSZ",
-  "totals": {
-    "errors": 0,
-    "warnings": 0,
-    "problems": 0
-  },
-  "rules": {
+  "timestamp": "YYYY-MM-DDTHH:MM:SS",
+  "totalProblems": 0,
+  "errors": 0,
+  "warnings": 0,
+  "ruleCounts": {
     "rule-name-1": 123,
     "rule-name-2": 4
   }
@@ -91,7 +89,7 @@ This specification defines the process, tooling, and quality gates for tracking 
 
 4.4 Markdown Report Structure (machine-readable anchors)
 
-- Title: "ESLint Baseline Diff Report"
+- Title: "ESLint Baseline Diff"
 - Sections (in this order):
   1. Current Totals
   2. Baseline Comparisons (vs each known baseline)
@@ -178,4 +176,3 @@ Edge cases:
 - docs/reports/scripts/README.md — Lint scripts documentation and workflows
 - docs/DEVELOPMENT.md — Development workflow and quality gates
 - docs/reports/LINT_REDUCTION_ROADMAP.md — Progressive plan to reduce lint debt
-*** End Patch

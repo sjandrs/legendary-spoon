@@ -38,6 +38,15 @@ repos:
 
   - repo: local
     hooks:
+      - id: block-forbidden-files
+        name: Block committing forbidden files (db.sqlite3, coverage, pyc, backup)
+        entry: python tools/block_forbidden_files.py
+        language: system
+        pass_filenames: false
+        stages: [pre-commit]
+
+  - repo: local
+    hooks:
       - id: django-tests
         name: Run Django Tests
         # Use plain 'python' so it resolves inside active venv on all platforms
