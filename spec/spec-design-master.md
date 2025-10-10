@@ -31,6 +31,7 @@ This specification provides a comprehensive guide for developers, architects, an
 - **REQ-SYS-003**: All API endpoints MUST follow RESTful principles and maintain a consistent structure.
 - **REQ-SYS-004**: Every significant CRM operation MUST be logged in the ActivityLog for auditing purposes.
 - **REQ-SYS-005**: The frontend MUST be fully responsive and comply with WCAG 2.1 AA accessibility standards.
+- **REQ-SYS-006**: Resolving any GitHub issue MUST include updating relevant specifications in `spec/` (master or module-specific) to reflect behavior, constraints, and any new operational rules.
 
 ### Backend Constraints
 - **CON-BE-001**: The backend MUST be a pure API server built with Django and Django REST Framework.
@@ -41,6 +42,7 @@ This specification provides a comprehensive guide for developers, architects, an
 - **CON-FE-001**: The frontend MUST be a Single Page Application (SPA) built with React and Vite.
 - **CON-FE-002**: State management SHOULD primarily use React Hooks and TanStack Query.
 - **CON-FE-003**: All API interactions MUST be handled through a centralized Axios client.
+ - **CON-FE-004**: Lint baseline reports MUST include "Quality Gate Result" and "Invocation Parameters" sections for CI traceability.
 
 ## 4. Interfaces & Data Contracts
 
