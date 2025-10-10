@@ -1,5 +1,5 @@
 ﻿# ESLint Baseline Diff
-Generated: 2025-10-09 21:37:03
+Generated: 2025-10-09 22:29:56
 
 ## Current Summary
 - totalProblems: 7755
@@ -19,3 +19,29 @@ Generated: 2025-10-09 21:37:03
 - TaskAdministration.jsx: formData.default_task_type dependency
 - TechnicianPayroll.jsx: fetchPayrollData missing dependency
 - CertificationForm.jsx: fetchCertification missing dependency
+
+## Per-rule counts (top 10)
+- no-undef: 7585
+- no-unused-vars: 104
+- react-refresh/only-export-components: 28
+- react-hooks/exhaustive-deps: 27
+- import/no-extraneous-dependencies: 4
+- no-empty: 3
+- no-useless-escape: 2
+- no-case-declarations: 1
+- no-useless-catch: 1
+
+## Quality Gate Result
+- status: FAIL
+- total delta vs main baseline: 6201 (allowed: 0)
+- per-rule max delta since last snapshot: (no previous snapshot)
+
+## Invocation Parameters
+- FrontendDir: C:\Users\sjand\ws\legendary-spoon\frontend
+- ReportOut: C:\Users\sjand\ws\legendary-spoon\docs\reports\lint-baseline-diff.md
+- SnapshotOut: C:\Users\sjand\ws\legendary-spoon\tools\..\docs\reports\lint-snapshot.json
+- BaselineMain: C:\Users\sjand\ws\legendary-spoon\frontend\lint-baseline.json
+- BaselineBatch: C:\Users\sjand\ws\legendary-spoon\frontend\lint-baseline-batch3.json
+- MaxTotalDelta: 0
+- MaxRuleDelta: 0
+- TopN: 10

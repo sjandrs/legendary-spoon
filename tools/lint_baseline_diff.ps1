@@ -211,6 +211,52 @@ if ($ruleDelta.Count -gt 0) {
 	$out += $nl
 }
 
+# Quality Gate Result section
+$gateStatus = 'PASS'
+$deltaTotalDisplay = $null
+if ($bm) {
+	$deltaTotalDisplay = $current.totalProblems - $bm.totalProblems
+}
+$worstDeltaDisplay = $null
+if ($ruleDelta.Count -gt 0) {
+	$worstDeltaDisplay = ($ruleDelta | Measure-Object delta -Maximum).Maximum
+}
+# Determine status mirroring gate logic
+$gateFail = $false
+if ($bm -and $deltaTotalDisplay -ne $null) {
+	if ($deltaTotalDisplay -gt $MaxTotalDelta) { $gateFail = $true }
+}
+if ($ruleDelta.Count -gt 0 -and $MaxRuleDelta -ge 0 -and $worstDeltaDisplay -ne $null) {
+	if ($worstDeltaDisplay -gt $MaxRuleDelta) { $gateFail = $true }
+}
+if ($gateFail) { $gateStatus = 'FAIL' }
+
+$out += "## Quality Gate Result" + $nl
+$out += ("- status: {0}" -f $gateStatus) + $nl
+if ($bm) {
+	$out += ("- total delta vs main baseline: {0} (allowed: {1})" -f $deltaTotalDisplay, $MaxTotalDelta) + $nl
+} else {
+	$out += "- total delta vs main baseline: (no baseline)" + $nl
+}
+if ($worstDeltaDisplay -ne $null) {
+	$out += ("- per-rule max delta since last snapshot: {0} (allowed: {1})" -f $worstDeltaDisplay, $MaxRuleDelta) + $nl
+} else {
+	$out += "- per-rule max delta since last snapshot: (no previous snapshot)" + $nl
+}
+$out += $nl
+
+# Invocation Parameters section
+$out += "## Invocation Parameters" + $nl
+$out += ("- FrontendDir: {0}" -f $FrontendDir) + $nl
+$out += ("- ReportOut: {0}" -f $ReportOut) + $nl
+$out += ("- SnapshotOut: {0}" -f $SnapshotOut) + $nl
+$out += ("- BaselineMain: {0}" -f (Ensure-Path $BaselineMain)) + $nl
+$out += ("- BaselineBatch: {0}" -f (Ensure-Path $BaselineBatch)) + $nl
+$out += ("- MaxTotalDelta: {0}" -f $MaxTotalDelta) + $nl
+$out += ("- MaxRuleDelta: {0}" -f $MaxRuleDelta) + $nl
+$out += ("- TopN: {0}" -f $TopN) + $nl
+$out += $nl
+
 $out -join '' | Out-File -FilePath $ReportOut -Encoding UTF8
 
 Write-Host "Baseline diff report written to: $ReportOut"
