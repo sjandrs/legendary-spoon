@@ -14,7 +14,8 @@
 	"customizations": {
 		"vscode": {
 			"extensions": [
-				"GitHub.remotehub"
+				"GitHub.remotehub",
+				"timheuer.awesome-copilot"
 			]
 		}
 	}
