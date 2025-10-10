@@ -143,6 +143,6 @@ expense = Expense.objects.create(
 
 ## 11. Related Specifications / Further Reading
 
-- [spec-schema-accounting.md] (to be created)
-- Django/DRF documentation
-- OWASP security guidelines
+- [spec-schema-accounting.md](spec-schema-accounting.md) (to be created)
+- [Django/DRF documentation](https://www.django-rest-framework.org/)
+- [OWASP security guidelines](https://owasp.org/www-project-top-ten/)

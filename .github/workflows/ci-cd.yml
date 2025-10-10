@@ -5,6 +5,16 @@ on:
     branches: [ main, develop, Feature-Bootcamp ]
   pull_request:
     branches: [ main, develop, Feature-Bootcamp ]
+  workflow_dispatch:
+    inputs:
+      lint_max_total_delta:
+        description: "Max allowed increase in total ESLint problems"
+        required: false
+        default: "0"
+      lint_max_rule_delta:
+        description: "Max allowed increase per ESLint rule"
+        required: false
+        default: "0"
 
 jobs:
   test-backend:
@@ -76,10 +86,39 @@ jobs:
         cd frontend
         npm ci
 
+    - name: Frontend ESLint (CI parity fail-fast)
+      run: |
+        cd frontend
+        npx eslint --max-warnings=0 --ext .js,.jsx,.ts,.tsx src
+
+    - name: Resolve lint gate thresholds
+      shell: bash
+      run: |
+        TOTAL="${LINT_MAX_TOTAL_DELTA:-}"
+        RULE="${LINT_MAX_RULE_DELTA:-}"
+        if [ -z "$TOTAL" ]; then TOTAL="${{ github.event.inputs.lint_max_total_delta || '0' }}"; fi
+        if [ -z "$RULE" ]; then RULE="${{ github.event.inputs.lint_max_rule_delta || '0' }}"; fi
+        echo "LINT_MAX_TOTAL_DELTA=$TOTAL" >> $GITHUB_ENV
+        echo "LINT_MAX_RULE_DELTA=$RULE" >> $GITHUB_ENV
+
     - name: Run frontend linting
       run: |
         cd frontend
         npm run lint
+
+    - name: Lint baseline diff and gate (report + enforce non-regression)
+      shell: pwsh
+      run: |
+        ./tools/lint_baseline_diff.ps1 -MaxTotalDelta $env:LINT_MAX_TOTAL_DELTA -MaxRuleDelta $env:LINT_MAX_RULE_DELTA -FrontendDir "./frontend" -ReportOut "./docs/reports/lint-baseline-diff.md" -SnapshotOut "./docs/reports/lint-snapshot.json"
+
+    - name: Upload lint baseline artifacts
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: lint-baseline-artifacts
+        path: |
+          docs/reports/lint-baseline-diff.md
+          docs/reports/lint-snapshot.json
 
     - name: Run frontend unit tests
       run: |
@@ -174,7 +213,6 @@ jobs:
       with:
         working-directory: frontend
         browser: chrome
-        headless: true
         record: false
         config-file: cypress.config.js
       env:
@@ -261,7 +299,7 @@ jobs:
           bandit-report.json
 
   build-and-deploy:
-    needs: [test-backend, test-frontend, e2e-tests, quality-checks]
+    needs: [test-backend, test-frontend, e2e-tests, quality-checks, lint-gates]
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
 
@@ -294,7 +332,7 @@ jobs:
         # Add your deployment commands here
 
   notify:
-    needs: [test-backend, test-frontend, e2e-tests, quality-checks, security-scan]
+    needs: [test-backend, test-frontend, e2e-tests, quality-checks, security-scan, lint-gates]
     runs-on: ubuntu-latest
     if: always()
 
@@ -308,3 +346,55 @@ jobs:
       if: success()
       run: |
         echo "All tests passed successfully!"
+
+  lint-gates:
+    runs-on: ubuntu-latest
+    # Lint-only quality gates; runs independently from tests
+    env:
+      # Optional: allow manual dispatch to feed initial values; defaults resolved in step below
+      LINT_MAX_TOTAL_DELTA: ${{ github.event.inputs.lint_max_total_delta }}
+      LINT_MAX_RULE_DELTA: ${{ github.event.inputs.lint_max_rule_delta }}
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        cache-dependency-path: frontend/package-lock.json
+
+    - name: Install frontend dependencies
+      run: |
+        cd frontend
+        npm ci
+
+    - name: Frontend ESLint (CI parity fail-fast)
+      run: |
+        cd frontend
+        npx eslint --max-warnings=0 --ext .js,.jsx,.ts,.tsx src
+
+    - name: Resolve lint gate thresholds
+      shell: bash
+      run: |
+        TOTAL="${LINT_MAX_TOTAL_DELTA:-}"
+        RULE="${LINT_MAX_RULE_DELTA:-}"
+        if [ -z "$TOTAL" ]; then TOTAL="${{ github.event.inputs.lint_max_total_delta || '0' }}"; fi
+        if [ -z "$RULE" ]; then RULE="${{ github.event.inputs.lint_max_rule_delta || '0' }}"; fi
+        echo "LINT_MAX_TOTAL_DELTA=$TOTAL" >> $GITHUB_ENV
+        echo "LINT_MAX_RULE_DELTA=$RULE" >> $GITHUB_ENV
+
+    - name: Lint baseline diff and gate (report + enforce non-regression)
+      shell: pwsh
+      run: |
+        ./tools/lint_baseline_diff.ps1 -MaxTotalDelta $env:LINT_MAX_TOTAL_DELTA -MaxRuleDelta $env:LINT_MAX_RULE_DELTA -FrontendDir "./frontend" -ReportOut "./docs/reports/lint-baseline-diff.md" -SnapshotOut "./docs/reports/lint-snapshot.json"
+
+    - name: Upload lint baseline artifacts
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: lint-baseline-artifacts
+        path: |
+          docs/reports/lint-baseline-diff.md
+          docs/reports/lint-snapshot.json

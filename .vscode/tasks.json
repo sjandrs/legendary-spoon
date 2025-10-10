@@ -174,6 +174,69 @@
 				"clear": false
 			},
 			"detail": "Runs comprehensive quality checks: tests and linting."
+		},
+		{
+			"label": "docs: generate-unreviewed-markdown-todo",
+			"type": "shell",
+			"command": "powershell -NoProfile -ExecutionPolicy Bypass -File \"${workspaceFolder}\\tools\\generate_md_todo.ps1\"",
+			"group": "build",
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": false,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": false
+			},
+			"detail": "Generates docs/reports/UNREVIEWED_MARKDOWN_TODO.md with Markdown files needing review."
+		},
+		{
+			"label": "lint: baseline-diff",
+			"type": "shell",
+			"command": "powershell -NoProfile -ExecutionPolicy Bypass -File \"${workspaceFolder}\\tools\\lint_baseline_diff.ps1\"",
+			"group": "test",
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": false,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": false
+			},
+			"detail": "Runs ESLint and compares results to baselines, writing docs/reports/lint-baseline-diff.md"
+		},
+		{
+			"label": "lint: ci-parity",
+			"type": "shell",
+			"command": "npx eslint --max-warnings=0 --ext .js,.jsx,.ts,.tsx src",
+			"options": {
+				"cwd": "${workspaceFolder}/frontend"
+			},
+			"group": "test",
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": false,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": false
+			},
+			"detail": "Run ESLint in CI-like mode using local config and ignores"
+		},
+		{
+			"label": "lint: gate-baseline",
+			"type": "shell",
+			"command": "powershell -NoProfile -ExecutionPolicy Bypass -File \"${workspaceFolder}\\tools\\lint_baseline_diff.ps1\" -MaxTotalDelta 0 -MaxRuleDelta 0",
+			"group": "test",
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": false,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": false
+			},
+			"detail": "Quality gate: fail if totals or any rule regress vs baseline"
 		}
 	]
 }
