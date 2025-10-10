@@ -45,9 +45,9 @@ class Command(BaseCommand):
 
         # Get all parent events with recurrence patterns
         parent_events = ScheduledEvent.objects.filter(
-            recurrence_pattern__isnull=False,
+            recurrence_rule__isnull=False,
             parent_event__isnull=True,  # Only parent events, not generated ones
-        ).exclude(recurrence_pattern="")
+        ).exclude(recurrence_rule="")
 
         if not parent_events:
             self.stdout.write(
@@ -65,10 +65,8 @@ class Command(BaseCommand):
         for parent_event in parent_events:
             try:
                 # Check if we should stop generating (if recurrence_end_date is set)
-                if (
-                    parent_event.recurrence_end_date
-                    and parent_event.recurrence_end_date < now.date()
-                ):
+                recurrence_end = getattr(parent_event, "recurrence_end_date", None)
+                if recurrence_end and recurrence_end < now.date():
                     continue
 
                 created, skipped, errors = self.process_single_recurrence(
@@ -118,7 +116,7 @@ class Command(BaseCommand):
         errors = 0
 
         # Parse recurrence pattern (simple implementation)
-        pattern = parent_event.recurrence_pattern.lower()
+        pattern = (getattr(parent_event, "recurrence_rule", "") or "").lower()
 
         if pattern == "daily":
             interval = timedelta(days=1)
@@ -163,10 +161,8 @@ class Command(BaseCommand):
 
         while current_date <= end_date:
             # Check if this event should be created
-            if (
-                parent_event.recurrence_end_date
-                and current_date.date() > parent_event.recurrence_end_date
-            ):
+            recurrence_end = getattr(parent_event, "recurrence_end_date", None)
+            if recurrence_end and current_date.date() > recurrence_end:
                 break
 
             # Check if event already exists (unless forced)
@@ -202,9 +198,7 @@ class Command(BaseCommand):
                         start_time=current_date,
                         end_time=end_time,
                         status="scheduled",
-                        priority=parent_event.priority,
-                        estimated_duration=parent_event.estimated_duration,
-                        notes=f"Recurring appointment (Pattern: {parent_event.recurrence_pattern})",
+                        notes=f"Recurring appointment (Pattern: {getattr(parent_event, 'recurrence_rule', '')})",
                         parent_event=parent_event,
                     )
 

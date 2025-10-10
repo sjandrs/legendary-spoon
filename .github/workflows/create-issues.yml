@@ -1,0 +1,84 @@
+name: Create Issues
+
+on:
+  workflow_dispatch:
+    inputs:
+      which:
+        description: "Which issues to create"
+        required: true
+        default: "both"
+        type: choice
+        options:
+          - slack
+          - pr-comment
+          - both
+      labels:
+        description: "Comma-separated labels"
+        required: false
+        default: "tooling,linting,DX"
+
+jobs:
+  create:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Prepare bodies
+        id: prep
+        shell: bash
+        run: |
+          SLACK_BODY="issues/NOTIFICATIONS_slack-weekly.md"
+          PR_BODY="issues/PR_COMMENT_lint-baseline-summary.md"
+          echo "slack_path=$SLACK_BODY" >> $GITHUB_OUTPUT
+          echo "pr_path=$PR_BODY" >> $GITHUB_OUTPUT
+
+      - name: Create Slack weekly notification issue
+        if: ${{ inputs.which == 'slack' || inputs.which == 'both' }}
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          result-encoding: string
+          script: |
+            const fs = require('fs');
+            const bodyPath = process.env.BODY_PATH;
+            const labelsCsv = process.env.ISSUE_LABELS || '';
+            const body = fs.readFileSync(bodyPath, 'utf8');
+            const labels = labelsCsv.split(',').map(s => s.trim()).filter(Boolean);
+            const title = 'Notifications: Post weekly lint baseline summary to Slack';
+            const { data: issues } = await github.rest.issues.listForRepo({ owner: context.repo.owner, repo: context.repo.repo, state: 'open', per_page: 100 });
+            if (issues.find(i => i.title === title)) {
+              core.info('Issue already exists; skipping creation.');
+            } else {
+              await github.rest.issues.create({ owner: context.repo.owner, repo: context.repo.repo, title, body, labels });
+              core.info('Created Slack notifications issue.');
+            }
+        env:
+          BODY_PATH: ${{ steps.prep.outputs.slack_path }}
+          ISSUE_LABELS: ${{ inputs.labels }}
+
+      - name: Create PR comment summary issue
+        if: ${{ inputs.which == 'pr-comment' || inputs.which == 'both' }}
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          result-encoding: string
+          script: |
+            const fs = require('fs');
+            const bodyPath = process.env.BODY_PATH;
+            const labelsCsv = process.env.ISSUE_LABELS || '';
+            const body = fs.readFileSync(bodyPath, 'utf8');
+            const labels = labelsCsv.split(',').map(s => s.trim()).filter(Boolean);
+            const title = 'DevEx: Post lint baseline summary as PR comment/status';
+            const { data: issues } = await github.rest.issues.listForRepo({ owner: context.repo.owner, repo: context.repo.repo, state: 'open', per_page: 100 });
+            if (issues.find(i => i.title === title)) {
+              core.info('Issue already exists; skipping creation.');
+            } else {
+              await github.rest.issues.create({ owner: context.repo.owner, repo: context.repo.repo, title, body, labels });
+              core.info('Created PR comment summary issue.');
+            }
+        env:
+          BODY_PATH: ${{ steps.prep.outputs.pr_path }}
+          ISSUE_LABELS: ${{ inputs.labels }}

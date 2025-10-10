@@ -1,10 +1,11 @@
+/* eslint-env jest */
 
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import TaskCalendar from '../../components/TaskCalendar';
 
-const mockGetTasks = jest.fn();
-const mockCreateTask = jest.fn();
-const mockUpdateTask = jest.fn();
+const mockGetProjects = jest.fn();
+const mockCreateProject = jest.fn();
+const mockUpdateProject = jest.fn();
 const mockApiGet = jest.fn();
 
 jest.mock('../../api', () => ({
@@ -13,9 +14,9 @@ jest.mock('../../api', () => ({
   default: {
     get: (...args) => mockApiGet(...args)
   },
-  getTasks: (...args) => mockGetTasks(...args),
-  createTask: (...args) => mockCreateTask(...args),
-  updateTask: (...args) => mockUpdateTask(...args)
+  getProjects: (...args) => mockGetProjects(...args),
+  createProject: (...args) => mockCreateProject(...args),
+  updateProject: (...args) => mockUpdateProject(...args)
 }));
 
 // Mock react-big-calendar to a lightweight test double similar to TaskCalendar.test.jsx
@@ -61,8 +62,8 @@ const initialTasks = [
 describe('TaskCalendar interaction flow', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockGetTasks.mockResolvedValue({ data: initialTasks });
-    mockCreateTask.mockResolvedValue({ data: { id: 2, title: 'New Task', due_date: '2025-10-10', priority: 'medium', status: 'pending' } });
+  mockGetProjects.mockResolvedValue({ data: initialTasks });
+  mockCreateProject.mockResolvedValue({ data: { id: 2, title: 'New Task', due_date: '2025-10-10', priority: 'medium', status: 'pending' } });
     // TaskModal fetches task types via apiClient.get('/api/task-types/')
     mockApiGet.mockImplementation((url) => {
       if (url.includes('/api/task-types/')) {
@@ -83,7 +84,7 @@ describe('TaskCalendar interaction flow', () => {
     render(<TaskCalendar />);
 
     // Initial load
-    await waitFor(() => expect(mockGetTasks).toHaveBeenCalledTimes(1));
+  await waitFor(() => expect(mockGetProjects).toHaveBeenCalledTimes(1));
 
   // Open modal by clicking on the existing event rendered in the calendar
   const existingEvent = await screen.findByText('Seed Task');
@@ -101,9 +102,9 @@ describe('TaskCalendar interaction flow', () => {
   // Submit form (update path)
   fireEvent.click(screen.getByRole('button', { name: /update task/i }));
 
-  await waitFor(() => expect(mockUpdateTask).toHaveBeenCalledTimes(1));
+  await waitFor(() => expect(mockUpdateProject).toHaveBeenCalledTimes(1));
 
-    // After create, a reload should occur (second getTasks)
-    await waitFor(() => expect(mockGetTasks).toHaveBeenCalledTimes(2));
+  // After create, a reload should occur (second getProjects)
+  await waitFor(() => expect(mockGetProjects).toHaveBeenCalledTimes(2));
   });
 });

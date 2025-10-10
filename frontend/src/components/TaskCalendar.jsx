@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Calendar, momentLocalizer } from 'react-big-calendar';
 import moment from 'moment';
-import apiClient, { getTasks, updateTask, createTask } from '../api';
+import apiClient, { getProjects, updateProject, createProject } from '../api';
 import './TaskCalendar.css';
 
 const localizer = momentLocalizer(moment);
@@ -34,7 +34,7 @@ const TaskCalendar = () => {
 
   const loadTasks = async () => {
     try {
-      const response = await getTasks();
+  const response = await getProjects();
       setTasks(response.data);
     } catch (_err) {
       console.error('Error loading tasks:', _err);
@@ -71,9 +71,9 @@ const TaskCalendar = () => {
   const handleSaveTask = async (taskData) => {
     try {
       if (isEditing) {
-        await updateTask(selectedTask.id, taskData);
+        await updateProject(selectedTask.id, taskData);
       } else {
-        await createTask(taskData);
+        await createProject(taskData);
       }
       setShowModal(false);
       setSelectedTask(null);

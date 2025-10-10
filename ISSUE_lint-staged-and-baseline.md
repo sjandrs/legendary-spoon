@@ -47,4 +47,3 @@ Introduce lint-staged to run ESLint/Prettier only on staged files in pre-commit 
 - [x] Relax baseline gate thresholds in VS Code task
 - [ ] Mirror threshold changes in CI workflow (if applicable)
 - [ ] Update `FRONTEND_TESTING.md` with lint-staged usage
-

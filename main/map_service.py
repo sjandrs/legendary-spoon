@@ -11,20 +11,21 @@ from django.conf import settings
 logger = logging.getLogger(__name__)
 
 
+# Expose symbol for tests to patch: main.map_service.googlemaps
+try:  # pragma: no cover - simple alias for test patching
+    import googlemaps  # type: ignore
+except Exception:  # If not installed in test env, keep None so patch works
+    googlemaps = None  # type: ignore
+
+
 class MapService:
     """Service for route optimization and travel time calculations"""
 
     def __init__(self):
         self.maps_client = None
-        if hasattr(settings, "GOOGLE_MAPS_API_KEY"):
-            try:
-                import googlemaps
-
-                self.maps_client = googlemaps.Client(key=settings.GOOGLE_MAPS_API_KEY)
-            except ImportError:
-                logger.warning(
-                    "googlemaps not installed. Route optimization will be disabled."
-                )
+        if hasattr(settings, "GOOGLE_MAPS_API_KEY") and googlemaps is not None:
+            # Use module-level googlemaps symbol so tests can patch it
+            self.maps_client = googlemaps.Client(key=settings.GOOGLE_MAPS_API_KEY)
 
     def calculate_travel_time(
         self, origin: str, destination: str, departure_time=None

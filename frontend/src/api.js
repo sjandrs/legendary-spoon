@@ -6,8 +6,9 @@ try {
     apiClient = axios && typeof axios.create === 'function'
         ? axios.create({ baseURL: 'http://localhost:8000' })
         : (axios || {});
-} catch (_err) {
-    apiClient = axios || {}; // fallback to the mocked instance
+} catch {
+    // noop: fall back to mocked instance when axios.create is unavailable in tests
+    apiClient = axios || {};
 }
 
 // If apiClient is not a usable client, create a minimal shim with axios-like API
@@ -37,7 +38,9 @@ if (apiClient.interceptors && apiClient.interceptors.request && typeof apiClient
                 config.headers = config.headers || {};
                 config.headers.Authorization = `Token ${token}`;
             }
-        } catch (_err) {}
+        } catch {
+            // noop: localStorage/window may be unavailable in tests
+        }
         return config;
     }, error => Promise.reject(error));
 }
@@ -51,7 +54,9 @@ if (apiClient.interceptors && apiClient.interceptors.response && typeof apiClien
                 try {
                     if (typeof localStorage !== 'undefined') localStorage.removeItem('authToken');
                     if (typeof window !== 'undefined' && window.location) window.location.href = '/login';
-                } catch (_err) {}
+                } catch {
+                    // noop: localStorage/window may be unavailable in tests
+                }
             }
             return Promise.reject(error);
         }
@@ -66,9 +71,12 @@ export const post = (...args) => call('post', ...args);
 export const put = (...args) => call('put', ...args);
 export const del = (...args) => call('delete', ...args);
 
-export const getTasks = () => get('/api/tasks/');
-export const updateTask = (id, task) => put(`/api/tasks/${id}/`, task);
-export const createTask = (task) => post('/api/tasks/', task);
+// Projects API (renamed from Tasks)
+// Accept optional endpoint to fetch filtered lists (e.g., overdue/upcoming)
+export const getProjects = (url = '/api/projects/') => get(url);
+export const updateProject = (id, project) => put(`/api/projects/${id}/`, project);
+export const createProject = (project) => post('/api/projects/', project);
+
 export const getActivityLogs = (url) => get(url);
 
 // --- Accounting API ---
@@ -105,7 +113,8 @@ export const updateTimeEntry = (id, data) => put(`/api/time-entries/${id}/`, dat
 export const deleteTimeEntry = (id) => del(`/api/time-entries/${id}/`);
 
 // Projects (for time tracking)
-export const getProjects = () => apiClient.get('/api/tasks/');
+// Align to renamed resource (Task -> Project)
+// Note: getProjects is already defined above with optional URL support
 
 // Warehouse Management
 export const getWarehouses = () => get('/api/warehouses/');
@@ -140,8 +149,9 @@ export const getTaxReport = (year) => get('/api/tax-report/', { params: { year }
 
 // --- Phase 3: Advanced Analytics & AI ---
 export const getAdvancedAnalyticsDashboard = () => get('/api/analytics/dashboard-v2/');
-export const calculateCustomerLifetimeValue = (contactId) => post(`/api/analytics/clv/${contactId}/`);
-export const predictDealOutcome = (dealId) => post(`/api/analytics/predict/${dealId}/`);
+// Align to master spec: use GET for CLV and Predict endpoints
+export const calculateCustomerLifetimeValue = (contactId) => get(`/api/analytics/clv/${contactId}/`);
+export const predictDealOutcome = (dealId) => get(`/api/analytics/predict/${dealId}/`);
 export const generateRevenueForecast = (data) => post('/api/analytics/forecast/', data);
 
 // --- Phase 2: Core CRM Features ---
@@ -174,3 +184,8 @@ export const getCertifications = () => get('/api/certifications/');
 export const createCertification = (data) => post('/api/certifications/', data);
 
 export default apiClient;
+
+// --- Auth helpers (align with master spec) ---
+export const login = (credentials) => post('/api/login/', credentials);
+export const logout = () => post('/api/logout/');
+export const getCurrentUser = () => get('/api/user/');

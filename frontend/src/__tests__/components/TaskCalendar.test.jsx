@@ -1,3 +1,4 @@
+/* eslint-env jest */
 import React from 'react';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -50,9 +51,9 @@ jest.mock('../../api', () => ({
     put: jest.fn(),
     delete: jest.fn()
   },
-  getTasks: jest.fn(),
-  updateTask: jest.fn(),
-  createTask: jest.fn()
+  getProjects: jest.fn(),
+  updateProject: jest.fn(),
+  createProject: jest.fn()
 }));
 
 const mockTasks = [
@@ -101,8 +102,8 @@ describe('TaskCalendar Component', () => {
     jest.clearAllMocks();
 
     // Setup default mocks
-    const { getTasks, default: apiClient } = require('../../api');
-    getTasks.mockResolvedValue({ data: mockTasks });
+  const { getProjects, default: apiClient } = require('../../api');
+  getProjects.mockResolvedValue({ data: mockTasks });
     apiClient.get.mockImplementation((url) => {
       if (url === '/api/task-types/') {
         return Promise.resolve({ data: mockTaskTypes });
@@ -138,8 +139,8 @@ describe('TaskCalendar Component', () => {
     });
 
     it('handles API loading errors gracefully', async () => {
-      const { getTasks } = require('../../api');
-      getTasks.mockRejectedValue(new Error('API Error'));
+  const { getProjects } = require('../../api');
+  getProjects.mockRejectedValue(new Error('API Error'));
 
       const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
 
@@ -338,8 +339,8 @@ describe('TaskCalendar Component', () => {
 
   describe('Task Creation', () => {
     it('creates new task successfully', async () => {
-      const { createTask } = require('../../api');
-      createTask.mockResolvedValue({ data: { id: 4, ...mockTasks[0] } });
+  const { createProject } = require('../../api');
+  createProject.mockResolvedValue({ data: { id: 4, ...mockTasks[0] } });
 
       renderWithProviders(<TaskCalendar />);
 
@@ -365,7 +366,7 @@ describe('TaskCalendar Component', () => {
 
       await user.click(saveButton);
 
-      expect(createTask).toHaveBeenCalledWith(expect.objectContaining({
+      expect(createProject).toHaveBeenCalledWith(expect.objectContaining({
         title: 'New Test Task',
         description: 'Test description',
         due_date: '2024-01-15',
@@ -374,9 +375,9 @@ describe('TaskCalendar Component', () => {
     });
 
     it('reloads tasks after successful creation', async () => {
-      const { createTask, getTasks } = require('../../api');
-      createTask.mockResolvedValue({ data: { id: 4 } });
-      getTasks.mockResolvedValue({ data: [...mockTasks, { id: 4, title: 'New Task' }] });
+  const { createProject, getProjects } = require('../../api');
+  createProject.mockResolvedValue({ data: { id: 4 } });
+  getProjects.mockResolvedValue({ data: [...mockTasks, { id: 4, title: 'New Task' }] });
 
       renderWithProviders(<TaskCalendar />);
 
@@ -400,13 +401,13 @@ describe('TaskCalendar Component', () => {
       await user.click(saveButton);
 
       await waitFor(() => {
-        expect(getTasks).toHaveBeenCalledTimes(2); // Initial load + reload after create
+        expect(getProjects).toHaveBeenCalledTimes(2); // Initial load + reload after create
       });
     });
 
     it('handles creation errors gracefully', async () => {
-      const { createTask } = require('../../api');
-      createTask.mockRejectedValue(new Error('Creation failed'));
+  const { createProject } = require('../../api');
+  createProject.mockRejectedValue(new Error('Creation failed'));
 
       const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
 
@@ -438,8 +439,8 @@ describe('TaskCalendar Component', () => {
 
   describe('Task Editing', () => {
     it('updates existing task successfully', async () => {
-      const { updateTask } = require('../../api');
-      updateTask.mockResolvedValue({ data: mockTasks[0] });
+  const { updateProject } = require('../../api');
+  updateProject.mockResolvedValue({ data: mockTasks[0] });
 
       renderWithProviders(<TaskCalendar />);
 
@@ -458,14 +459,14 @@ describe('TaskCalendar Component', () => {
 
       await user.click(saveButton);
 
-      expect(updateTask).toHaveBeenCalledWith(1, expect.objectContaining({
+      expect(updateProject).toHaveBeenCalledWith(1, expect.objectContaining({
         title: 'Updated Project Proposal'
       }));
     });
 
     it('reloads tasks after successful update', async () => {
-      const { updateTask, getTasks } = require('../../api');
-      updateTask.mockResolvedValue({ data: mockTasks[0] });
+  const { updateProject, getProjects } = require('../../api');
+  updateProject.mockResolvedValue({ data: mockTasks[0] });
 
       renderWithProviders(<TaskCalendar />);
 
@@ -480,13 +481,13 @@ describe('TaskCalendar Component', () => {
       await user.click(saveButton);
 
       await waitFor(() => {
-        expect(getTasks).toHaveBeenCalledTimes(2); // Initial load + reload after update
+        expect(getProjects).toHaveBeenCalledTimes(2); // Initial load + reload after update
       });
     });
 
     it('handles update errors gracefully', async () => {
-      const { updateTask } = require('../../api');
-      updateTask.mockRejectedValue(new Error('Update failed'));
+  const { updateProject } = require('../../api');
+  updateProject.mockRejectedValue(new Error('Update failed'));
 
       const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
 

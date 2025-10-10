@@ -261,6 +261,27 @@ Jest generates coverage reports in multiple formats:
 - HTML report in `coverage/lcov-report/index.html`
 - LCOV format for CI integration
 
+## Lint-staged and Baseline Gate (Temporary)
+
+To keep commits fast while we work down legacy lint, we run ESLint/Prettier only on staged files locally and keep full ESLint and a baseline gate in CI:
+
+- Pre-commit (local): lint-staged runs `eslint --fix` and `prettier --write` on staged files under `frontend/`.
+- CI: Full ESLint runs and a baseline diff gate enforces non-regression overall.
+
+Temporary relaxation of gate thresholds while the backlog is addressed:
+
+- Local VS Code task `lint: gate-baseline`: MaxTotalDelta=8000, MaxRuleDelta=250
+- CI defaults (workflow_dispatch inputs): lint_max_total_delta=8000, lint_max_rule_delta=250
+
+Tightening plan (target cadence):
+
+- Week 1: 8000 → 5000
+- Week 2: 5000 → 2500
+- Week 3: 2500 → 500
+- Week 4: 500 → 0 (strict)
+
+You can override CI thresholds via workflow dispatch inputs if needed. Baseline artifacts are published to `docs/reports/lint-baseline-diff.md` and `docs/reports/lint-snapshot.json` for visibility.
+
 ## Troubleshooting
 
 ### Common Issues

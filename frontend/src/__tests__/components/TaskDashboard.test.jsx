@@ -1,5 +1,6 @@
+/* eslint-env jest */
 import React from 'react';
-import { screen, waitFor, within, fireEvent } from '@testing-library/react';
+import { screen, waitFor, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { renderWithProviders, mockUsers, testComponentAccessibility } from '../helpers/test-utils';
 import TaskDashboard from '../../components/TaskDashboard';
@@ -19,7 +20,7 @@ jest.mock('../../components/ActivityTimeline', () => {
 
 // Mock API module
 jest.mock('../../api', () => ({
-  getTasks: jest.fn(),
+  getProjects: jest.fn(),
   getActivityLogs: jest.fn(),
 }));
 
@@ -115,11 +116,11 @@ describe('TaskDashboard Component', () => {
     jest.clearAllMocks();
 
     // Setup default mocks
-    const { getTasks } = require('../../api');
-    getTasks.mockImplementation((url) => {
-      if (url === '/api/tasks/overdue/') {
+    const { getProjects } = require('../../api');
+    getProjects.mockImplementation((url) => {
+      if (url === '/api/projects/overdue/') {
         return Promise.resolve({ data: mockOverdueTasks });
-      } else if (url === '/api/tasks/upcoming/') {
+      } else if (url === '/api/projects/upcoming/') {
         return Promise.resolve({ data: mockUpcomingTasks });
       } else {
         return Promise.resolve({ data: mockTasks });
@@ -355,8 +356,8 @@ describe('TaskDashboard Component', () => {
     });
 
     it('shows empty state when no tasks exist', async () => {
-      const { getTasks } = require('../../api');
-      getTasks.mockResolvedValue({ data: [] });
+  const { getProjects } = require('../../api');
+  getProjects.mockResolvedValue({ data: [] });
 
       renderWithProviders(<TaskDashboard />);
 
@@ -389,8 +390,8 @@ describe('TaskDashboard Component', () => {
   });
 
   describe('API Integration', () => {
-    it('calls getTasks API three times on component mount', async () => {
-      const { getTasks } = require('../../api');
+    it('calls getProjects API three times on component mount', async () => {
+      const { getProjects } = require('../../api');
 
       renderWithProviders(<TaskDashboard />);
 
@@ -398,17 +399,17 @@ describe('TaskDashboard Component', () => {
         expect(screen.getByText('Total Tasks')).toBeInTheDocument();
       });
 
-      expect(getTasks).toHaveBeenCalledTimes(3);
-      expect(getTasks).toHaveBeenCalledWith();
-      expect(getTasks).toHaveBeenCalledWith('/api/tasks/overdue/');
-      expect(getTasks).toHaveBeenCalledWith('/api/tasks/upcoming/');
+      expect(getProjects).toHaveBeenCalledTimes(3);
+      expect(getProjects).toHaveBeenCalledWith();
+      expect(getProjects).toHaveBeenCalledWith('/api/projects/overdue/');
+      expect(getProjects).toHaveBeenCalledWith('/api/projects/upcoming/');
     });
 
     it('handles API errors gracefully', async () => {
-      const { getTasks } = require('../../api');
+  const { getProjects } = require('../../api');
       const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
 
-      getTasks.mockRejectedValue(new Error('API Error'));
+  getProjects.mockRejectedValue(new Error('API Error'));
 
       renderWithProviders(<TaskDashboard />);
 
@@ -420,7 +421,7 @@ describe('TaskDashboard Component', () => {
     });
 
     it('reloads data when refresh button is clicked', async () => {
-      const { getTasks } = require('../../api');
+  const { getProjects } = require('../../api');
       const mockReload = jest.fn();
       Object.defineProperty(window, 'location', {
         value: { reload: mockReload },
@@ -482,10 +483,10 @@ describe('TaskDashboard Component', () => {
 
   describe('Error Handling', () => {
     it('handles API errors and continues to render', async () => {
-      const { getTasks } = require('../../api');
-      const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+  const { getProjects } = require('../../api');
+  const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
 
-      getTasks.mockRejectedValue(new Error('Network error'));
+  getProjects.mockRejectedValue(new Error('Network error'));
 
       renderWithProviders(<TaskDashboard />);
 
@@ -501,13 +502,13 @@ describe('TaskDashboard Component', () => {
     });
 
     it('handles partial API failures gracefully', async () => {
-      const { getTasks } = require('../../api');
+  const { getProjects } = require('../../api');
 
       // Make overdue and upcoming APIs fail but main API succeed
-      getTasks.mockImplementation((url) => {
-        if (url === '/api/tasks/overdue/') {
+      getProjects.mockImplementation((url) => {
+        if (url === '/api/projects/overdue/') {
           return Promise.reject(new Error('Overdue API failed'));
-        } else if (url === '/api/tasks/upcoming/') {
+        } else if (url === '/api/projects/upcoming/') {
           return Promise.reject(new Error('Upcoming API failed'));
         } else {
           return Promise.resolve({ data: mockTasks });
@@ -607,7 +608,7 @@ describe('TaskDashboard Component', () => {
 
   describe('Performance', () => {
     it('loads data efficiently with Promise.all', async () => {
-      const { getTasks } = require('../../api');
+  const { getProjects } = require('../../api');
       const startTime = Date.now();
 
       renderWithProviders(<TaskDashboard />);
@@ -621,7 +622,7 @@ describe('TaskDashboard Component', () => {
 
       // Should load within reasonable time (allowing for test environment)
       expect(loadTime).toBeLessThan(2000);
-      expect(getTasks).toHaveBeenCalledTimes(3);
+  expect(getProjects).toHaveBeenCalledTimes(3);
     });
   });
 });

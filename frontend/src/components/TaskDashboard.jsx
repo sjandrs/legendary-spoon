@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { Link } from 'react-router-dom';
-import { getTasks } from '../api';
+import { getProjects } from '../api';
 import TaskCalendar from './TaskCalendar';
 import ActivityTimeline from './ActivityTimeline';
 import AuthContext from '../contexts/AuthContext';
@@ -28,9 +28,9 @@ const TaskDashboard = () => {
     try {
       setLoading(true);
       const [tasksResponse, overdueResponse, upcomingResponse] = await Promise.all([
-        getTasks(),
-        getTasks('/api/tasks/overdue/'),
-        getTasks('/api/tasks/upcoming/')
+        getProjects(),
+        getProjects('/api/projects/overdue/'),
+        getProjects('/api/projects/upcoming/')
       ]);
 
       const tasks = Array.isArray(tasksResponse.data) ? tasksResponse.data : tasksResponse.data.results || [];

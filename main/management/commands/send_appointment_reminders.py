@@ -75,11 +75,21 @@ class Command(BaseCommand):
         for event in scheduled_events:
             # Check if reminder was already sent today (unless forced)
             if not force:
-                existing_reminder = NotificationLog.objects.filter(
-                    scheduled_event=event,
-                    notification_type="customer_reminder",
-                    sent_at__date=now.date(),
-                ).exists()
+                # We don't have typed fields for event/type; heuristically match only customer reminder emails
+                existing_reminder = (
+                    NotificationLog.objects.filter(
+                        content_type__model="scheduledevent",
+                        object_id=event.id,
+                        status="sent",
+                        sent_at__date=now.date(),
+                        channel="email",
+                    )
+                    .filter(
+                        # limit to the specific reminder subject used by NotificationService
+                        subject__icontains="Service Appointment Reminder"
+                    )
+                    .exists()
+                )
 
                 if existing_reminder:
                     already_sent_count += 1
@@ -94,10 +104,15 @@ class Command(BaseCommand):
                     self.stdout.write(
                         f"[DRY RUN] Would send reminder for appointment {event.id}:"
                     )
-                    self.stdout.write(
-                        f"  - Customer: {event.work_order.contact.first_name} "
-                        f"{event.work_order.contact.last_name}"
+                    contact = (
+                        event.work_order.project.contact
+                        if event.work_order and event.work_order.project
+                        else None
                     )
+                    if contact:
+                        self.stdout.write(
+                            f"  - Customer: {contact.first_name} {contact.last_name}"
+                        )
                     self.stdout.write(f"  - Service: {event.work_order.description}")
                     self.stdout.write(
                         f"  - Time: {event.start_time.strftime('%Y-%m-%d %H:%M')}"
@@ -109,16 +124,22 @@ class Command(BaseCommand):
                     sent_count += 1
                 else:
                     # Send the actual reminder
+                    contact = (
+                        event.work_order.project.contact
+                        if event.work_order and event.work_order.project
+                        else None
+                    )
                     success = notification_service.send_customer_reminder(event)
 
                     if success:
                         sent_count += 1
-                        self.stdout.write(
-                            self.style.SUCCESS(
-                                f"Sent reminder for appointment {event.id} "
-                                f"to {event.work_order.contact.email}"
+                        if contact:
+                            self.stdout.write(
+                                self.style.SUCCESS(
+                                    f"Sent reminder for appointment {event.id} "
+                                    f"to {contact.email}"
+                                )
                             )
-                        )
                     else:
                         error_count += 1
                         self.stdout.write(

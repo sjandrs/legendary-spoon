@@ -1,18 +1,19 @@
+/* eslint-env jest, node */
 
 import { render, waitFor } from '@testing-library/react';
 import TaskCalendar from '../../components/TaskCalendar';
 
 // Provide explicit mock factory to avoid no-import-assign rule violations
-const mockGetTasks = jest.fn();
-const mockCreateTask = jest.fn();
-const mockUpdateTask = jest.fn();
+const mockGetProjects = jest.fn();
+const mockCreateProject = jest.fn();
+const mockUpdateProject = jest.fn();
 
 jest.mock('../../api', () => ({
   __esModule: true,
   default: {},
-  getTasks: (...args) => mockGetTasks(...args),
-  createTask: (...args) => mockCreateTask(...args),
-  updateTask: (...args) => mockUpdateTask(...args)
+  getProjects: (...args) => mockGetProjects(...args),
+  createProject: (...args) => mockCreateProject(...args),
+  updateProject: (...args) => mockUpdateProject(...args)
 }));
 
 // Minimal mock tasks
@@ -27,27 +28,27 @@ describe('TaskCalendar data loading', () => {
   });
 
   it('loads tasks exactly once on mount (bootstrap effect)', async () => {
-  mockGetTasks.mockResolvedValue({ data: mockTasks });
+  mockGetProjects.mockResolvedValue({ data: mockTasks });
 
     render(<TaskCalendar />);
 
     await waitFor(() => {
-      expect(mockGetTasks).toHaveBeenCalledTimes(1);
+      expect(mockGetProjects).toHaveBeenCalledTimes(1);
     });
   });
 
   it('reloads tasks after save via onSave path', async () => {
-    mockGetTasks.mockResolvedValue({ data: mockTasks });
-    mockCreateTask.mockResolvedValue({ data: { success: true } });
+  mockGetProjects.mockResolvedValue({ data: mockTasks });
+  mockCreateProject.mockResolvedValue({ data: { success: true } });
 
     render(<TaskCalendar />);
-    await waitFor(() => expect(mockGetTasks).toHaveBeenCalledTimes(1));
+  await waitFor(() => expect(mockGetProjects).toHaveBeenCalledTimes(1));
 
     // Direct invocation of createTask to simulate internal modal save path
-    await mockCreateTask({ title: 'X' });
+  await mockCreateProject({ title: 'X' });
     // Manually trigger reload to emulate post-save refresh logic
-    await mockGetTasks({ data: mockTasks });
+  await mockGetProjects({ data: mockTasks });
 
-    expect(mockGetTasks.mock.calls.length).toBeGreaterThan(1);
+  expect(mockGetProjects.mock.calls.length).toBeGreaterThan(1);
   });
 });
