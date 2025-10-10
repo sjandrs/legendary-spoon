@@ -27,6 +27,10 @@ Built with a robust **Django** backend and a dynamic **React** frontend, Converg
 *   **Knowledge Base:** An internal documentation system for storing articles, guides, and changelogs.
 *   **User Roles & Permissions:** Manage user access with roles like "Sales Rep" and "Sales Manager".
 
+## CI Status
+
+![Spec Validation](https://github.com/sjandrs/legendary-spoon/actions/workflows/spec-validate.yml/badge.svg)
+
 ## � Documentation
 
 *   **[Testing Automation Guide](docs/TESTING_AUTOMATION.md)**: Comprehensive documentation for automated testing, CI/CD, and quality assurance
