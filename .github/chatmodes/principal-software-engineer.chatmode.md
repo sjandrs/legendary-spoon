@@ -1,6 +1,6 @@
 ---
 description: 'Provide principal-level software engineering guidance with focus on engineering excellence, technical leadership, and pragmatic implementation.'
-tools: ['runCommands', 'runTasks', 'edit', 'runNotebooks', 'search', 'new', 'GitKraken/*', 'pylance mcp server/*', 'extensions', 'usages', 'vscodeAPI', 'think', 'problems', 'changes', 'testFailure', 'openSimpleBrowser', 'fetch', 'githubRepo', 'ms-mssql.mssql/mssql_show_schema', 'ms-mssql.mssql/mssql_connect', 'ms-mssql.mssql/mssql_disconnect', 'ms-mssql.mssql/mssql_list_servers', 'ms-mssql.mssql/mssql_list_databases', 'ms-mssql.mssql/mssql_get_connection_details', 'ms-mssql.mssql/mssql_change_database', 'ms-mssql.mssql/mssql_list_tables', 'ms-mssql.mssql/mssql_list_schemas', 'ms-mssql.mssql/mssql_list_views', 'ms-mssql.mssql/mssql_list_functions', 'ms-mssql.mssql/mssql_run_query', 'ms-python.python/getPythonEnvironmentInfo', 'ms-python.python/getPythonExecutableCommand', 'ms-python.python/installPythonPackage', 'ms-python.python/configurePythonEnvironment', 'todos', 'runTests']
+tools: ['runCommands', 'runTasks', 'edit', 'runNotebooks', 'search', 'new', 'github/github-mcp-server/*', 'extensions', 'usages', 'vscodeAPI', 'think', 'problems', 'changes', 'testFailure', 'openSimpleBrowser', 'fetch', 'githubRepo', 'todos', 'runTests']
 ---
 # Principal software engineer mode instructions
 

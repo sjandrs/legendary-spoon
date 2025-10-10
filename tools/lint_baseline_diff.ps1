@@ -11,13 +11,13 @@ param(
 
 $ErrorActionPreference = 'Stop'
 
-function Ensure-Path([string]$p) {
+function Resolve-SafePath([string]$p) {
 	$full = Resolve-Path -LiteralPath $p -ErrorAction SilentlyContinue
 	if (-not $full) { return $p }
 	return $full.Path
 }
 
-$FrontendDir = Ensure-Path $FrontendDir
+$FrontendDir = Resolve-SafePath $FrontendDir
 $ReportOut = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($ReportOut)
 $ReportDir = Split-Path -Parent $ReportOut
 if (-not (Test-Path $ReportDir)) { New-Item -ItemType Directory -Path $ReportDir | Out-Null }
@@ -104,17 +104,17 @@ try {
 }
 
 # Load baselines if present
-function Load-JsonSafe([string]$path) {
+function Get-JsonSafe([string]$path) {
 	if (Test-Path $path) {
 		try { return Get-Content $path -Raw | ConvertFrom-Json } catch { return $null }
 	}
 	return $null
 }
-$baseMain = Load-JsonSafe (Ensure-Path $BaselineMain)
-$baseBatch = Load-JsonSafe (Ensure-Path $BaselineBatch)
+$baseMain = Get-JsonSafe (Resolve-SafePath $BaselineMain)
+$baseBatch = Get-JsonSafe (Resolve-SafePath $BaselineBatch)
 
 # Coerce baseline values
-function Coerce-Baseline($b) {
+function ConvertTo-Baseline($b) {
 	if (-not $b) { return $null }
 	$errors = 0; $warnings = 0; $total = 0
 	if ($b.eslint) {
@@ -130,11 +130,11 @@ function Coerce-Baseline($b) {
 	return [ordered]@{ errors = $errors; warnings = $warnings; totalProblems = $total }
 }
 
-$bm = Coerce-Baseline $baseMain
-$bb = Coerce-Baseline $baseBatch
+$bm = ConvertTo-Baseline $baseMain
+$bb = ConvertTo-Baseline $baseBatch
 
 # Diff helper
-function Diff-Counts($label, $current, $baseline) {
+function Compare-Counts($label, $current, $baseline) {
 		if (-not $baseline) {
 			return ('- {0}: (no baseline) current total={1}, errors={2}, warnings={3}' -f $label, $current.totalProblems, $current.errors, $current.warnings)
 		}
@@ -182,8 +182,8 @@ $out += "- errors: $($current.errors)" + $nl
 $out += "- warnings: $($current.warnings)" + $nl + $nl
 
 $out += "## Comparison" + $nl
-$out += (Diff-Counts 'Against main baseline' $current $bm) + $nl
-$out += (Diff-Counts 'Against batch3 baseline' $current $bb) + $nl + $nl
+$out += (Compare-Counts 'Against main baseline' $current $bm) + $nl
+$out += (Compare-Counts 'Against batch3 baseline' $current $bb) + $nl + $nl
 
 if ($baseBatch -and $baseBatch.hookWarnings) {
 	$out += "### Batch3 Hook Warning Buckets (baseline reference)" + $nl
@@ -223,10 +223,10 @@ if ($ruleDelta.Count -gt 0) {
 }
 # Determine status mirroring gate logic
 $gateFail = $false
-if ($bm -and $deltaTotalDisplay -ne $null) {
+if ($bm -and $null -ne $deltaTotalDisplay) {
 	if ($deltaTotalDisplay -gt $MaxTotalDelta) { $gateFail = $true }
 }
-if ($ruleDelta.Count -gt 0 -and $MaxRuleDelta -ge 0 -and $worstDeltaDisplay -ne $null) {
+if ($ruleDelta.Count -gt 0 -and $MaxRuleDelta -ge 0 -and $null -ne $worstDeltaDisplay) {
 	if ($worstDeltaDisplay -gt $MaxRuleDelta) { $gateFail = $true }
 }
 if ($gateFail) { $gateStatus = 'FAIL' }
@@ -238,7 +238,7 @@ if ($bm) {
 } else {
 	$out += "- total delta vs main baseline: (no baseline)" + $nl
 }
-if ($worstDeltaDisplay -ne $null) {
+if ($null -ne $worstDeltaDisplay) {
 	$out += ("- per-rule max delta since last snapshot: {0} (allowed: {1})" -f $worstDeltaDisplay, $MaxRuleDelta) + $nl
 } else {
 	$out += "- per-rule max delta since last snapshot: (no previous snapshot)" + $nl
@@ -250,8 +250,8 @@ $out += "## Invocation Parameters" + $nl
 $out += ("- FrontendDir: {0}" -f $FrontendDir) + $nl
 $out += ("- ReportOut: {0}" -f $ReportOut) + $nl
 $out += ("- SnapshotOut: {0}" -f $SnapshotOut) + $nl
-$out += ("- BaselineMain: {0}" -f (Ensure-Path $BaselineMain)) + $nl
-$out += ("- BaselineBatch: {0}" -f (Ensure-Path $BaselineBatch)) + $nl
+$out += ("- BaselineMain: {0}" -f (Resolve-SafePath $BaselineMain)) + $nl
+$out += ("- BaselineBatch: {0}" -f (Resolve-SafePath $BaselineBatch)) + $nl
 $out += ("- MaxTotalDelta: {0}" -f $MaxTotalDelta) + $nl
 $out += ("- MaxRuleDelta: {0}" -f $MaxRuleDelta) + $nl
 $out += ("- TopN: {0}" -f $TopN) + $nl

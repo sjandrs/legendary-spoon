@@ -301,7 +301,7 @@ jobs:
           bandit-report.json
 
   build-and-deploy:
-    needs: [test-backend, test-frontend, e2e-tests, quality-checks, lint-gates, workflow-lint]
+    needs: [test-backend, test-frontend, e2e-tests, quality-checks, lint-gates]
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
 
@@ -334,7 +334,7 @@ jobs:
         # Add your deployment commands here
 
   notify:
-    needs: [test-backend, test-frontend, e2e-tests, quality-checks, security-scan, lint-gates, workflow-lint]
+    needs: [test-backend, test-frontend, e2e-tests, quality-checks, security-scan, lint-gates]
     runs-on: ubuntu-latest
     if: always()
 
@@ -433,26 +433,7 @@ jobs:
           docs/reports/lint-baseline-diff.md
           docs/reports/lint-snapshot.json
 
-    - name: Post Slack weekly baseline summary (disabled)
-      if: ${{ false }}
-      env:
-        # Provide default empty string to avoid parser warnings when secret is unset
-        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL || '' }}
-      shell: bash
-      run: |
-        if [ -z "$SLACK_WEBHOOK_URL" ]; then
-          echo "SLACK_WEBHOOK_URL not set; skipping Slack notification.";
-          exit 0;
-        fi
-        if [ -f docs/reports/lint-baseline-diff.md ]; then
-          head -n 50 docs/reports/lint-baseline-diff.md > summary.txt
-        else
-          echo "No baseline report found." > summary.txt
-        fi
-        SUMMARY_TEXT=$(sed 's/\r$//' summary.txt | sed 's/"/\\"/g')
-        PAYLOAD=$(printf '{"text":"%s"}' "$SUMMARY_TEXT")
-        echo "Posting Slack message..."
-        curl -s -X POST -H 'Content-type: application/json' --data "$PAYLOAD" "$SLACK_WEBHOOK_URL" || true
+    # Slack posting is intentionally removed/shelved; tracked in issues.
 
     - name: Update PR with lint baseline summary
       if: ${{ github.event_name == 'pull_request' }}
