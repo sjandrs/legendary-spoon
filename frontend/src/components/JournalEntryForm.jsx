@@ -24,7 +24,7 @@ const JournalEntryForm = ({ onSuccess }) => {
       await createJournalEntry(form);
       setForm({ date: '', description: '', debit_account: '', credit_account: '', amount: '' });
       if (onSuccess) onSuccess();
-    } catch (err) {
+    } catch (_err) {
       setError('Failed to create journal entry');
     }
     setLoading(false);

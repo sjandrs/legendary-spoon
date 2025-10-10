@@ -30,8 +30,8 @@ function CustomerLifetimeValue() {
     try {
       const response = await api.get('/api/contacts/');
       setContacts(response.data.results || response.data);
-    } catch (err) {
-      console.error('Error fetching contacts:', err);
+    } catch (_err) {
+      console.error('Error fetching contacts:', _err);
     }
   };
 
@@ -41,8 +41,8 @@ function CustomerLifetimeValue() {
     try {
       const response = await api.get(`/api/analytics/clv/${id}/`);
       setClvData(response.data);
-    } catch (err) {
-      setError(err.response?.data?.error || 'Failed to calculate CLV');
+    } catch (_err) {
+      setError(_err.response?.data?.error || 'Failed to calculate CLV');
       setClvData(null);
     } finally {
       setLoading(false);

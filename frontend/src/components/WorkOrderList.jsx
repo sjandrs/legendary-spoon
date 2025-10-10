@@ -37,8 +37,8 @@ const WorkOrderList = () => {
             : order
         ));
       }
-    } catch (error) {
-      console.error('Error sending notification:', error);
+    } catch (_err) {
+      console.error('Error sending notification:', _err);
       setMessage('Error sending notification. Please try again.');
     } finally {
       setSendingNotification(null);

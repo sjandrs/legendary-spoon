@@ -17,9 +17,9 @@ const KnowledgeBase = () => {
         const articleData = Array.isArray(response.data) ? response.data : [];
         setArticles(articleData);
         setError(null);
-      } catch (err) {
+      } catch (_err) {
         setError('Failed to load knowledge base articles.');
-        console.error(err);
+        console.error(_err);
         setArticles([]); // Set to empty array on error
       } finally {
         setLoading(false);

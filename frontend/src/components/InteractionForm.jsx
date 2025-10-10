@@ -37,8 +37,8 @@ function InteractionForm() {
     try {
       const response = await api.get('/api/accounts/');
       setAccounts(response.data.results || response.data);
-    } catch (err) {
-      console.error('Error fetching accounts:', err);
+    } catch (_err) {
+      console.error('Error fetching accounts:', _err);
     }
   };
 
@@ -48,8 +48,8 @@ function InteractionForm() {
         params: { account: accountId },
       });
       setContacts(response.data.results || response.data);
-    } catch (err) {
-      console.error('Error fetching contacts:', err);
+    } catch (_err) {
+      console.error('Error fetching contacts:', _err);
     }
   };
 
@@ -103,9 +103,9 @@ function InteractionForm() {
 
       await api.post('/api/interactions/', interactionData);
       navigate('/interactions');
-    } catch (err) {
-      console.error('Error creating interaction:', err);
-      setError(err.response?.data?.detail || 'Failed to log interaction. Please try again.');
+    } catch (_err) {
+      console.error('Error creating interaction:', _err);
+      setError(_err.response?.data?.detail || 'Failed to log interaction. Please try again.');
     } finally {
       setLoading(false);
     }

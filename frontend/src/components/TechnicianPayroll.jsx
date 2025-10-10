@@ -34,8 +34,8 @@ function TechnicianPayroll() {
     try {
       const response = await api.get('/api/technicians/');
       setTechnicians(response.data.results || response.data);
-    } catch (err) {
-      console.error('Failed to fetch technicians:', err);
+    } catch (_err) {
+      console.error('Failed to fetch technicians:', _err);
     }
   };
 
@@ -47,9 +47,9 @@ function TechnicianPayroll() {
         params: { start_date: startDate, end_date: endDate }
       });
       setPayrollData(response.data);
-    } catch (err) {
+    } catch (_err) {
       setError('Failed to load payroll data');
-      console.error(err);
+      console.error(_err);
     } finally {
       setLoading(false);
     }

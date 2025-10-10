@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { Link } from 'react-router-dom';
-import { getTasks, getActivityLogs } from '../api';
+import { getTasks } from '../api';
 import TaskCalendar from './TaskCalendar';
 import ActivityTimeline from './ActivityTimeline';
 import AuthContext from '../contexts/AuthContext';
@@ -54,8 +54,8 @@ const TaskDashboard = () => {
         .slice(0, 5);
       setRecentTasks(sortedTasks);
 
-    } catch (error) {
-      console.error('Error loading task stats:', error);
+    } catch (_err) {
+      console.error('Error loading task stats:', _err);
     } finally {
       setLoading(false);
     }

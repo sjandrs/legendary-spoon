@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { post } from '../api';
 import './SearchResults.css';
 
 const SearchResults = ({ results, onBulkAction, onLoadMore }) => {

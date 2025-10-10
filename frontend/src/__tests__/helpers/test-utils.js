@@ -218,8 +218,8 @@ export const renderWithRole = (component, role = 'salesRep') => {
 export const TestErrorBoundary = ({ children, onError = jest.fn() }) => {
   try {
     return children;
-  } catch (error) {
-    onError(error);
+  } catch (_err) {
+    onError(_err);
     return <div role="alert">Something went wrong</div>;
   }
 };

@@ -1,7 +1,7 @@
 import React from 'react';
 import { screen, waitFor, within, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { renderWithProviders, mockUsers, createMockApiCall, testComponentAccessibility } from '../helpers/test-utils';
+import { renderWithProviders, mockUsers, testComponentAccessibility } from '../helpers/test-utils';
 import TaskDashboard from '../../components/TaskDashboard';
 
 // Mock child components

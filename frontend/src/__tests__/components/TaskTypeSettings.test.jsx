@@ -1,7 +1,7 @@
 import React from 'react';
 import { screen, waitFor, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { renderWithProviders, mockUsers, createMockApiCall, testComponentAccessibility } from '../helpers/test-utils';
+import { renderWithProviders, testComponentAccessibility } from '../helpers/test-utils';
 import TaskTypeSettings from '../../components/TaskTypeSettings';
 
 // Mock API module

@@ -1,7 +1,7 @@
 import React from 'react';
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { renderWithProviders, mockUsers } from '../helpers/test-utils';
+import { renderWithProviders } from '../helpers/test-utils';
 import WorkOrderForm from '../../components/WorkOrderForm';
 import * as api from '../../api';
 

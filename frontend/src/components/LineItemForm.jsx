@@ -18,7 +18,7 @@ const LineItemForm = ({ onSuccess }) => {
       await createLineItem(form);
       setForm({ work_order: '', description: '', quantity: 1, unit_price: 0 });
       if (onSuccess) onSuccess();
-    } catch (err) {
+    } catch (_err) {
       setError('Failed to create line item');
     }
     setLoading(false);

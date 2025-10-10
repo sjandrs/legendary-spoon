@@ -34,8 +34,8 @@ function QuoteList() {
         setQuotes(response.data);
       }
       setError(null);
-    } catch (err) {
-      console.error('Error fetching quotes:', err);
+    } catch (_err) {
+      console.error('Error fetching quotes:', _err);
       setError('Failed to load quotes. Please try again.');
     } finally {
       setLoading(false);

@@ -15,9 +15,9 @@ function LoginPage() {
     try {
       await login(username, password);
       navigate('/');
-    } catch (err) {
+    } catch (_err) {
       setError('Failed to login. Please check your credentials.');
-      console.error(err);
+      console.error(_err);
     }
   };
 

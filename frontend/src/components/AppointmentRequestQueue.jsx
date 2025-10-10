@@ -32,8 +32,8 @@ const AppointmentRequestQueue = () => {
       const response = await api.get('/api/appointment-requests/');
       const requestData = response.data.results || response.data;
       setRequests(requestData);
-    } catch (error) {
-      console.error('Error loading appointment requests:', error);
+    } catch (_err) {
+      console.error('Error loading appointment requests:', _err);
     } finally {
       setLoading(false);
     }
@@ -43,8 +43,8 @@ const AppointmentRequestQueue = () => {
     try {
       const response = await api.get('/api/technicians/');
       setTechnicians(response.data.results || response.data);
-    } catch (error) {
-      console.error('Error loading technicians:', error);
+    } catch (_err) {
+      console.error('Error loading technicians:', _err);
     }
   };
 
@@ -94,8 +94,8 @@ const AppointmentRequestQueue = () => {
         updated_at: new Date().toISOString()
       });
       loadRequests();
-    } catch (error) {
-      console.error('Error updating request status:', error);
+    } catch (_err) {
+      console.error('Error updating request status:', _err);
     }
   };
 
@@ -140,8 +140,8 @@ const AppointmentRequestQueue = () => {
       setShowScheduleModal(false);
       setSelectedRequest(null);
       loadRequests();
-    } catch (error) {
-      console.error('Error scheduling appointment:', error);
+    } catch (_err) {
+      console.error('Error scheduling appointment:', _err);
     } finally {
       setLoading(false);
     }

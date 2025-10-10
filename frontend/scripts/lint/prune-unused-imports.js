@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+/* eslint-env node */
 /*
  * prune-unused-imports.js
  * Phase 1 codemod: identifies unused imported specifiers and prints a diff or rewrites file.
@@ -6,6 +7,7 @@
  */
 import fs from 'fs';
 import path from 'path';
+import process from 'node:process';
 import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -13,6 +15,7 @@ const __dirname = path.dirname(__filename);
 
 const ROOT = path.resolve(__dirname, '../../src');
 const WRITE = process.argv.includes('--write');
+const TESTS_ONLY = process.argv.includes('--tests-only');
 
 function walk(dir, acc = []) {
   for (const entry of fs.readdirSync(dir)) {
@@ -21,7 +24,9 @@ function walk(dir, acc = []) {
     if (stat.isDirectory()) {
       walk(full, acc);
     } else if (/\.jsx?$/.test(entry)) {
-      acc.push(full);
+      // If tests-only, include files that look like tests under __tests__ or with .test. in name
+      const isTest = /__tests__/.test(full) || /\.test\.[jt]sx?$/.test(entry);
+      if (!TESTS_ONLY || isTest) acc.push(full);
     }
   }
   return acc;

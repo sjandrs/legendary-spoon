@@ -42,8 +42,8 @@ const ContactForm = () => {
                     });
                 }
                 setError(null);
-            } catch (err) {
-                console.error("Failed to fetch data", err);
+            } catch (_err) {
+                console.error("Failed to fetch data", _err);
                 setError("Failed to load necessary data. Please try again.");
             } finally {
                 setLoading(false);
@@ -77,9 +77,9 @@ const ContactForm = () => {
                 response = await api.post('/api/contacts/', payload);
             }
             navigate(`/contacts/${response.data.id}`);
-        } catch (err) {
-            console.error("Failed to save contact", err.response.data);
-            const errorData = err.response.data;
+        } catch (_err) {
+            console.error("Failed to save contact", _err);
+            const errorData = _err.response?.data || { detail: 'Unknown error' };
             // Format errors for display
             const errorMessages = Object.entries(errorData).map(([key, value]) => `${key}: ${Array.isArray(value) ? value.join(', ') : value}`);
             setError(errorMessages.join('; '));

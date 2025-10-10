@@ -20,9 +20,9 @@ function ProjectTemplateList() {
     try {
       const response = await api.get('/api/project-templates/');
       setTemplates(response.data.results || response.data);
-    } catch (err) {
+    } catch (_err) {
       setError('Failed to load project templates');
-      console.error(err);
+      console.error(_err);
     } finally {
       setLoading(false);
     }
@@ -36,9 +36,9 @@ function ProjectTemplateList() {
     try {
       await api.delete(`/api/project-templates/${id}/`);
       setTemplates(templates.filter(t => t.id !== id));
-    } catch (err) {
+    } catch (_err) {
       alert('Failed to delete template');
-      console.error(err);
+      console.error(_err);
     }
   };
 

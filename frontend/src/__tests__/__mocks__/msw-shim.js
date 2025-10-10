@@ -54,12 +54,13 @@ const rest = {};
       if (typeof path === 'string' && path.startsWith('http')) {
         normalizedPath = new URL(path).pathname;
       }
-    } catch (_) {}
+    } catch (_err) {}
     return { method: method.toUpperCase(), path: normalizedPath, regex: normalizedPath.includes(':') ? pathToRegex(normalizedPath) : null, resolver };
   };
 });
 
 function setupServer(...handlers) {
+  const initialHandlers = handlers.slice();
   const store = handlers.slice();
   const original = {
     get: axios.get,
@@ -74,18 +75,30 @@ function setupServer(...handlers) {
   async function handle(method, url, data, config = {}) {
     const handler = matchHandler(store, method, url);
     if (!handler) {
-      const fn = original[method.toLowerCase()];
-      return method === 'GET' || method === 'DELETE'
-        ? fn(url, config)
-        : fn(url, data, config);
+      const err = new Error(`MSW shim: no handler for ${method} ${url}`);
+      // mimic Axios network error (no response)
+      err.config = { method, url };
+      throw err;
     }
-    const req = { url, method, body: data, params: config.params || {}, headers: config.headers || {} };
+    let urlObj;
+    try {
+      urlObj = new URL(url);
+    } catch (_err) {
+      urlObj = new URL(url, 'http://localhost');
+    }
+    const req = {
+      url: urlObj, // expose URL object with searchParams like MSW
+      method,
+      body: data,
+      params: config.params || Object.fromEntries(urlObj.searchParams.entries()),
+      headers: config.headers || {},
+    };
     let outcome;
     try {
       outcome = handler.resolver(req, res, ctx);
-    } catch (e) {
-      // Resolver threw (e.g., network error) -> propagate as axios rejection
-      throw e;
+    } catch (_err) {
+      // Resolver threw (_err.g., network error) -> propagate as axios rejection
+      throw _err;
     }
     const result = outcome && typeof outcome.then === 'function' ? await outcome : outcome;
     const { status = 200, data: respData, delay: wait = 0 } = result || {};
@@ -111,7 +124,7 @@ function setupServer(...handlers) {
       let fullUrl = config.url || '';
       try {
         if (base) fullUrl = new URL(config.url, base).toString();
-      } catch (_) {}
+      } catch (_err) {}
       return handle(method, fullUrl, config.data, config);
     };
 
@@ -122,7 +135,7 @@ function setupServer(...handlers) {
         let fullUrl = config.url || '';
         try {
           if (base) fullUrl = new URL(config.url, base).toString();
-        } catch (_) {}
+        } catch (_err) {}
         return handle(method, fullUrl, config.data, config);
       };
     }
@@ -142,7 +155,9 @@ function setupServer(...handlers) {
       }
     },
     resetHandlers(...next) {
+      // Reset to the initially provided handlers, then apply any overrides
       store.length = 0;
+      store.push(...initialHandlers);
       if (next.length) store.push(...next);
     },
     use(...next) { store.push(...next); },

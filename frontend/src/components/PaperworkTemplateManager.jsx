@@ -26,8 +26,8 @@ const PaperworkTemplateManager = () => {
     try {
       const response = await api.get('/api/paperwork-templates/');
       setTemplates(response.data.results || response.data);
-    } catch (error) {
-      console.error('Error loading templates:', error);
+    } catch (_err) {
+      console.error('Error loading templates:', _err);
     }
   };
 
@@ -71,8 +71,8 @@ const PaperworkTemplateManager = () => {
       setShowEditor(false);
       setSelectedTemplate(null);
       loadTemplates();
-    } catch (error) {
-      console.error('Error saving template:', error);
+    } catch (_err) {
+      console.error('Error saving template:', _err);
     } finally {
       setLoading(false);
     }
@@ -84,8 +84,8 @@ const PaperworkTemplateManager = () => {
     try {
       await api.delete(`/api/paperwork-templates/${templateId}/`);
       loadTemplates();
-    } catch (error) {
-      console.error('Error deleting template:', error);
+    } catch (_err) {
+      console.error('Error deleting template:', _err);
     }
   };
 

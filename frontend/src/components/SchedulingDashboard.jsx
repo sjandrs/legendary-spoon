@@ -1,17 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Line, Bar, Doughnut } from 'react-chartjs-2';
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  BarElement,
-  ArcElement,
-  Title,
-  Tooltip,
-  Legend,
-} from 'chart.js';
+import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, BarElement, ArcElement, Title, Tooltip, Legend } from 'chart.js';
 import api from '../api';
 import './SchedulingDashboard.css';
 
@@ -48,8 +37,8 @@ const SchedulingDashboard = () => {
         params: { period: selectedPeriod, technician: selectedTechnician }
       });
       setDashboardData(response.data);
-    } catch (error) {
-      console.error('Error loading dashboard data:', error);
+    } catch (_err) {
+      console.error('Error loading dashboard data:', _err);
     }
   };
 
@@ -59,8 +48,8 @@ const SchedulingDashboard = () => {
         params: { period: selectedPeriod, technician: selectedTechnician }
       });
       setAnalyticsData(response.data.results || response.data);
-    } catch (error) {
-      console.error('Error loading analytics data:', error);
+    } catch (_err) {
+      console.error('Error loading analytics data:', _err);
     } finally {
       setLoading(false);
     }
@@ -70,8 +59,8 @@ const SchedulingDashboard = () => {
     try {
       const response = await api.get('/api/technicians/');
       setTechnicians(response.data.results || response.data);
-    } catch (error) {
-      console.error('Error loading technicians:', error);
+    } catch (_err) {
+      console.error('Error loading technicians:', _err);
     }
   };
 

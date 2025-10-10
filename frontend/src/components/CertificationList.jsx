@@ -21,9 +21,9 @@ function CertificationList() {
     try {
       const response = await api.get('/api/certifications/');
       setCertifications(response.data.results || response.data);
-    } catch (err) {
+    } catch (_err) {
       setError('Failed to load certifications');
-      console.error(err);
+      console.error(_err);
     } finally {
       setLoading(false);
     }
@@ -37,9 +37,9 @@ function CertificationList() {
     try {
       await api.delete(`/api/certifications/${id}/`);
       setCertifications(certifications.filter(c => c.id !== id));
-    } catch (err) {
+    } catch (_err) {
       alert('Failed to delete certification');
-      console.error(err);
+      console.error(_err);
     }
   };
 

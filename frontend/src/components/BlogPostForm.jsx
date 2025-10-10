@@ -41,7 +41,7 @@ function BlogPostForm() {
         const res = await api.get('/api/tags/');
         const results = res.data?.results || [];
         setAvailableTags(results);
-      } catch (e) {
+      } catch (_err) {
         // Non-blocking fallback for tests
         setAvailableTags([
           { id: 1, name: 'Technology' },
@@ -56,7 +56,13 @@ function BlogPostForm() {
   const fetchPost = async () => {
     setLoading(true);
     try {
-      const response = await api.get(`/api/blog-posts/${id}/`);
+  // Prefer legacy posts endpoint; fall back to blog-posts if unavailable
+  let response;
+  try {
+    response = await api.get(`/api/posts/${id}/`);
+  } catch (_err) {
+    response = await api.get(`/api/blog-posts/${id}/`);
+  }
       const post = response.data;
       setFormData({
         title: post.title || '',
@@ -75,7 +81,7 @@ function BlogPostForm() {
       if (Array.isArray(post.tags)) {
         setSelectedTags(post.tags.map(t => (typeof t === 'string' ? t : t.name)));
       }
-    } catch (err) {
+    } catch (_err) {
       // Fallback for tests if MSW interception is inactive
       const fallback = {
         title: 'Existing Blog Post',
@@ -191,21 +197,21 @@ function BlogPostForm() {
       };
 
       if (id) {
-        await api.put(`/api/blog-posts/${id}/`, payload);
+  await api.put(`/api/blog-posts/${id}/`, payload);
         setSuccess('Blog post updated successfully');
       } else {
-        await api.post('/api/blog-posts/', payload);
+  await api.post('/api/blog-posts/', payload);
         setSuccess('Blog post created successfully');
       }
       // Optionally navigate after a brief delay to allow success message visibility in tests
       // navigate('/blog');
-    } catch (err) {
+    } catch (_err) {
       setSuccess('');
-  const apiMsg = err.response?.data?.error || err.response?.data?.detail;
-  if (apiMsg) setError(apiMsg);
-  else if (!err.response) setError('Network error');
+      const apiMsg = _err.response?.data?.error || _err.response?.data?.detail;
+      if (apiMsg) setError(apiMsg);
+      else if (!_err.response) setError('Network error');
       else setError('Failed to save blog post');
-      console.error(err);
+      console.error('Failed to save blog post:', _err);
     } finally {
       setSaving(false);
     }

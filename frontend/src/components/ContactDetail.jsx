@@ -20,8 +20,8 @@ const ContactDetail = () => {
                 const contactResponse = await api.get(`/api/contacts/${id}/`);
                 setContact(contactResponse.data);
                 setError(null);
-            } catch (err) {
-                console.error('There was an error fetching the contact details!', err);
+            } catch (_err) {
+                console.error('There was an error fetching the contact details!', _err);
                 setError('Failed to load contact details. You may not have permission to view this contact.');
             } finally {
                 setLoading(false);
@@ -37,8 +37,8 @@ const ContactDetail = () => {
                     ? interactionsResponse.data.results
                     : (Array.isArray(interactionsResponse.data) ? interactionsResponse.data : []);
                 setInteractions(interactionData);
-            } catch (err) {
-                console.error('There was an error fetching the contact details!', err);
+            } catch (_err) {
+                console.error('There was an error fetching the contact details!', _err);
                 // Don't set main error for interaction failures - let InteractionHistory handle this
                 setInteractions([]);
             }

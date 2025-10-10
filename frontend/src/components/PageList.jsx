@@ -17,10 +17,12 @@ function PageList() {
   const fetchPages = async () => {
     try {
       setLoading(true);
-      const response = await api.get('/api/pages/');
-      setPages(response.data);
-    } catch (error) {
-      console.error('Error fetching pages:', error);
+  const response = await api.get('/api/pages/');
+  const data = response?.data ?? [];
+  // Support both array and paginated shapes used in tests
+  setPages(Array.isArray(data) ? data : (data.results || []));
+    } catch (_err) {
+      console.error('Error fetching pages:', _err);
     } finally {
       setLoading(false);
     }
@@ -31,17 +33,20 @@ function PageList() {
       try {
         await api.delete(`/api/pages/${id}/`);
         setPages(pages.filter(page => page.id !== id));
-      } catch (error) {
-        console.error('Error deleting page:', error);
+      } catch (_err) {
+        console.error('Error deleting page:', _err);
         alert('Failed to delete page. Please try again.');
       }
     }
   };
 
-  const filteredPages = pages.filter(page => {
-    const matchesSearch = page.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         page.slug.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = statusFilter === 'all' || page.status === statusFilter;
+  const filteredPages = (Array.isArray(pages) ? pages : []).filter(page => {
+    const title = (page.title || '').toString();
+    const slug = (page.slug || '').toString();
+    const matchesSearch = title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         slug.toLowerCase().includes(searchTerm.toLowerCase());
+    const status = page.status || (page.is_published ? 'published' : 'draft');
+    const matchesStatus = statusFilter === 'all' || status === statusFilter;
     return matchesSearch && matchesStatus;
   });
 
@@ -60,7 +65,7 @@ function PageList() {
     <div className="page-list">
       <div className="header">
         <h1>CMS Pages</h1>
-        <button className="btn-primary" onClick={() => navigate('/pages/new')}>
+        <button className="btn-primary" onClick={() => navigate('/pages/new')} data-testid="new-page-button">
           + Create Page
         </button>
       </div>
@@ -68,7 +73,7 @@ function PageList() {
       <div className="controls">
         <input
           type="text"
-          placeholder="Search pages by title or slug..."
+          placeholder="Search pages"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           className="search-input"
@@ -79,15 +84,15 @@ function PageList() {
           className="filter-select"
         >
           <option value="all">All Status</option>
-          <option value="draft">Draft</option>
-          <option value="published">Published</option>
+          <option value="draft">Not Live Only</option>
+          <option value="published">Live Only</option>
           <option value="archived">Archived</option>
         </select>
       </div>
 
       {filteredPages.length === 0 ? (
         <div className="empty-state">
-          <p>No pages found. Create your first page to get started!</p>
+          <p>No pages found</p>
         </div>
       ) : (
         <table className="pages-table striped-table">
@@ -97,7 +102,7 @@ function PageList() {
               <th>Slug</th>
               <th>Status</th>
               <th>Template</th>
-              <th>Published</th>
+              <th>Publish Date</th>
               <th>Updated</th>
               <th>Actions</th>
             </tr>
@@ -112,13 +117,13 @@ function PageList() {
                   <code className="slug-code">/{page.slug}</code>
                 </td>
                 <td>
-                  <span className={`status-badge status-${page.status}`}>
-                    {page.status}
+                  <span className={`status-badge status-${page.is_published ? 'published' : (page.status || 'draft')}`}>
+                    {page.is_published ? 'Published' : (page.status ? page.status : 'draft')}
                   </span>
                 </td>
                 <td>{page.template || 'Default'}</td>
                 <td>
-                  {page.published_at ? new Date(page.published_at).toLocaleDateString() : 'Not published'}
+                  {page.published_at ? new Date(page.published_at).toLocaleDateString() : 'Not Live'}
                 </td>
                 <td>{new Date(page.updated_at).toLocaleDateString()}</td>
                 <td>
@@ -134,6 +139,7 @@ function PageList() {
                       className="btn-edit"
                       onClick={() => navigate(`/pages/${page.id}/edit`)}
                       title="Edit Page"
+                      data-testid={`edit-page-${page.id}`}
                     >
                       Edit
                     </button>
@@ -141,6 +147,7 @@ function PageList() {
                       className="btn-delete"
                       onClick={() => handleDelete(page.id)}
                       title="Delete Page"
+                      data-testid={`delete-page-${page.id}`}
                     >
                       Delete
                     </button>

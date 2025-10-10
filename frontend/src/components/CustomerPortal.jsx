@@ -42,8 +42,8 @@ const CustomerPortal = () => {
         { id: 'installation', name: 'New Installation' },
         { id: 'inspection', name: 'Inspection/Assessment' }
       ]);
-    } catch (error) {
-      console.error('Error loading service types:', error);
+    } catch (_err) {
+      console.error('Error loading service types:', _err);
     }
   };
 
@@ -76,8 +76,8 @@ const CustomerPortal = () => {
       }
 
       setAvailableSlots(slots.filter(slot => slot.available));
-    } catch (error) {
-      console.error('Error loading available slots:', error);
+    } catch (_err) {
+      console.error('Error loading available slots:', _err);
     }
   };
 
@@ -118,8 +118,8 @@ const CustomerPortal = () => {
         });
         setSelectedSlot(null);
       }
-    } catch (error) {
-      console.error('Error submitting appointment request:', error);
+    } catch (_err) {
+      console.error('Error submitting appointment request:', _err);
       setMessage('Error submitting your request. Please try again or call us directly.');
     } finally {
       setLoading(false);

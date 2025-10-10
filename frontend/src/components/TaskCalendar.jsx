@@ -36,8 +36,8 @@ const TaskCalendar = () => {
     try {
       const response = await getTasks();
       setTasks(response.data);
-    } catch (error) {
-      console.error('Error loading tasks:', error);
+    } catch (_err) {
+      console.error('Error loading tasks:', _err);
     }
   };
 
@@ -78,8 +78,8 @@ const TaskCalendar = () => {
       setShowModal(false);
       setSelectedTask(null);
       loadTasks();
-    } catch (error) {
-      console.error('Error saving task:', error);
+    } catch (_err) {
+      console.error('Error saving task:', _err);
     }
   };
 
@@ -193,8 +193,8 @@ const TaskModal = ({ task, isEditing, onSave, onClose }) => {
             if (!formData.task_type && activeTypes.length > 0) {
                 setFormData(prev => ({ ...prev, task_type: activeTypes[0].id }));
             }
-        } catch (err) {
-            console.error("Failed to fetch task types for modal", err);
+        } catch (_err) {
+            console.error("Failed to fetch task types for modal", _err);
         }
     };
     fetchTaskTypes();

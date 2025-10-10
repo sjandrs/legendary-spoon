@@ -5,12 +5,12 @@
  */
 
 import React from 'react';
-import { render, screen, waitFor, within } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import userEvent from '@testing-library/user-event';
 // TODO: Re-enable real MSW server once polyfills for WebSocket/TransformStream are stabilized in Jest env.
 // Hybrid fallback: directly mock API client instead of MSW server
-import { get, del as apiDelete } from '../../api';
+import { get } from '../../api';
 jest.mock('../../api', () => ({
   get: jest.fn(),
   post: jest.fn(),

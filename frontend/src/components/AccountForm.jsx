@@ -38,9 +38,9 @@ const AccountForm = () => {
     try {
       const response = await get(`/api/accounts/${id}/`);
       setFormData(response.data);
-    } catch (err) {
+    } catch (_err) {
       setSubmitError('Failed to load account details.');
-      console.error('Error loading account:', err);
+      console.error('Error loading account:', _err);
     }
   };
 
@@ -93,9 +93,9 @@ const AccountForm = () => {
       }
 
       navigate('/accounts');
-    } catch (err) {
-      setSubmitError(err.response?.data?.message || 'Failed to save account. Please try again.');
-      console.error('Error saving account:', err);
+    } catch (_err) {
+      setSubmitError(_err.response?.data?.message || 'Failed to save account. Please try again.');
+      console.error('Error saving account:', _err);
     } finally {
       setLoading(false);
     }

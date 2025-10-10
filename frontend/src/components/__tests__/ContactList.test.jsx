@@ -1,7 +1,7 @@
 import React from 'react';
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { renderWithProviders, createMockContact } from '../../__tests__/helpers/test-utils';
+import { renderWithProviders } from '../../__tests__/helpers/test-utils';
 import ContactList from '../ContactList';
 import * as api from '../../api';
 

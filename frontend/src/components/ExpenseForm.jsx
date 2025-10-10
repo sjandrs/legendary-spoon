@@ -37,9 +37,9 @@ const ExpenseForm = () => {
         vendor: expense.vendor || '',
         receipt: null // File inputs can't be pre-populated
       });
-    } catch (err) {
+    } catch (_err) {
       setError('Failed to load expense');
-      console.error('Error fetching expense:', err);
+      console.error('Error fetching expense:', _err);
     }
   };
 
@@ -75,9 +75,9 @@ const ExpenseForm = () => {
       }
 
       navigate('/expenses');
-    } catch (err) {
+    } catch (_err) {
       setError('Failed to save expense');
-      console.error('Error saving expense:', err);
+      console.error('Error saving expense:', _err);
     } finally {
       setLoading(false);
     }

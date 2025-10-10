@@ -18,7 +18,7 @@ const WorkOrderForm = ({ onSuccess }) => {
       await createWorkOrder(form);
       setForm({ project: '', description: '', status: 'open' });
       if (onSuccess) onSuccess();
-    } catch (err) {
+    } catch (_err) {
       setError('Failed to create work order');
     }
     setLoading(false);

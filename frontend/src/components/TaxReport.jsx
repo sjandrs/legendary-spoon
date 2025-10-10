@@ -16,9 +16,9 @@ const TaxReport = () => {
       setLoading(true);
       const response = await api.get(`/api/tax-report/?year=${selectedYear}`);
       setTaxData(response.data);
-    } catch (err) {
+    } catch (_err) {
       setError('Failed to load tax data');
-      console.error('Error fetching tax data:', err);
+      console.error('Error fetching tax data:', _err);
     } finally {
       setLoading(false);
     }

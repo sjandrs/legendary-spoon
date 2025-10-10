@@ -38,9 +38,9 @@ const AnalyticsDashboard = () => {
             setLoading(true);
             const response = await getAdvancedAnalyticsDashboard();
             setAnalytics(response.data);
-        } catch (err) {
+        } catch (_err) {
             setError('Failed to fetch advanced analytics.');
-            console.error(err);
+            console.error(_err);
         } finally {
             setLoading(false);
         }
@@ -55,8 +55,8 @@ const AnalyticsDashboard = () => {
             setDealPredictionFeedback(
                 `Prediction: ${response.data.predicted_outcome} (${(response.data.confidence_score * 100).toFixed(1)}% confidence)`
             );
-        } catch (err) {
-            console.error('Failed to predict deal outcome:', err);
+        } catch (_err) {
+            console.error('Failed to predict deal outcome:', _err);
             setDealPredictionFeedback('Failed to predict deal outcome.');
         }
     };
@@ -77,8 +77,8 @@ const AnalyticsDashboard = () => {
                 }
             }));
             alert(`CLV: $${response.data.predicted_clv.toLocaleString()} (${(response.data.confidence * 100).toFixed(1)}% confidence)`);
-        } catch (err) {
-            console.error('Failed to calculate CLV:', err);
+        } catch (_err) {
+            console.error('Failed to calculate CLV:', _err);
         }
     };
 
@@ -98,8 +98,8 @@ const AnalyticsDashboard = () => {
                 }
             }));
             alert(`Generated ${response.data.message}`);
-        } catch (err) {
-            console.error('Failed to generate forecast:', err);
+        } catch (_err) {
+            console.error('Failed to generate forecast:', _err);
         }
     };
 

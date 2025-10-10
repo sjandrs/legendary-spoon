@@ -33,9 +33,9 @@ const AccountDetail = () => {
       setContacts(contactsRes.data.results || contactsRes.data);
       setDeals(dealsRes.data.results || dealsRes.data);
       setError(null);
-    } catch (err) {
+    } catch (_err) {
       setError('Failed to load account details.');
-      console.error('Error loading account:', err);
+      console.error('Error loading account:', _err);
     } finally {
       setLoading(false);
     }
@@ -46,9 +46,9 @@ const AccountDetail = () => {
       try {
         await del(`/api/accounts/${id}/`);
         navigate('/accounts');
-      } catch (err) {
+      } catch (_err) {
         alert('Failed to delete account. It may have related records.');
-        console.error('Error deleting account:', err);
+        console.error('Error deleting account:', _err);
       }
     }
   };

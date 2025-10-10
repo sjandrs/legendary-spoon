@@ -36,8 +36,8 @@ function PageForm() {
     try {
       const response = await api.get('/api/pages/');
       setPages(response.data);
-    } catch (error) {
-      console.error('Error fetching pages:', error);
+    } catch (_err) {
+      console.error('Error fetching pages:', _err);
     }
   };
 
@@ -50,8 +50,8 @@ function PageForm() {
         published_at: response.data.published_at ? response.data.published_at.split('T')[0] : '',
         parent_page: response.data.parent_page?.id || ''
       });
-    } catch (error) {
-      console.error('Error fetching page:', error);
+    } catch (_err) {
+      console.error('Error fetching page:', _err);
       alert('Failed to load page. Please try again.');
     } finally {
       setLoading(false);
@@ -93,8 +93,8 @@ function PageForm() {
         alert('Page created successfully!');
       }
       navigate('/pages');
-    } catch (error) {
-      console.error('Error saving page:', error);
+    } catch (_err) {
+      console.error('Error saving page:', _err);
       alert(`Failed to ${isEdit ? 'update' : 'create'} page. Please check all fields and try again.`);
     } finally {
       setLoading(false);

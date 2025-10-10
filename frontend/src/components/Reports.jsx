@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { get as apiGet } from '../api';
+import React, { useState, useEffect, useCallback } from 'react';
+import api, { get as apiGetNamed } from '../api';
 
 const Reports = () => {
   const [activeTab, setActiveTab] = useState('balance-sheet');
@@ -15,11 +15,16 @@ const Reports = () => {
     endDate: new Date().toISOString().split('T')[0]
   });
 
-  const fetchReports = async () => {
+  const fetchReports = useCallback(async () => {
     setLoading(true);
     setError(null);
 
     try {
+      // Dynamically import the API module so Jest mocks (both default and named exports) are observed in tests
+      const mod = await import('../api');
+      const apiGet = (mod && mod.default && typeof mod.default.get === 'function')
+        ? mod.default.get
+        : (typeof mod.get === 'function' ? mod.get : apiGetNamed);
       const [balanceRes, pnlRes, cashRes] = await Promise.all([
         apiGet(`/api/reports/balance-sheet/?as_of_date=${dateFilters.asOfDate}`),
         apiGet(`/api/reports/pnl/?start_date=${dateFilters.startDate}&end_date=${dateFilters.endDate}`),
@@ -29,17 +34,17 @@ const Reports = () => {
       setBalanceSheet(balanceRes.data);
       setProfitLoss(pnlRes.data);
       setCashFlow(cashRes.data);
-    } catch (err) {
+    } catch (_err) {
       setError('Failed to load reports. Please try again.');
-      console.error('Error fetching reports:', err);
+      console.error('Error fetching reports:', _err);
     } finally {
       setLoading(false);
     }
-  };
+  }, [dateFilters.asOfDate, dateFilters.startDate, dateFilters.endDate]);
 
   useEffect(() => {
     fetchReports();
-  }, [dateFilters]);
+  }, [fetchReports]);
 
   const exportToCSV = (data, filename) => {
     const csvContent = "data:text/csv;charset=utf-8," + data;

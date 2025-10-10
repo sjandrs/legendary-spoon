@@ -1,7 +1,6 @@
 import React from 'react';
-import { render, screen, waitFor, fireEvent } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { BrowserRouter } from 'react-router-dom';
 import ExpenseForm from '../../components/ExpenseForm';
 import { renderWithProviders } from '../helpers/test-utils';
 

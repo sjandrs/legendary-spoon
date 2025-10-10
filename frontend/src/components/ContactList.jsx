@@ -16,8 +16,8 @@ const ContactList = () => {
                 const contactData = Array.isArray(response.data) ? response.data : [];
                 setContacts(contactData);
                 setError(null);
-            } catch (err) {
-                console.error('There was an error fetching the contacts!', err);
+            } catch (_err) {
+                console.error('There was an error fetching the contacts!', _err);
                 setError('Failed to load contacts.');
                 setContacts([]); // Set to empty array on error
             } finally {

@@ -15,4 +15,4 @@ afterAll(() => server.close());
 
 // Force-load interceptors that were failing resolution in mixed ESM/CJS
 // eslint-disable-next-line import/no-extraneous-dependencies
-try { require('@mswjs/interceptors/ClientRequest'); } catch (e) { /* ignore */ }
+try { require('@mswjs/interceptors/ClientRequest'); } catch (_err) { /* ignore */ }

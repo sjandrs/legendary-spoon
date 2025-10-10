@@ -1,7 +1,6 @@
 import React from 'react';
-import { render, screen, waitFor, within } from '@testing-library/react';
+import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { BrowserRouter } from 'react-router-dom';
 import Warehouse from '../../components/Warehouse';
 import { renderWithProviders } from '../helpers/test-utils';
 import * as api from '../../api';

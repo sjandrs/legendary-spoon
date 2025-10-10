@@ -15,9 +15,9 @@ const DashboardPage = () => {
                 setLoading(true);
                 const response = await getDashboardAnalytics();
                 setAnalytics(response.data);
-            } catch (err) {
+            } catch (_err) {
                 setError('Failed to fetch dashboard analytics.');
-                console.error(err);
+                console.error(_err);
             } finally {
                 setLoading(false);
             }

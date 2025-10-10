@@ -39,9 +39,9 @@ function ProjectTemplateForm() {
       if (template.tasks && template.tasks.length > 0) {
         setTasks(template.tasks);
       }
-    } catch (err) {
+    } catch (_err) {
       setError('Failed to load template');
-      console.error(err);
+      console.error(_err);
     } finally {
       setLoading(false);
     }
@@ -89,9 +89,9 @@ function ProjectTemplateForm() {
       }
 
       navigate('/project-templates');
-    } catch (err) {
-      setError(err.response?.data?.detail || 'Failed to save template');
-      console.error(err);
+    } catch (_err) {
+      setError(_err.response?.data?.detail || 'Failed to save template');
+      console.error(_err);
     } finally {
       setSaving(false);
     }

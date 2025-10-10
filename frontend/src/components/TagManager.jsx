@@ -16,9 +16,9 @@ const TagManager = ({ associatedTags, onTagsUpdate, entityId, entityType }) => {
                 const response = await api.get('/api/tags/');
                 setAllTags(response.data.results || []);
                 setLoading(false);
-            } catch (err) {
+            } catch (_err) {
                 setError('Failed to load tags.');
-                console.error(err);
+                console.error(_err);
                 setLoading(false);
             }
         };
@@ -34,9 +34,9 @@ const TagManager = ({ associatedTags, onTagsUpdate, entityId, entityType }) => {
         try {
             const response = await api.patch(`/api/${entityType}/${entityId}/`, { tag_ids: updatedTagIds });
             onTagsUpdate(response.data.tags);
-        } catch (err) {
-            setError(`Failed to add tag. ${err.response?.data?.detail || ''}`);
-            console.error(err);
+        } catch (_err) {
+            setError(`Failed to add tag. ${_err.response?.data?.detail || ''}`);
+            console.error(_err);
         }
     };
 
@@ -45,9 +45,9 @@ const TagManager = ({ associatedTags, onTagsUpdate, entityId, entityType }) => {
         try {
             const response = await api.patch(`/api/${entityType}/${entityId}/`, { tag_ids: updatedTagIds });
             onTagsUpdate(response.data.tags);
-        } catch (err) {
-            setError(`Failed to remove tag. ${err.response?.data?.detail || ''}`);
-            console.error(err);
+        } catch (_err) {
+            setError(`Failed to remove tag. ${_err.response?.data?.detail || ''}`);
+            console.error(_err);
         }
     };
 
@@ -68,9 +68,9 @@ const TagManager = ({ associatedTags, onTagsUpdate, entityId, entityType }) => {
 
             onTagsUpdate(updateResponse.data.tags);
             setNewTagName(''); // Clear input
-        } catch (err) {
-            setError(`Failed to create and add tag. ${err.response?.data?.detail || ''}`);
-            console.error(err);
+        } catch (_err) {
+            setError(`Failed to create and add tag. ${_err.response?.data?.detail || ''}`);
+            console.error(_err);
         }
     };
 

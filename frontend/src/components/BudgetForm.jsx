@@ -33,9 +33,9 @@ const BudgetForm = () => {
         amount: budget.amount,
         notes: budget.notes || ''
       });
-    } catch (err) {
+    } catch (_err) {
       setError('Failed to load budget');
-      console.error('Error fetching budget:', err);
+      console.error('Error fetching budget:', _err);
     }
   };
 
@@ -65,9 +65,9 @@ const BudgetForm = () => {
       }
 
       navigate('/budgets');
-    } catch (err) {
+    } catch (_err) {
       setError('Failed to save budget');
-      console.error('Error saving budget:', err);
+      console.error('Error saving budget:', _err);
     } finally {
       setLoading(false);
     }

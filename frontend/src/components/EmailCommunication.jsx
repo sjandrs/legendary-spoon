@@ -18,9 +18,9 @@ const EmailCommunication = () => {
       setLoading(true);
       const response = await getOverdueInvoices();
       setOverdueInvoices(response.data);
-    } catch (err) {
+    } catch (_err) {
       setError('Failed to fetch overdue invoices');
-      console.error(err);
+      console.error(_err);
     } finally {
       setLoading(false);
     }
@@ -32,9 +32,9 @@ const EmailCommunication = () => {
       await sendInvoiceEmail(invoiceId);
       alert('Invoice email sent successfully!');
       fetchOverdueInvoices(); // Refresh the list
-    } catch (err) {
+    } catch (_err) {
       setError('Failed to send invoice email');
-      console.error(err);
+      console.error(_err);
     } finally {
       setSendingEmail(false);
     }
@@ -47,9 +47,9 @@ const EmailCommunication = () => {
       setEmailResults(response.data);
       alert(`Sent ${response.data.sent} reminders, ${response.data.failed} failed`);
       fetchOverdueInvoices(); // Refresh the list
-    } catch (err) {
+    } catch (_err) {
       setError('Failed to send overdue reminders');
-      console.error(err);
+      console.error(_err);
     } finally {
       setSendingEmail(false);
     }

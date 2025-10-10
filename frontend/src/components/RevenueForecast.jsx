@@ -27,8 +27,8 @@ function RevenueForecast() {
       };
       const response = await api.get('/api/analytics/forecast/', { params });
       setForecastData(response.data);
-    } catch (err) {
-      setError(err.response?.data?.error || 'Failed to generate revenue forecast');
+    } catch (_err) {
+      setError(_err.response?.data?.error || 'Failed to generate revenue forecast');
       setForecastData(null);
     } finally {
       setLoading(false);

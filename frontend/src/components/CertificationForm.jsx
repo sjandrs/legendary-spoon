@@ -36,9 +36,9 @@ function CertificationForm() {
         expiration_date: cert.expiration_date || '',
         renewal_required: cert.renewal_required || false,
       });
-    } catch (err) {
+    } catch (_err) {
       setError('Failed to load certification');
-      console.error(err);
+      console.error(_err);
     } finally {
       setLoading(false);
     }
@@ -64,9 +64,9 @@ function CertificationForm() {
         await api.post('/api/certifications/', formData);
       }
       navigate('/certifications');
-    } catch (err) {
-      setError(err.response?.data?.detail || 'Failed to save certification');
-      console.error(err);
+    } catch (_err) {
+      setError(_err.response?.data?.detail || 'Failed to save certification');
+      console.error(_err);
     } finally {
       setSaving(false);
     }

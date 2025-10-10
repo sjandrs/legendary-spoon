@@ -14,10 +14,10 @@ const Contacts = () => {
                 const response = await api.get('/api/contacts/');
                 setContacts(response.data.results || response.data || []);
                 setLoading(false);
-            } catch (err) {
+            } catch (_err) {
                 setError('Failed to fetch contacts.');
                 setLoading(false);
-                console.error(err);
+                console.error(_err);
             }
         };
 

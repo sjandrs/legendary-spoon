@@ -65,8 +65,8 @@ const DigitalSignaturePad = ({ workOrderId, onSignatureComplete, onCancel }) => 
           onSignatureComplete(response.data);
         }
       }
-    } catch (error) {
-      console.error('Error saving signature:', error);
+    } catch (_err) {
+      console.error('Error saving signature:', _err);
       setMessage('Error saving signature. Please try again.');
     } finally {
       setLoading(false);
@@ -90,7 +90,7 @@ const DigitalSignaturePad = ({ workOrderId, onSignatureComplete, onCancel }) => 
       const response = await fetch('https://api.ipify.org?format=json');
       const data = await response.json();
       return data.ip;
-    } catch (error) {
+    } catch (_err) {
       return 'Unknown';
     }
   };
@@ -112,8 +112,8 @@ const DigitalSignaturePad = ({ workOrderId, onSignatureComplete, onCancel }) => 
       link.click();
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
-    } catch (error) {
-      console.error('Error downloading PDF:', error);
+    } catch (_err) {
+      console.error('Error downloading PDF:', _err);
       setMessage('Error downloading PDF. Please try again.');
     }
   };

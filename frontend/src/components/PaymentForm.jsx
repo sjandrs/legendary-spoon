@@ -18,7 +18,7 @@ const PaymentForm = ({ onSuccess }) => {
       await createPayment(form);
       setForm({ content_type: '', object_id: '', amount: '', payment_date: '', method: '', received_by: '' });
       if (onSuccess) onSuccess();
-    } catch (err) {
+    } catch (_err) {
       setError('Failed to create payment');
     }
     setLoading(false);

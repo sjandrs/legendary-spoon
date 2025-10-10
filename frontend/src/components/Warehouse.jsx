@@ -51,9 +51,9 @@ const Warehouse = () => {
       ]);
       setWarehouses(warehousesResponse.data);
       setWarehouseItems(itemsResponse.data);
-    } catch (err) {
+    } catch (_err) {
       setError('Failed to fetch warehouse data');
-      console.error(err);
+      console.error(_err);
     } finally {
       setLoading(false);
     }
@@ -69,9 +69,9 @@ const Warehouse = () => {
       }
       fetchData();
       resetWarehouseForm();
-    } catch (err) {
+    } catch (_err) {
       setError('Failed to save warehouse');
-      console.error(err);
+      console.error(_err);
     }
   };
 
@@ -92,9 +92,9 @@ const Warehouse = () => {
       }
       fetchData();
       resetItemForm();
-    } catch (err) {
+    } catch (_err) {
       setError('Failed to save warehouse item');
-      console.error(err);
+      console.error(_err);
     }
   };
 
@@ -127,9 +127,9 @@ const Warehouse = () => {
       try {
         await deleteWarehouse(id);
         fetchData();
-      } catch (err) {
+      } catch (_err) {
         setError('Failed to delete warehouse');
-        console.error(err);
+        console.error(_err);
       }
     }
   };
@@ -139,9 +139,9 @@ const Warehouse = () => {
       try {
         await deleteWarehouseItem(id);
         fetchData();
-      } catch (err) {
+      } catch (_err) {
         setError('Failed to delete warehouse item');
-        console.error(err);
+        console.error(_err);
       }
     }
   };

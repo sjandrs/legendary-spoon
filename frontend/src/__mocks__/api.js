@@ -17,12 +17,12 @@ const toAxiosLike = async (response) => {
   result.statusText = response.statusText;
   try {
     result.data = await response.json();
-  } catch (e) {
+  } catch (_err) {
     // If parsing fails (204 No Content, or non-JSON), fall back to null and
     // avoid setting undefined which causes component state issues.
     // Log to aid debugging in test runs.
   // console.debug intentionally left for troubleshooting; keep but no lint disable needed
-  console.debug('[mock api] response.json() failed:', e && e.message);
+  console.debug('[mock api] response.json() failed:', _err && _err.message);
     result.data = null;
   }
   result.headers = {};

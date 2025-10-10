@@ -13,10 +13,10 @@ function PostList() {
         const response = await axios.get('/api/posts/');
         const postData = Array.isArray(response.data.results) ? response.data.results : [];
         setPosts(postData);
-      } catch (error) {
-        console.error("There was an error fetching the posts!", error);
+      } catch (_err) {
+        console.error("There was an error fetching the posts!", _err);
         setError('Failed to load posts.');
-        setPosts([]); // Set to empty array on error
+        setPosts([]); // Set to empty array on _err
       } finally {
         setLoading(false);
       }

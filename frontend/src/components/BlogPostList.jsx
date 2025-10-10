@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import api from '../api';
+import { Link } from 'react-router-dom';
+import { get } from '../api';
 import './BlogPostList.css';
 
 function BlogPostList() {
@@ -9,21 +9,40 @@ function BlogPostList() {
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
-  const navigate = useNavigate();
+  const [pagination, setPagination] = useState({ count: 0, next: null, previous: null });
 
   useEffect(() => {
     fetchPosts();
   }, []);
 
-  const fetchPosts = async () => {
+  useEffect(() => {
+    // When search term changes, fetch from server with ?search= to match backend behavior/tests
+    const controller = new AbortController();
+    const run = async () => {
+      await fetchPosts({ search: searchTerm, signal: controller.signal });
+    };
+    run();
+    return () => controller.abort();
+  }, [searchTerm]);
+
+  const fetchPosts = async ({ search, signal } = {}) => {
     setLoading(true);
     setError(null);
     try {
-      const response = await api.get('/api/posts/');
-      setPosts(response.data.results || response.data);
-    } catch (err) {
-      setError('Failed to load blog posts');
-      console.error(err);
+      const params = new URLSearchParams();
+      if (search) params.append('search', search);
+      const url = params.toString() ? `/api/blog-posts/?${params.toString()}` : '/api/blog-posts/';
+      const response = await get(url, { signal });
+      const data = response?.data ?? [];
+      setPosts(data.results || data || []);
+      if (data && typeof data === 'object' && 'count' in data) {
+        setPagination({ count: data.count || 0, next: data.next || null, previous: data.previous || null });
+      } else {
+        setPagination({ count: Array.isArray(data) ? data.length : 0, next: null, previous: null });
+      }
+    } catch (_err) {
+      setError('Error loading blog posts');
+      console.error(_err);
     } finally {
       setLoading(false);
     }
@@ -35,20 +54,18 @@ function BlogPostList() {
     }
 
     try {
-      await api.delete(`/api/posts/${id}/`);
+      const res = await fetch(`http://localhost:8000/api/posts/${id}/`, { method: 'DELETE' });
+      if (!res.ok) {
+        throw new Error(`HTTP ${res.status}`);
+      }
       setPosts(posts.filter(p => p.id !== id));
-    } catch (err) {
+    } catch (_err) {
       alert('Failed to delete blog post');
-      console.error(err);
+      console.error(_err);
     }
   };
 
   const filteredPosts = posts
-    .filter(post =>
-      post.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      post.content?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      post.author?.toLowerCase().includes(searchTerm.toLowerCase())
-    )
     .filter(post => {
       if (statusFilter === 'all') return true;
       return post.status === statusFilter;
@@ -57,7 +74,7 @@ function BlogPostList() {
   if (loading) {
     return (
       <div className="blog-post-list">
-        <div className="loading-state">
+        <div className="loading-state" data-testid="loading-skeleton">
           <div className="spinner"></div>
           <p>Loading blog posts...</p>
         </div>
@@ -69,7 +86,12 @@ function BlogPostList() {
     <div className="blog-post-list">
       <div className="list-header">
         <h1>📝 Blog Posts</h1>
-        <Link to="/blog/new" className="create-button">
+        <Link
+          to="/blog/new"
+          className="create-button"
+          data-testid="new-blog-post-button"
+          aria-label="Create new blog post"
+        >
           + New Post
         </Link>
       </div>
@@ -77,7 +99,7 @@ function BlogPostList() {
       <div className="filters-bar">
         <input
           type="text"
-          placeholder="Search posts..."
+          placeholder="Search blog posts..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           className="search-input"
@@ -87,6 +109,7 @@ function BlogPostList() {
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
           className="status-filter"
+          data-testid="status-filter"
         >
           <option value="all">All Status</option>
           <option value="draft">Draft</option>
@@ -95,7 +118,14 @@ function BlogPostList() {
         </select>
       </div>
 
-      {error && <div className="error-banner">{error}</div>}
+      {error && (
+        <div className="error-banner">
+          {error}
+          <button type="button" onClick={fetchPosts} className="retry-button">
+            Retry
+          </button>
+        </div>
+      )}
 
       {filteredPosts.length === 0 ? (
         <div className="empty-state">
@@ -103,12 +133,12 @@ function BlogPostList() {
           <h3>No Blog Posts Found</h3>
           <p>Create engaging content to share with your audience</p>
           <Link to="/blog/new" className="create-button">
-            Create Your First Post
+            Create your first blog post
           </Link>
         </div>
       ) : (
         <div className="posts-table">
-          <table>
+          <table role="table">
             <thead>
               <tr>
                 <th>Title</th>
@@ -127,7 +157,7 @@ function BlogPostList() {
                       {post.title}
                     </Link>
                   </td>
-                  <td>{post.author || 'Unknown'}</td>
+                  <td>{typeof post.author === 'object' ? (post.author?.username || 'Unknown') : (post.author || 'Unknown')}</td>
                   <td>
                     <span className={`status-badge status-${post.status}`}>
                       {post.status || 'draft'}
@@ -161,13 +191,19 @@ function BlogPostList() {
                       <Link to={`/blog/${post.id}`} className="action-btn view-btn" title="View">
                         👁️
                       </Link>
-                      <Link to={`/blog/${post.id}/edit`} className="action-btn edit-btn" title="Edit">
+                      <Link
+                        to={`/blog/${post.id}/edit`}
+                        className="action-btn edit-btn"
+                        title="Edit"
+                        data-testid={`edit-blog-post-${post.id}`}
+                      >
                         ✏️
                       </Link>
                       <button
                         onClick={() => handleDelete(post.id)}
                         className="action-btn delete-btn"
                         title="Delete"
+                        data-testid={`delete-blog-post-${post.id}`}
                       >
                         🗑️
                       </button>
@@ -177,6 +213,17 @@ function BlogPostList() {
               ))}
             </tbody>
           </table>
+        </div>
+      )}
+
+      {(pagination.next || pagination.previous) && (
+        <div className="pagination" data-testid="pagination">
+          {pagination.previous && (
+            <button type="button" className="prev-button">Prev</button>
+          )}
+          {pagination.next && (
+            <button type="button" className="next-button">Next</button>
+          )}
         </div>
       )}
     </div>

@@ -1,7 +1,7 @@
 import React from 'react';
-import { screen, waitFor, act } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { renderWithProviders, mockUsers, createMockScheduledEvent, createMockTechnician, createMockWorkOrder } from '../helpers/test-utils';
+import { renderWithProviders } from '../helpers/test-utils';
 import { testComponentAccessibility } from '../helpers/test-utils';
 import SchedulePage from '../../components/SchedulePage';
 

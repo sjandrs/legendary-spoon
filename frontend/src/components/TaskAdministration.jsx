@@ -18,9 +18,9 @@ const TaskAdministration = () => {
             const response = await apiClient.get('/api/project-templates/');
             setTemplates(response.data.results || response.data);
             setError(null);
-        } catch (err) {
+        } catch (_err) {
             setError('Failed to load templates. You may not have the required permissions.');
-            console.error(err);
+            console.error(_err);
         } finally {
             setIsLoading(false);
         }
@@ -35,9 +35,9 @@ const TaskAdministration = () => {
             await apiClient[method](url, templateData);
             setEditingTemplate(null);
             fetchTemplates();
-        } catch (err) {
-            setError(`Failed to save template. ${err.response?.data?.detail || ''}`);
-            console.error(err);
+        } catch (_err) {
+            setError(`Failed to save template. ${_err.response?.data?.detail || ''}`);
+            console.error(_err);
         }
     };
 
@@ -46,9 +46,9 @@ const TaskAdministration = () => {
             try {
                 await apiClient.delete(`/api/project-templates/${templateId}/`);
                 fetchTemplates();
-            } catch (err) {
+            } catch (_err) {
                 setError('Failed to delete template.');
-                console.error(err);
+                console.error(_err);
             }
         }
     };
@@ -120,8 +120,8 @@ const TemplateForm = ({ template, onSave, onCancel }) => {
                 if (!formData.default_task_type && activeTypes.length > 0) {
                     setFormData(prev => ({ ...prev, default_task_type: activeTypes[0].id }));
                 }
-            } catch (err) {
-                console.error("Failed to fetch task types for template form", err);
+            } catch (_err) {
+                console.error("Failed to fetch task types for template form", _err);
             }
         };
         fetchTaskTypes();

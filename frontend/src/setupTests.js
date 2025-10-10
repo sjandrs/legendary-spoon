@@ -1,18 +1,8 @@
 import '@testing-library/jest-dom';
+import * as mswNode from 'msw/node';
+import * as msw from 'msw';
 
-// Mock API module
-jest.mock('./api', () => ({
-  get: jest.fn(),
-  post: jest.fn(),
-  put: jest.fn(),
-  delete: jest.fn(),
-  patch: jest.fn(),
-}));
-
-// Mock axios for API calls
-import axios from 'axios';
-jest.mock('axios');
-axios.create = jest.fn(() => axios);
+// Do not globally mock axios; allow real HTTP client for MSW interception
 
 // Mock react-markdown
 jest.mock('react-markdown', () => {
@@ -120,43 +110,73 @@ afterAll(() => {
 });
 
 // MSW setup for API mocking in tests (temporarily disabled for immediate component fixes)
-// TODO: Complete MSW v2 integration in next phase
-// import { startMswServer } from './__tests__/utils/msw-server';
-// startMswServer();
+// Provide a lightweight global MSW server for tests that reference `server` and `rest` globals
+const server = mswNode.setupServer();
+beforeAll(() => {
+  server.listen();
+  // Wrap axios methods with jest.fn so tests can mockResolvedValue/mockRejectedValue on them when desired
+  try {
+    const axios = require('axios');
+    if (typeof jest !== 'undefined' && axios) {
+      const wrap = (fn) => {
+        if (!fn) return jest.fn();
+        if (jest.isMockFunction(fn)) return fn;
+        const w = jest.fn((...args) => fn(...args));
+        return w;
+      };
+      axios.get = wrap(axios.get);
+      axios.post = wrap(axios.post);
+      axios.put = wrap(axios.put);
+      axios.patch = wrap(axios.patch);
+      axios.delete = wrap(axios.delete);
+      axios.request = wrap(axios.request);
+    }
+  } catch (_err) {}
+});
+afterEach(() => server.resetHandlers());
+afterAll(() => server.close());
+// Expose for tests that expect globals
+globalThis.server = server;
+globalThis.rest = msw.rest;
 
 // Polyfills for jsdom
 import { TextEncoder, TextDecoder } from 'util';
-global.TextEncoder = TextEncoder;
-global.TextDecoder = TextDecoder;
+globalThis.TextEncoder = TextEncoder;
+globalThis.TextDecoder = TextDecoder;
 
 // Polyfill TransformStream required by @mswjs/interceptors for fetch interception
-if (typeof global.TransformStream === 'undefined') {
+if (typeof globalThis.TransformStream === 'undefined') {
   // Use web-streams-polyfill implementation
-  // eslint-disable-next-line import/no-extraneous-dependencies
-  const { TransformStream } = require('web-streams-polyfill/dist/ponyfill.js');
-  global.TransformStream = TransformStream;
+  import('web-streams-polyfill/dist/ponyfill.js').then(mod => {
+    globalThis.TransformStream = mod.TransformStream;
+  }).catch(() => {});
 }
 
 // Polyfill WebSocket (used indirectly by msw in some environments) if missing
-if (typeof global.WebSocket === 'undefined') {
-  try {
-    // eslint-disable-next-line import/no-extraneous-dependencies
-    const WebSocket = require('ws');
-    global.WebSocket = WebSocket;
-  } catch (e) {
-    // Ignore if ws not available; tests that require it will fail loudly
-  }
+if (typeof globalThis.WebSocket === 'undefined') {
+  import('ws').then(mod => {
+    globalThis.WebSocket = mod.default || mod;
+  }).catch(() => {});
 }
 
-// MSW polyfills for Jest environment
-import { fetch, Headers, Request, Response } from 'cross-fetch';
-global.fetch = fetch;
-global.Headers = Headers;
-global.Request = Request;
-global.Response = Response;
+// MSW polyfills for Jest environment (only if missing)
+if (typeof globalThis.fetch === 'undefined') {
+  import('cross-fetch').then(mod => {
+    // Wrap in jest.fn so tests can mockResolvedValue/mockRejectedValue
+    const fn = (...args) => mod.fetch(...args);
+    globalThis.fetch = typeof jest !== 'undefined' ? jest.fn(fn) : fn;
+    globalThis.Headers = mod.Headers;
+    globalThis.Request = mod.Request;
+    globalThis.Response = mod.Response;
+  }).catch(() => {
+    if (typeof jest !== 'undefined') {
+      globalThis.fetch = jest.fn(() => Promise.resolve({ ok: true, json: async () => ({}) }));
+    }
+  });
+}
 
 // Polyfill for BroadcastChannel (needed for MSW v2)
-global.BroadcastChannel = class BroadcastChannel {
+globalThis.BroadcastChannel = class BroadcastChannel {
   constructor(name) {
     this.name = name;
   }
@@ -169,13 +189,21 @@ global.BroadcastChannel = class BroadcastChannel {
 // Mock FullCalendar components that cause Jest ES6 module issues
 jest.mock('@fullcalendar/react', () => {
   const React = require('react');
+  const passthrough = new Set([
+    'className','style','id','role','tabIndex','title','children','onClick','onChange','onMouseDown','onMouseUp',
+  ]);
+  const isDomSafeProp = (key) => key.startsWith('data-') || key.startsWith('aria-') || passthrough.has(key);
+  const filterProps = (props) => Object.keys(props || {}).reduce((acc, k) => {
+    if (isDomSafeProp(k)) acc[k] = props[k];
+    return acc;
+  }, {});
   return {
     __esModule: true,
     default: React.forwardRef((props, ref) =>
       React.createElement('div', {
         'data-testid': 'fullcalendar-mock',
         ref,
-        ...props
+        ...filterProps(props)
       }, 'FullCalendar Mock')
     ),
   };

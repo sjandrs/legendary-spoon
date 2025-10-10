@@ -1,0 +1,17 @@
+﻿{
+    "warnings":  25,
+    "timestamp":  "2025-10-10T01:21:42",
+    "errors":  7693,
+    "totalProblems":  7718,
+    "ruleCounts":  {
+                       "no-empty":  6,
+                       "no-useless-catch":  1,
+                       "no-case-declarations":  1,
+                       "react-hooks/exhaustive-deps":  25,
+                       "no-undef":  7574,
+                       "no-useless-escape":  2,
+                       "import/no-extraneous-dependencies":  2,
+                       "react-refresh/only-export-components":  28,
+                       "no-unused-vars":  79
+                   }
+}

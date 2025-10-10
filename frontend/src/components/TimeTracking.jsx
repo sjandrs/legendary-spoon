@@ -30,9 +30,9 @@ const TimeTracking = () => {
       ]);
       setTimeEntries(entriesResponse.data);
       setProjects(projectsResponse.data);
-    } catch (err) {
+    } catch (_err) {
       setError('Failed to fetch time tracking data');
-      console.error(err);
+      console.error(_err);
     } finally {
       setLoading(false);
     }
@@ -54,9 +54,9 @@ const TimeTracking = () => {
 
       fetchData();
       resetForm();
-    } catch (err) {
+    } catch (_err) {
       setError('Failed to save time entry');
-      console.error(err);
+      console.error(_err);
     }
   };
 
@@ -77,9 +77,9 @@ const TimeTracking = () => {
       try {
         await deleteTimeEntry(id);
         fetchData();
-      } catch (err) {
+      } catch (_err) {
         setError('Failed to delete time entry');
-        console.error(err);
+        console.error(_err);
       }
     }
   };

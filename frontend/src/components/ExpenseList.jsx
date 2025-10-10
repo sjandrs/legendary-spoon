@@ -16,9 +16,9 @@ const ExpenseList = () => {
       setLoading(true);
       const response = await api.get('/api/expenses/');
       setExpenses(response.data || []);
-    } catch (err) {
+    } catch (_err) {
       setError('Failed to load expenses');
-      console.error('Error fetching expenses:', err);
+      console.error('Error fetching expenses:', _err);
       setExpenses([]);
     } finally {
       setLoading(false);
@@ -29,8 +29,8 @@ const ExpenseList = () => {
     try {
       await api.patch(`/api/expenses/${expenseId}/`, { approved: true });
       fetchExpenses(); // Refresh the list
-    } catch (err) {
-      console.error('Error approving expense:', err);
+    } catch (_err) {
+      console.error('Error approving expense:', _err);
     }
   };
 

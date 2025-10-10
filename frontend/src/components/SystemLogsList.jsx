@@ -16,8 +16,8 @@ function SystemLogsList() {
     try {
       const response = await api.get('/api/system-logs/');
       setLogs(response.data.results || response.data);
-    } catch (err) {
-      console.error('Failed to fetch system logs:', err);
+    } catch (_err) {
+      console.error('Failed to fetch system logs:', _err);
     } finally {
       setLoading(false);
     }

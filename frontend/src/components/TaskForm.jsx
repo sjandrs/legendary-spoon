@@ -53,8 +53,8 @@ const TaskForm = () => {
                     setContactDetails(contactResponse.data);
                 }
 
-            } catch (err) {
-                console.error("Failed to fetch initial data", err);
+            } catch (_err) {
+                console.error("Failed to fetch initial data", _err);
                 setError("Failed to load necessary data. Please try again later.");
             } finally {
                 setIsLoading(false);
@@ -92,9 +92,9 @@ const TaskForm = () => {
             setDescription('');
             setDueDate('');
             setTimeout(() => navigate('/tasks'), 2000);
-        } catch (err) {
-            console.error("Failed to create task", err);
-            const errorMessage = err.response?.data?.detail || 'Failed to create task. Please check the details and try again.';
+        } catch (_err) {
+            console.error("Failed to create task", _err);
+            const errorMessage = _err.response?.data?.detail || 'Failed to create task. Please check the details and try again.';
             setError(errorMessage);
         }
     };

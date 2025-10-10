@@ -18,7 +18,7 @@ const LedgerAccountForm = ({ onSuccess }) => {
       await createLedgerAccount(form);
       setForm({ name: '', code: '', account_type: 'asset' });
       if (onSuccess) onSuccess();
-    } catch (err) {
+    } catch (_err) {
       setError('Failed to create account');
     }
     setLoading(false);

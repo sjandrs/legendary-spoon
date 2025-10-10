@@ -16,9 +16,9 @@ const BudgetList = () => {
       setLoading(true);
       const response = await api.get('/api/budgets/');
       setBudgets(response.data);
-    } catch (err) {
+    } catch (_err) {
       setError('Failed to load budgets');
-      console.error('Error fetching budgets:', err);
+      console.error('Error fetching budgets:', _err);
     } finally {
       setLoading(false);
     }

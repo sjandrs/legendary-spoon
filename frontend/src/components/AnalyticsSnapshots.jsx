@@ -27,8 +27,8 @@ function AnalyticsSnapshots() {
       };
       const response = await api.get('/api/analytics-snapshots/', { params });
       setSnapshots(response.data.results || response.data);
-    } catch (err) {
-      setError(err.response?.data?.error || 'Failed to load analytics snapshots');
+    } catch (_err) {
+      setError(_err.response?.data?.error || 'Failed to load analytics snapshots');
       setSnapshots([]);
     } finally {
       setLoading(false);

@@ -39,9 +39,9 @@ const AccountList = () => {
       }
 
       setError(null);
-    } catch (err) {
+    } catch (_err) {
       setError('Failed to load accounts. Please try again.');
-      console.error('Error loading accounts:', err);
+      console.error('Error loading accounts:', _err);
     } finally {
       setLoading(false);
     }

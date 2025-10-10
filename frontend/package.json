@@ -7,8 +7,10 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "lint:codemod": "node scripts/lint/run-codemods.js",
-    "lint:codemod:dry": "node scripts/lint/run-codemods.js --dry",
+  "lint:codemod": "node scripts/lint/run-codemods.js",
+  "lint:codemod:dry": "node scripts/lint/run-codemods.js --dry-run",
+  "lint:codemod:tests": "node scripts/lint/run-codemods.js --tests-only",
+  "lint:codemod:tests:dry": "node scripts/lint/run-codemods.js --tests-only --dry-run",
     "lint:audit:hooks": "node scripts/lint/audit-hooks.js",
     "preview": "vite preview",
     "test": "jest",
@@ -99,5 +101,15 @@
     "wait-on": "^8.0.5",
     "web-streams-polyfill": "^4.2.0",
     "ws": "^8.18.3"
+  }
+  ,
+  "lint-staged": {
+    "src/**/*.{js,jsx,ts,tsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "**/*.{css,scss,md,json}": [
+      "prettier --write"
+    ]
   }
 }

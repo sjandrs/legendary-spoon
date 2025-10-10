@@ -30,8 +30,8 @@ function DealPredictions() {
     try {
       const response = await api.get('/api/deals/');
       setDeals(response.data.results || response.data);
-    } catch (err) {
-      console.error('Error fetching deals:', err);
+    } catch (_err) {
+      console.error('Error fetching deals:', _err);
     }
   };
 
@@ -41,8 +41,8 @@ function DealPredictions() {
     try {
       const response = await api.get(`/api/analytics/predict/${id}/`);
       setPrediction(response.data);
-    } catch (err) {
-      setError(err.response?.data?.error || 'Failed to load prediction');
+    } catch (_err) {
+      setError(_err.response?.data?.error || 'Failed to load prediction');
       setPrediction(null);
     } finally {
       setLoading(false);

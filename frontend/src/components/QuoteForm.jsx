@@ -45,8 +45,8 @@ function QuoteForm() {
     try {
       const response = await api.get('/api/accounts/');
       setAccounts(response.data.results || response.data);
-    } catch (err) {
-      console.error('Error fetching accounts:', err);
+    } catch (_err) {
+      console.error('Error fetching accounts:', _err);
     }
   };
 
@@ -56,8 +56,8 @@ function QuoteForm() {
         params: { account: accountId },
       });
       setContacts(response.data.results || response.data);
-    } catch (err) {
-      console.error('Error fetching contacts:', err);
+    } catch (_err) {
+      console.error('Error fetching contacts:', _err);
     }
   };
 
@@ -81,8 +81,8 @@ function QuoteForm() {
       // Fetch line items
       const itemsResponse = await api.get(`/api/quotes/${id}/items/`);
       setLineItems(itemsResponse.data || []);
-    } catch (err) {
-      console.error('Error fetching quote:', err);
+    } catch (_err) {
+      console.error('Error fetching quote:', _err);
       setError('Failed to load quote data.');
     } finally {
       setLoading(false);
@@ -225,9 +225,9 @@ function QuoteForm() {
       }
 
       navigate(`/quotes/${quoteId}`);
-    } catch (err) {
-      console.error('Error saving quote:', err);
-      setError(err.response?.data?.detail || 'Failed to save quote. Please try again.');
+    } catch (_err) {
+      console.error('Error saving quote:', _err);
+      setError(_err.response?.data?.detail || 'Failed to save quote. Please try again.');
     } finally {
       setLoading(false);
     }

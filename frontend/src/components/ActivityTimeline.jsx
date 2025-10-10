@@ -30,8 +30,8 @@ const ActivityTimeline = ({ resourceType, resourceId, limit = 20 }) => {
       }
 
       setActivities(filteredData.slice(0, limit));
-    } catch (error) {
-      console.error('Error loading activities:', error);
+    } catch (_err) {
+      console.error('Error loading activities:', _err);
     } finally {
       setLoading(false);
     }

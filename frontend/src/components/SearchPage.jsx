@@ -34,8 +34,8 @@ const SearchPage = () => {
       const response = await get(`/api/search/?${params.toString()}`);
 
       setSearchResults(response.data);
-    } catch (error) {
-      console.error('Search error:', error);
+    } catch (_err) {
+      console.error('Search error:', _err);
       setSearchResults({
         error: 'Search failed. Please try again.',
         results: []
@@ -49,7 +49,7 @@ const SearchPage = () => {
     setLoading(true);
 
     try {
-      const response = await post('/api/search/bulk-operations/', {
+      await post('/api/search/bulk-operations/', {
         action,
         items: selectedItems,
         data: actionData
@@ -62,8 +62,8 @@ const SearchPage = () => {
 
       // Show success message
       alert(`Bulk ${action} completed successfully!`);
-    } catch (error) {
-      console.error('Bulk action error:', error);
+    } catch (_err) {
+      console.error('Bulk action error:', _err);
       alert(`Bulk ${action} failed. Please try again.`);
     } finally {
       setLoading(false);
@@ -90,8 +90,8 @@ const SearchPage = () => {
         ...prev,
         results: prev.results.concat(response.results)
       }));
-    } catch (error) {
-      console.error('Load more error:', error);
+    } catch (_err) {
+      console.error('Load more error:', _err);
       alert('Failed to load more results. Please try again.');
     } finally {
       setLoading(false);

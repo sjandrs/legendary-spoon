@@ -17,8 +17,8 @@ function ActivityLogList() {
     try {
       const response = await api.get('/api/activity-logs/');
       setLogs(response.data.results || response.data);
-    } catch (err) {
-      console.error('Failed to fetch activity logs:', err);
+    } catch (_err) {
+      console.error('Failed to fetch activity logs:', _err);
     } finally {
       setLoading(false);
     }

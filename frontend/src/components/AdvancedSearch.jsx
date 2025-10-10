@@ -63,8 +63,8 @@ const AdvancedSearch = ({ onSearch, onSaveSearch }) => {
     try {
       const response = await get(`/api/search/filters/?entity_type=${searchType}`);
       setAvailableFilters(response.data[searchType] || {});
-    } catch (error) {
-      console.error('Error loading filters:', error);
+    } catch (_err) {
+      console.error('Error loading filters:', _err);
     }
   };
 
@@ -82,8 +82,8 @@ const AdvancedSearch = ({ onSearch, onSaveSearch }) => {
         setLoading(true);
         try {
             await onSearch(searchPayload);
-        } catch (error) {
-            console.error('Search error:', error);
+    } catch (_err) {
+      console.error('Search error:', _err);
         } finally {
             setLoading(false);
         }
@@ -100,8 +100,8 @@ const AdvancedSearch = ({ onSearch, onSaveSearch }) => {
         const response = await get(`/api/search/suggestions/?q=${encodeURIComponent(query)}&type=${searchType}`);
         setSuggestions(response.data.suggestions || []);
         setShowSuggestions(true);
-      } catch (error) {
-        console.error('Error getting suggestions:', error);
+      } catch (_err) {
+        console.error('Error getting suggestions:', _err);
       }
     } else {
       setSuggestions([]);
@@ -180,8 +180,8 @@ const AdvancedSearch = ({ onSearch, onSaveSearch }) => {
       if (onSaveSearch) {
         onSaveSearch(response.data);
       }
-    } catch (error) {
-      console.error('Error saving search:', error);
+    } catch (_err) {
+  console.error('Error saving search:', _err);
     }
   };
 

@@ -28,8 +28,8 @@ function QuoteDetail() {
       setLineItems(itemsResponse.data);
 
       setError(null);
-    } catch (err) {
-      console.error('Error fetching quote details:', err);
+    } catch (_err) {
+      console.error('Error fetching quote details:', _err);
       setError('Failed to load quote details. Please try again.');
     } finally {
       setLoading(false);
@@ -40,8 +40,8 @@ function QuoteDetail() {
     try {
       await api.del(`/api/quotes/${id}/`);
       navigate('/quotes');
-    } catch (err) {
-      console.error('Error deleting quote:', err);
+    } catch (_err) {
+      console.error('Error deleting quote:', _err);
       setError('Failed to delete quote. Please try again.');
       setShowDeleteModal(false);
     }
@@ -55,8 +55,8 @@ function QuoteDetail() {
       const response = await api.post(`/api/quotes/${id}/convert-to-deal/`);
       alert(`Quote successfully converted to deal! Deal ID: ${response.data.deal_id}`);
       navigate(`/deals/${response.data.deal_id}`);
-    } catch (err) {
-      console.error('Error converting quote:', err);
+    } catch (_err) {
+      console.error('Error converting quote:', _err);
       setError('Failed to convert quote to deal. Please try again.');
     } finally {
       setConverting(false);

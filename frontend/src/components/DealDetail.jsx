@@ -17,9 +17,9 @@ const DealDetail = () => {
         const response = await get(`/api/deals/${id}/`);
         setDeal(response.data); // Correctly access the data property
         setError(null);
-      } catch (err) {
+      } catch (_err) {
         setError('Failed to fetch deal details. The deal may not exist or you may not have permission to view it.');
-        console.error(err);
+        console.error(_err);
       } finally {
         setLoading(false);
       }

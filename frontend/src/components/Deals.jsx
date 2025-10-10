@@ -36,8 +36,8 @@ const Deals = () => {
                     setStageName('');
                 }
 
-            } catch (err) {
-                console.error("Failed to fetch deals:", err);
+            } catch (_err) {
+                console.error("Failed to fetch deals:", _err);
                 setError("Could not load deals. Please try again later.");
             } finally {
                 setLoading(false);

@@ -41,8 +41,8 @@ const SchedulePage = () => {
       setEvents(formatEventsForCalendar(eventsRes.data.results || eventsRes.data));
       setTechnicians(techniciansRes.data.results || techniciansRes.data);
       setWorkOrders(workOrdersRes.data.results || workOrdersRes.data);
-    } catch (error) {
-      console.error('Error loading schedule data:', error);
+    } catch (_err) {
+      console.error('Error loading schedule data:', _err);
     }
   };
 
@@ -110,9 +110,9 @@ const SchedulePage = () => {
         estimated_end_time: event.end ? event.end.toISOString() : null
       });
       loadInitialData(); // Reload to get updated data
-    } catch (error) {
-      console.error('Error updating event:', error);
-      eventDropInfo.revert(); // Revert the change on error
+    } catch (_err) {
+      console.error('Error updating event:', _err);
+      eventDropInfo.revert(); // Revert the change on _err
     }
   };
 
@@ -138,8 +138,8 @@ const SchedulePage = () => {
         technician: '', workOrder: '', customer: '', address: '', recurrenceRule: ''
       });
       loadInitialData();
-    } catch (error) {
-      console.error('Error saving event:', error);
+    } catch (_err) {
+      console.error('Error saving event:', _err);
     } finally {
       setLoading(false);
     }
@@ -155,8 +155,8 @@ const SchedulePage = () => {
         technician_id: eventForm.technician
       });
       setRouteOptimization(response.data);
-    } catch (error) {
-      console.error('Error optimizing route:', error);
+    } catch (_err) {
+      console.error('Error optimizing route:', _err);
     } finally {
       setLoading(false);
     }

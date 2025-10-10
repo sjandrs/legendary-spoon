@@ -36,6 +36,23 @@ repos:
 
 # ESLint is handled in CI/CD pipeline with proper working directory
 
+  - repo: https://github.com/pre-commit/mirrors-prettier
+    rev: v3.3.3
+    hooks:
+      - id: prettier
+        name: Prettier format (staged JS/TS/CSS/JSON/MD)
+        files: ^frontend/.*\.(js|jsx|ts|tsx|css|scss|json|md)$
+        stages: [pre-commit]
+
+  - repo: local
+    hooks:
+      - id: lint-staged
+        name: lint-staged (ESLint/Prettier on staged files)
+        entry: npx --yes lint-staged
+        language: system
+        pass_filenames: false
+        stages: [pre-commit]
+
   - repo: local
     hooks:
       - id: block-forbidden-files
@@ -43,6 +60,14 @@ repos:
         entry: python tools/block_forbidden_files.py
         language: system
         pass_filenames: false
+        stages: [pre-commit]
+
+      - id: validate-test-imports
+        name: Validate test import hygiene (no nested/duplicate imports)
+        entry: python tools/validate_test_imports.py
+        language: system
+        pass_filenames: false
+        files: ^frontend/.*\.(js|jsx|ts|tsx)$
         stages: [pre-commit]
 
   - repo: local
