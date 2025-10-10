@@ -43,7 +43,7 @@ describe('AdvancedSearch fetch behavior', () => {
     expect(filterCalls).toHaveLength(1);
 
     // Trigger a manual search
-    const searchButton = screen.getByRole('button', { name: /search/i });
+  const searchButton = screen.getByRole('button', { name: /^search$/i });
     searchButton.click();
 
     await waitFor(() => expect(onSearch).toHaveBeenCalledTimes(1));
@@ -61,14 +61,14 @@ describe('AdvancedSearch fetch behavior', () => {
     await waitFor(() => expect(onSearch).toHaveBeenCalledTimes(0)); // initial does not auto search on type alone
 
     // Perform first explicit search
-    screen.getByRole('button', { name: /search/i }).click();
+  screen.getByRole('button', { name: /^search$/i }).click();
     await waitFor(() => expect(onSearch).toHaveBeenCalledTimes(1));
 
     // Change sort order and trigger another search
     const orderSelect = screen.getByDisplayValue('Descending');
     orderSelect.value = 'asc';
     orderSelect.dispatchEvent(new Event('change', { bubbles: true }));
-    screen.getByRole('button', { name: /search/i }).click();
+  screen.getByRole('button', { name: /^search$/i }).click();
 
     await waitFor(() => expect(onSearch).toHaveBeenCalledTimes(2));
 

@@ -1,5 +1,5 @@
 
-import { MemoryRouter, Route, Routes } from 'react-router-dom';
+import { Route, Routes } from 'react-router-dom';
 import { waitFor } from '@testing-library/react';
 import { renderWithProviders } from '../helpers/test-utils';
 import * as api from '../../api';
@@ -17,11 +17,10 @@ describe('PageForm fetch behavior', () => {
     });
 
     renderWithProviders(
-      <MemoryRouter initialEntries={['/pages/new']}>
-        <Routes>
-          <Route path="/pages/new" element={<PageForm />} />
-        </Routes>
-      </MemoryRouter>
+      <Routes>
+        <Route path="/pages/new" element={<PageForm />} />
+      </Routes>,
+      { initialEntries: ['/pages/new'] }
     );
 
     await waitFor(() => expect(api.get).toHaveBeenCalledWith('/api/pages/'));
@@ -36,11 +35,10 @@ describe('PageForm fetch behavior', () => {
     });
 
     renderWithProviders(
-      <MemoryRouter initialEntries={['/pages/77/edit']}>
-        <Routes>
-          <Route path="/pages/:id/edit" element={<PageForm />} />
-        </Routes>
-      </MemoryRouter>
+      <Routes>
+        <Route path="/pages/:id/edit" element={<PageForm />} />
+      </Routes>,
+      { initialEntries: ['/pages/77/edit'] }
     );
 
     await waitFor(() => expect(api.get).toHaveBeenCalledWith('/api/pages/'));

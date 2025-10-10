@@ -2,7 +2,7 @@
 import { renderWithProviders } from '../helpers/test-utils';
 import { waitFor } from '@testing-library/react';
 import * as api from '../../api';
-import { MemoryRouter, Route, Routes } from 'react-router-dom';
+import { Route, Routes } from 'react-router-dom';
 import QuoteDetail from '../../components/QuoteDetail';
 
 jest.mock('../../api');
@@ -22,11 +22,10 @@ describe('QuoteDetail fetch behavior', () => {
     });
 
     renderWithProviders(
-      <MemoryRouter initialEntries={['/quotes/999']}>
-        <Routes>
-          <Route path="/quotes/:id" element={<QuoteDetail />} />
-        </Routes>
-      </MemoryRouter>
+      <Routes>
+        <Route path="/quotes/:id" element={<QuoteDetail />} />
+      </Routes>,
+      { initialEntries: ['/quotes/999'] }
     );
 
     await waitFor(() => expect(api.get).toHaveBeenCalledWith('/api/quotes/999/'));

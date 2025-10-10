@@ -2,7 +2,7 @@
 import { renderWithProviders } from '../helpers/test-utils';
 import { waitFor, screen } from '@testing-library/react';
 import * as api from '../../api';
-import { MemoryRouter, Route, Routes } from 'react-router-dom';
+import { Route, Routes } from 'react-router-dom';
 import BlogPostForm from '../../components/BlogPostForm';
 
 jest.mock('../../api');
@@ -18,11 +18,10 @@ describe('BlogPostForm fetch behavior', () => {
     api.get.mockResolvedValue({ data: {} });
 
     renderWithProviders(
-      <MemoryRouter initialEntries={['/blog/new']}>
-        <Routes>
-          <Route path="/blog/new" element={<BlogPostForm />} />
-        </Routes>
-      </MemoryRouter>
+      <Routes>
+        <Route path="/blog/new" element={<BlogPostForm />} />
+      </Routes>,
+      { initialEntries: ['/blog/new'] }
     );
 
     expect(screen.getByText(/new blog post/i)).toBeInTheDocument();
@@ -37,11 +36,10 @@ describe('BlogPostForm fetch behavior', () => {
     });
 
     renderWithProviders(
-      <MemoryRouter initialEntries={['/blog/42/edit']}>
-        <Routes>
-          <Route path="/blog/:id/edit" element={<BlogPostForm />} />
-        </Routes>
-      </MemoryRouter>
+      <Routes>
+        <Route path="/blog/:id/edit" element={<BlogPostForm />} />
+      </Routes>,
+      { initialEntries: ['/blog/42/edit'] }
     );
 
     await waitFor(() => expect(api.get).toHaveBeenCalledWith('/api/posts/42/'));

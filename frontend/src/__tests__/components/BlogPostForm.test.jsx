@@ -11,6 +11,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import BlogPostForm from '../../components/BlogPostForm';
 import { rest } from 'msw';
 import { setupServer } from 'msw/node';
+import api from '../../api';
 import '@testing-library/jest-dom';
 
 const server = setupServer(
@@ -346,14 +347,9 @@ describe('BlogPostForm Component', () => {
 
   describe('Error Handling', () => {
     it('should display API error message on save failure', async () => {
-      server.use(
-        rest.post('http://localhost:8000/api/blog-posts/', (req, res, ctx) => {
-          return res(
-            ctx.status(400),
-            ctx.json({ error: 'A blog post with this slug already exists' })
-          );
-        })
-      );
+      const spy = jest.spyOn(api, 'post').mockRejectedValueOnce({
+        response: { status: 400, data: { error: 'A blog post with this slug already exists' } }
+      });
 
       const user = userEvent.setup();
       renderWithProviders(<BlogPostForm />);
@@ -369,14 +365,14 @@ describe('BlogPostForm Component', () => {
           screen.getByText(/a blog post with this slug already exists/i)
         ).toBeInTheDocument();
       });
+
+      spy.mockRestore();
     });
 
     it('should handle network errors gracefully', async () => {
-      server.use(
-        rest.post('http://localhost:8000/api/blog-posts/', (req, res, ctx) => {
-          return res.networkError('Failed to connect');
-        })
-      );
+      const networkError = new Error('Network Error');
+      // No response property simulates network failure
+      const spy = jest.spyOn(api, 'post').mockRejectedValueOnce(networkError);
 
       const user = userEvent.setup();
       renderWithProviders(<BlogPostForm />);
@@ -390,6 +386,8 @@ describe('BlogPostForm Component', () => {
       await waitFor(() => {
         expect(screen.getByText(/network error/i)).toBeInTheDocument();
       });
+
+      spy.mockRestore();
     });
   });
 

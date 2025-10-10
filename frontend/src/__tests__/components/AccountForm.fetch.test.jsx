@@ -1,8 +1,8 @@
 
 import { renderWithProviders } from '../helpers/test-utils';
-import { waitFor } from '@testing-library/react';
+import { waitFor, screen } from '@testing-library/react';
 import * as api from '../../api';
-import { MemoryRouter, Route, Routes } from 'react-router-dom';
+import { Route, Routes } from 'react-router-dom';
 import AccountForm from '../../components/AccountForm';
 
 jest.mock('../../api');
@@ -18,11 +18,10 @@ describe('AccountForm fetch behavior', () => {
     api.get.mockResolvedValue({ data: {} });
 
     renderWithProviders(
-      <MemoryRouter initialEntries={[ '/accounts/new' ]}>
-        <Routes>
-          <Route path="/accounts/new" element={<AccountForm />} />
-        </Routes>
-      </MemoryRouter>
+      <Routes>
+        <Route path="/accounts/new" element={<AccountForm />} />
+      </Routes>,
+      { initialEntries: ['/accounts/new'] }
     );
 
     // Minimal interaction just to ensure render completes
@@ -40,11 +39,10 @@ describe('AccountForm fetch behavior', () => {
     });
 
     renderWithProviders(
-      <MemoryRouter initialEntries={[ '/accounts/123/edit' ]}>
-        <Routes>
-          <Route path="/accounts/:id/edit" element={<AccountForm />} />
-        </Routes>
-      </MemoryRouter>
+      <Routes>
+        <Route path="/accounts/:id/edit" element={<AccountForm />} />
+      </Routes>,
+      { initialEntries: ['/accounts/123/edit'] }
     );
 
     await waitFor(() => expect(api.get).toHaveBeenCalledWith('/api/accounts/123/'));

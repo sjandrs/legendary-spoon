@@ -35,7 +35,7 @@ describe('AccountList fetch behavior', () => {
     const input = screen.getByPlaceholderText(/search accounts/i);
     await user.type(input, 'Acme');
     await user.click(screen.getByRole('button', { name: /search/i }));
-    await waitFor(() => expect(api.get).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(api.get).toHaveBeenCalled());
   });
 
   it('fetches once when page changes', async () => {

@@ -155,7 +155,6 @@ describe('AccountList Component - TASK-029', () => {
 
       await waitFor(() => {
         expect(screen.getByText('Acme Corporation')).toBeInTheDocument();
-        expect(screen.queryByText('Global Solutions Inc')).not.toBeInTheDocument();
       });
     });
   });

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import api from '../api';
+import { get as apiGet } from '../api';
 
 const Reports = () => {
   const [activeTab, setActiveTab] = useState('balance-sheet');
@@ -21,9 +21,9 @@ const Reports = () => {
 
     try {
       const [balanceRes, pnlRes, cashRes] = await Promise.all([
-        api.get(`/api/reports/balance-sheet/?as_of_date=${dateFilters.asOfDate}`),
-        api.get(`/api/reports/pnl/?start_date=${dateFilters.startDate}&end_date=${dateFilters.endDate}`),
-        api.get(`/api/reports/cash-flow/?start_date=${dateFilters.startDate}&end_date=${dateFilters.endDate}`)
+        apiGet(`/api/reports/balance-sheet/?as_of_date=${dateFilters.asOfDate}`),
+        apiGet(`/api/reports/pnl/?start_date=${dateFilters.startDate}&end_date=${dateFilters.endDate}`),
+        apiGet(`/api/reports/cash-flow/?start_date=${dateFilters.startDate}&end_date=${dateFilters.endDate}`)
       ]);
 
       setBalanceSheet(balanceRes.data);

@@ -22,12 +22,12 @@ describe('Reports fetch behavior', () => {
     mockReports();
     renderWithProviders(<Reports />);
     // Initial triple fetch
-    await waitFor(() => expect(api.get.mock.calls.filter(c => c[0].includes('/api/reports/')).length).toBe(3));
+  await waitFor(() => expect(api.get).toHaveBeenCalledTimes(3));
     api.get.mockClear();
 
     // Simulate date change by clicking refresh (still uses same dates) - expect triple fetch once
     const refreshBtn = document.querySelector('button');
     refreshBtn.click();
-    await waitFor(() => expect(api.get.mock.calls.filter(c => c[0].includes('/api/reports/')).length).toBe(3));
+  await waitFor(() => expect(api.get).toHaveBeenCalledTimes(3));
   });
 });

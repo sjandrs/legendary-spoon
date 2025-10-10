@@ -18,11 +18,11 @@ describe('TaxReport fetch behavior', () => {
 
   it('fetches once on mount and once when year changes', async () => {
     mockTax();
-    const { getByLabelText } = renderWithProviders(<TaxReport />);
-    await waitFor(() => expect(api.get).toHaveBeenCalledTimes(1));
+  const { getByLabelText, findByLabelText } = renderWithProviders(<TaxReport />);
+  await waitFor(() => expect(api.get).toHaveBeenCalledTimes(1));
     api.get.mockClear();
 
-    const yearSelect = getByLabelText(/tax year/i);
+  const yearSelect = await findByLabelText(/tax year/i);
     // Simulate changing year
     yearSelect.value = String(new Date().getFullYear() - 1);
     yearSelect.dispatchEvent(new Event('change', { bubbles: true }));

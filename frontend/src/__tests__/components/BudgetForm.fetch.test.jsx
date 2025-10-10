@@ -2,7 +2,7 @@
 import { renderWithProviders } from '../helpers/test-utils';
 import { waitFor, screen } from '@testing-library/react';
 import * as api from '../../api';
-import { MemoryRouter, Route, Routes } from 'react-router-dom';
+import { Route, Routes } from 'react-router-dom';
 import BudgetForm from '../../components/BudgetForm';
 
 jest.mock('../../api');
@@ -18,14 +18,14 @@ describe('BudgetForm fetch behavior', () => {
     api.get.mockResolvedValue({ data: {} });
 
     renderWithProviders(
-      <MemoryRouter initialEntries={['/budgets/new']}>
-        <Routes>
-          <Route path="/budgets/new" element={<BudgetForm />} />
-        </Routes>
-      </MemoryRouter>
+      <Routes>
+        <Route path="/budgets/new" element={<BudgetForm />} />
+      </Routes>,
+      { initialEntries: ['/budgets/new'] }
     );
 
-    expect(screen.getByText(/create budget/i)).toBeInTheDocument();
+  // Header and submit button both contain this text; target the heading to avoid ambiguity
+  expect(screen.getByRole('heading', { name: /create budget/i })).toBeInTheDocument();
     await waitFor(() => {});
     expect(api.get).not.toHaveBeenCalledWith(expect.stringMatching(/\/api\/budgets\/.+\//));
   });
@@ -37,11 +37,10 @@ describe('BudgetForm fetch behavior', () => {
     });
 
     renderWithProviders(
-      <MemoryRouter initialEntries={['/budgets/55/edit']}>
-        <Routes>
-          <Route path="/budgets/:id/edit" element={<BudgetForm />} />
-        </Routes>
-      </MemoryRouter>
+      <Routes>
+        <Route path="/budgets/:id/edit" element={<BudgetForm />} />
+      </Routes>,
+      { initialEntries: ['/budgets/55/edit'] }
     );
 
     await waitFor(() => expect(api.get).toHaveBeenCalledWith('/api/budgets/55/'));

@@ -6,9 +6,11 @@ export default {
     '^@/(.*)$': '<rootDir>/src/$1',
     '@fullcalendar/(.*)': '<rootDir>/node_modules/@fullcalendar/$1',
     // MSW mappings for Jest CJS resolution
-    '^msw/node$': '<rootDir>/node_modules/msw/lib/node/index.js',
-    '^msw$': '<rootDir>/node_modules/msw/lib/core/index.js',
-    '^@mswjs/interceptors/(.*)$': '<rootDir>/node_modules/@mswjs/interceptors/lib/node/interceptors/$1/index.js',
+  '^msw/node$': '<rootDir>/src/__tests__/__mocks__/msw-shim.js',
+  '^msw$': '<rootDir>/src/__tests__/__mocks__/msw-shim.js',
+    // MSW v2 Node interceptors sometimes fail to resolve on Windows; stub them in unit tests
+    '^@mswjs/interceptors/(.*)$': '<rootDir>/src/__tests__/__mocks__/msw-interceptors.js',
+    '^@mswjs/interceptors/fetch$': '<rootDir>/src/__tests__/__mocks__/msw-interceptors.js',
   },
   transform: {
     '^.+\\.(js|jsx|ts|tsx)$': 'babel-jest',
@@ -30,6 +32,7 @@ export default {
   testPathIgnorePatterns: [
     '<rootDir>/src/__tests__/helpers/',
     '<rootDir>/src/__tests__/utils/',
+    '<rootDir>/src/__tests__/__mocks__/',
     '/node_modules/',
   ],
   collectCoverageFrom: [

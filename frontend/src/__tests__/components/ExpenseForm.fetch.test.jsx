@@ -2,7 +2,7 @@
 import { renderWithProviders } from '../helpers/test-utils';
 import { waitFor, screen } from '@testing-library/react';
 import * as api from '../../api';
-import { MemoryRouter, Route, Routes } from 'react-router-dom';
+import { Route, Routes } from 'react-router-dom';
 import ExpenseForm from '../../components/ExpenseForm';
 
 jest.mock('../../api');
@@ -18,14 +18,13 @@ describe('ExpenseForm fetch behavior', () => {
     api.get.mockResolvedValue({ data: {} });
 
     renderWithProviders(
-      <MemoryRouter initialEntries={['/expenses/new']}>
-        <Routes>
-          <Route path="/expenses/new" element={<ExpenseForm />} />
-        </Routes>
-      </MemoryRouter>
+      <Routes>
+        <Route path="/expenses/new" element={<ExpenseForm />} />
+      </Routes>,
+      { initialEntries: ['/expenses/new'] }
     );
 
-    expect(screen.getByText(/add expense/i)).toBeInTheDocument();
+  expect(screen.getByRole('heading', { name: /add expense/i })).toBeInTheDocument();
     await waitFor(() => {});
     expect(api.get).not.toHaveBeenCalledWith(expect.stringMatching(/\/api\/expenses\/.+\//));
   });
@@ -37,11 +36,10 @@ describe('ExpenseForm fetch behavior', () => {
     });
 
     renderWithProviders(
-      <MemoryRouter initialEntries={['/expenses/77/edit']}>
-        <Routes>
-          <Route path="/expenses/:id/edit" element={<ExpenseForm />} />
-        </Routes>
-      </MemoryRouter>
+      <Routes>
+        <Route path="/expenses/:id/edit" element={<ExpenseForm />} />
+      </Routes>,
+      { initialEntries: ['/expenses/77/edit'] }
     );
 
     await waitFor(() => expect(api.get).toHaveBeenCalledWith('/api/expenses/77/'));
