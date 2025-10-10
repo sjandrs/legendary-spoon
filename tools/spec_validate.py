@@ -32,7 +32,7 @@ RULES_FILE = ROOT / ".github" / "spec-driven-workflow-v1.instructions.md"
 def read_text(path: Path) -> str:
     try:
         return path.read_text(encoding="utf-8")
-    except Exception as e:
+    except Exception:
         return ""
 
 
@@ -128,8 +128,13 @@ def main() -> int:
             ]
             ok, missing = contains_headings(md, must_headings)
             if not ok:
+                # Wrap long message for flake8 E501
+                missing_list = ", ".join(missing)
                 issues.append(
-                    f"{master_spec.relative_to(ROOT)}: missing required sections: {', '.join(missing)}"
+                    (
+                        f"{master_spec.relative_to(ROOT)}: missing required sections: "
+                        f"{missing_list}"
+                    )
                 )
             else:
                 notes.append(f"{master_spec.relative_to(ROOT)}: core sections present")

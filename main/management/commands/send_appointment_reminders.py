@@ -58,7 +58,9 @@ class Command(BaseCommand):
 
         # Find scheduled events for the target date
         scheduled_events = ScheduledEvent.objects.filter(
-            start_time__gte=start_of_day, start_time__lte=end_of_day, status="scheduled"
+            start_time__gte=start_of_day,
+            start_time__lte=end_of_day,
+            status="scheduled",
         ).select_related("work_order", "technician")
 
         if not scheduled_events:

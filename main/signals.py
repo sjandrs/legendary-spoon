@@ -237,19 +237,26 @@ def work_order_completed_handler(sender, instance, created, **kwargs):
 
                 # Log completion workflow
                 ActivityLog.objects.create(
-                    user=scheduled_event.technician.user_account
-                    if hasattr(scheduled_event.technician, "user_account")
-                    else None,
+                    user=(
+                        scheduled_event.technician.user_account
+                        if hasattr(scheduled_event.technician, "user_account")
+                        else None
+                    ),
                     action="complete",
                     content_object=instance,
-                    description=f"Completed post-appointment workflow for WorkOrder #{instance.id}",
+                    description=(
+                        "Completed post-appointment workflow "
+                        f"for WorkOrder #{instance.id}"
+                    ),
                 )
 
             except Exception as e:
                 ActivityLog.objects.create(
-                    user=scheduled_event.technician.user_account
-                    if hasattr(scheduled_event.technician, "user_account")
-                    else None,
+                    user=(
+                        scheduled_event.technician.user_account
+                        if hasattr(scheduled_event.technician, "user_account")
+                        else None
+                    ),
                     action="complete",
                     content_object=instance,
                     description=f"Failed post-appointment workflow: {str(e)}",
@@ -285,7 +292,10 @@ def work_order_status_changed_celery_handler(sender, instance, created, **kwargs
                     user=user,
                     action="complete",
                     content_object=instance,
-                    description=f"Triggered post-appointment workflow for WorkOrder #{instance.id}",
+                    description=(
+                        "Triggered post-appointment workflow "
+                        f"for WorkOrder #{instance.id}"
+                    ),
                 )
 
         except ImportError:
