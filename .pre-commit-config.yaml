@@ -49,6 +49,15 @@ repos:
 
   - repo: local
     hooks:
+      - id: spec-validate
+        name: Validate specs (spec-driven workflow)
+        entry: python tools/spec_validate.py
+        language: system
+        pass_filenames: false
+        stages: [pre-commit]
+
+  - repo: local
+    hooks:
       - id: block-forbidden-files
         name: Block committing forbidden files (db.sqlite3, coverage, pyc, backup)
         entry: python tools/block_forbidden_files.py

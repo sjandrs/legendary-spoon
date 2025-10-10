@@ -22,7 +22,7 @@ from __future__ import annotations
 import sys
 import re
 from pathlib import Path
-from typing import List, Tuple
+from typing import List, Tuple, Set
 
 ROOT = Path(__file__).resolve().parents[1]
 SPEC_DIR = ROOT / "spec"
@@ -64,12 +64,18 @@ def contains_headings(md: str, headings: List[str]) -> Tuple[bool, List[str]]:
 
 
 def find_any(paths: List[Path], names: List[str]) -> List[Path]:
-    found: List[Path] = []
+    """Find any files matching names under the given paths. Deduplicate results."""
+    found: Set[Path] = set()
     for base in paths:
         for name in names:
             for p in base.rglob(name):
-                found.append(p)
-    return found
+                try:
+                    found.add(p.resolve())
+                except Exception:
+                    # Fallback to raw path if resolve fails
+                    found.add(p)
+    # Return stable, sorted list by POSIX path for consistency across OSes
+    return sorted(found, key=lambda p: p.as_posix())
 
 
 def main() -> int:
@@ -152,10 +158,12 @@ def main() -> int:
         print("\nIssues (blocking):")
         for i in issues:
             print(f"  - {i}")
-        print("\nResult: FAIL ❌")
+        # Use ASCII-only output for cross-platform console compatibility
+        print("\nResult: FAIL")
         return 1
     else:
-        print("\nResult: PASS ✅")
+        # Use ASCII-only output for cross-platform console compatibility
+        print("\nResult: PASS")
         return 0
 
 
