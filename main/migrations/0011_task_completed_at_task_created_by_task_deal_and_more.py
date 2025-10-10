@@ -6,61 +6,129 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('contenttypes', '0002_remove_content_type_name'),
-        ('main', '0010_auto_20250925_2310'),
+        ("contenttypes", "0002_remove_content_type_name"),
+        ("main", "0010_auto_20250925_2310"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='task',
-            name='completed_at',
+            model_name="task",
+            name="completed_at",
             field=models.DateTimeField(blank=True, null=True),
         ),
         migrations.AddField(
-            model_name='task',
-            name='created_by',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='created_tasks', to=settings.AUTH_USER_MODEL),
+            model_name="task",
+            name="created_by",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="created_tasks",
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
         migrations.AddField(
-            model_name='task',
-            name='deal',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='tasks', to='main.deal'),
+            model_name="task",
+            name="deal",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="tasks",
+                to="main.deal",
+            ),
         ),
         migrations.AddField(
-            model_name='task',
-            name='priority',
-            field=models.CharField(choices=[('low', 'Low'), ('medium', 'Medium'), ('high', 'High'), ('urgent', 'Urgent')], default='medium', max_length=10),
+            model_name="task",
+            name="priority",
+            field=models.CharField(
+                choices=[
+                    ("low", "Low"),
+                    ("medium", "Medium"),
+                    ("high", "High"),
+                    ("urgent", "Urgent"),
+                ],
+                default="medium",
+                max_length=10,
+            ),
         ),
         migrations.AddField(
-            model_name='task',
-            name='task_type',
-            field=models.CharField(choices=[('call', 'Call'), ('email', 'Email'), ('meeting', 'Meeting'), ('follow_up', 'Follow Up'), ('research', 'Research'), ('other', 'Other')], default='other', max_length=20),
+            model_name="task",
+            name="task_type",
+            field=models.CharField(
+                choices=[
+                    ("call", "Call"),
+                    ("email", "Email"),
+                    ("meeting", "Meeting"),
+                    ("follow_up", "Follow Up"),
+                    ("research", "Research"),
+                    ("other", "Other"),
+                ],
+                default="other",
+                max_length=20,
+            ),
         ),
         migrations.AddField(
-            model_name='task',
-            name='updated_at',
+            model_name="task",
+            name="updated_at",
             field=models.DateTimeField(auto_now=True),
         ),
         migrations.AlterField(
-            model_name='task',
-            name='due_date',
+            model_name="task",
+            name="due_date",
             field=models.DateTimeField(),
         ),
         migrations.CreateModel(
-            name='ActivityLog',
+            name="ActivityLog",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('action', models.CharField(choices=[('create', 'Created'), ('update', 'Updated'), ('delete', 'Deleted'), ('complete', 'Completed'), ('email_sent', 'Email Sent'), ('call_made', 'Call Made'), ('meeting_held', 'Meeting Held')], max_length=20)),
-                ('description', models.TextField()),
-                ('object_id', models.PositiveIntegerField(blank=True, null=True)),
-                ('timestamp', models.DateTimeField(auto_now_add=True)),
-                ('content_type', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='contenttypes.contenttype')),
-                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='activity_logs', to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "action",
+                    models.CharField(
+                        choices=[
+                            ("create", "Created"),
+                            ("update", "Updated"),
+                            ("delete", "Deleted"),
+                            ("complete", "Completed"),
+                            ("email_sent", "Email Sent"),
+                            ("call_made", "Call Made"),
+                            ("meeting_held", "Meeting Held"),
+                        ],
+                        max_length=20,
+                    ),
+                ),
+                ("description", models.TextField()),
+                ("object_id", models.PositiveIntegerField(blank=True, null=True)),
+                ("timestamp", models.DateTimeField(auto_now_add=True)),
+                (
+                    "content_type",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="contenttypes.contenttype",
+                    ),
+                ),
+                (
+                    "user",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="activity_logs",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'ordering': ['-timestamp'],
+                "ordering": ["-timestamp"],
             },
         ),
     ]

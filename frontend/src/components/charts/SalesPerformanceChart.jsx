@@ -1,5 +1,5 @@
 import React, { useRef } from 'react';
-import { Doughnut, getElementAtEvent } from 'react-chartjs-2';
+import { Doughnut } from 'react-chartjs-2';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
 import { useNavigate } from 'react-router-dom';
 
@@ -8,6 +8,11 @@ ChartJS.register(ArcElement, Tooltip, Legend);
 const SalesPerformanceChart = ({ data }) => {
     const navigate = useNavigate();
     const chartRef = useRef();
+
+    // Ensure data is not null or undefined before processing
+    if (!data) {
+        return <div>Loading chart...</div>;
+    }
 
     const chartData = {
         labels: ['Won', 'Lost', 'In Progress'],
@@ -20,6 +25,8 @@ const SalesPerformanceChart = ({ data }) => {
     };
 
     const options = {
+        responsive: true,
+        maintainAspectRatio: false,
         onClick: (event, elements) => {
             if (elements.length > 0) {
                 const elementIndex = elements[0].index;
@@ -47,7 +54,11 @@ const SalesPerformanceChart = ({ data }) => {
         }
     };
 
-    return <Doughnut ref={chartRef} data={chartData} options={options} />;
+    return (
+        <div style={{ position: 'relative', minHeight: '300px', minWidth: '300px' }}>
+            <Doughnut ref={chartRef} data={chartData} options={options} />
+        </div>
+    );
 };
 
 export default SalesPerformanceChart;

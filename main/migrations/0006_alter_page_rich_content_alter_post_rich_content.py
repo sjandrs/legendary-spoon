@@ -5,20 +5,23 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('main', '0005_notification'),
+        ("main", "0005_notification"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='page',
-            name='rich_content',
-            field=django_ckeditor_5.fields.CKEditor5Field(blank=True, help_text='Rich text (HTML)', verbose_name='Rich Content'),
+            model_name="page",
+            name="rich_content",
+            field=django_ckeditor_5.fields.CKEditor5Field(
+                blank=True, help_text="Rich text (HTML)", verbose_name="Rich Content"
+            ),
         ),
         migrations.AlterField(
-            model_name='post',
-            name='rich_content',
-            field=django_ckeditor_5.fields.CKEditor5Field(blank=True, help_text='Rich text (HTML)', verbose_name='Rich Content'),
+            model_name="post",
+            name="rich_content",
+            field=django_ckeditor_5.fields.CKEditor5Field(
+                blank=True, help_text="Rich text (HTML)", verbose_name="Rich Content"
+            ),
         ),
     ]

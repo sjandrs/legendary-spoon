@@ -1,3 +1,8 @@
 {
-    "python.globalModuleInstallation": true
+    "python.globalModuleInstallation": true,
+    "github.copilot.chat.agent.thinkingTool": true,
+    "github.copilot.advanced": {
+        "github.copilot.chat.filecreation": true,
+        "github.copilot.chat.history": true
+    }
 }

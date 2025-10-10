@@ -1,0 +1,88 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-added-large-files
+      - id: check-merge-conflict
+      - id: debug-statements
+        exclude: ^venv/
+
+  - repo: https://github.com/psf/black
+    rev: 23.12.1
+    hooks:
+      - id: black
+        language_version: python3.13
+        files: ^(main|web)/.*\.py$
+        exclude: ^main/migrations/
+
+  - repo: https://github.com/pycqa/isort
+    rev: 5.13.2
+    hooks:
+      - id: isort
+        args: ["--profile", "black"]
+        files: ^(main|web)/.*\.py$
+        exclude: ^main/migrations/
+
+  - repo: https://github.com/pycqa/flake8
+    rev: 7.0.0
+    hooks:
+      - id: flake8
+        args: ["--max-line-length=120", "--extend-ignore=E203,W503"]
+        files: ^(main|web)/.*\.py$
+        exclude: ^main/migrations/
+
+# ESLint is handled in CI/CD pipeline with proper working directory
+
+  # Prettier mirror hook removed; lint-staged handles Prettier/ESLint formatting for frontend files
+
+  - repo: local
+    hooks:
+      - id: lint-staged
+        name: lint-staged (ESLint/Prettier on staged files)
+        entry: npx --yes lint-staged
+        language: system
+        pass_filenames: false
+        stages: [pre-commit]
+
+  - repo: local
+    hooks:
+      - id: block-forbidden-files
+        name: Block committing forbidden files (db.sqlite3, coverage, pyc, backup)
+        entry: python tools/block_forbidden_files.py
+        language: system
+        pass_filenames: false
+        stages: [pre-commit]
+
+      # - id: validate-test-imports
+      #   name: Validate test import hygiene (no nested/duplicate imports)
+      #   entry: python tools/validate_test_imports.py
+      #   language: system
+      #   pass_filenames: false
+      #   files: ^frontend/.*\.(js|jsx|ts|tsx)$
+      #   stages: [pre-commit]
+
+  - repo: local
+    hooks:
+      - id: noop-placeholder
+        name: noop placeholder to keep schema valid
+        entry: bash -c "echo 'noop'"
+        language: system
+        pass_filenames: false
+        stages: [pre-push]
+
+  - repo: local
+    hooks:
+      - id: frontend-tests
+        name: Run Frontend Tests
+        entry: bash -c "cd frontend && npm test -- --watchAll=false"
+        language: system
+        pass_filenames: false
+        files: ^frontend/src/.*\.(js|jsx|ts|tsx)$
+        stages: [pre-push]
+
+# Enforce current virtualenv Python version to avoid fallback to missing Store install
+default_language_version:
+  python: python3.13

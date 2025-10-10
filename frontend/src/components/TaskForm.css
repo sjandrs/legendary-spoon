@@ -1,0 +1,189 @@
+/* frontend/src/components/TaskForm.css */
+
+.task-form-container {
+    max-width: 1000px; /* Increased width for desktop */
+    margin: 1.5rem auto;
+    padding: 1.5rem; /* Reduced padding */
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 4px_12px rgba(0, 0, 0, 0.08);
+    border: 1px solid #e9ecef;
+}
+
+.task-form-container h2 {
+    text-align: center;
+    margin-bottom: 0.5rem;
+    color: #343a40;
+}
+
+.task-form-contact-info {
+    text-align: center;
+    margin-bottom: 1.5rem;
+    padding: 0.75rem;
+    background-color: #e9f5ff;
+    color: #0056b3;
+    border-radius: 6px;
+    font-weight: 500;
+    border: 1px solid #b3d7ff;
+}
+
+.task-form-contact-card {
+    display: flex;
+    align-items: center;
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 2rem;
+    gap: 1.5rem;
+    max-width: 480px;
+}
+
+.contact-avatar {
+    width: 56px;
+    height: 56px;
+    background: linear-gradient(135deg, #4e8cff 60%, #6ed6ff 100%);
+    color: #fff;
+    font-size: 2rem;
+    font-weight: 700;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    flex-shrink: 0;
+}
+
+.contact-card-details {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.contact-card-name {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+    color: #222;
+}
+
+.contact-card-row {
+    font-size: 1rem;
+    color: #444;
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.contact-card-label {
+    font-weight: 500;
+    color: #888;
+    min-width: 60px;
+}
+
+.contact-card-faded {
+    color: #bbb;
+    font-style: italic;
+}
+
+.task-form {
+    display: grid;
+    gap: 1rem; /* Reduced gap */
+}
+
+.form-grid {
+    display: grid;
+    /* Allow more columns on wider screens */
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1rem; /* Reduced gap */
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group.full-width {
+    grid-column: 1 / -1;
+}
+
+.form-group label {
+    margin-bottom: 0.4rem; /* Reduced margin */
+    font-weight: 600;
+    color: #495057;
+    font-size: 0.85rem; /* Slightly smaller font */
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select {
+    width: 100%;
+    padding: 0.65rem; /* Reduced padding */
+    border: 1px solid #ced4da;
+    border-radius: 6px;
+    font-size: 0.95rem; /* Slightly smaller font */
+    background-color: #f8f9fa;
+    color: #343a40; /* Added text color for readability */
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: #80bdff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    background-color: #fff;
+}
+
+.form-group textarea {
+    min-height: 100px; /* Reduced height */
+    resize: vertical;
+}
+
+.submit-btn {
+    grid-column: 1 / -1;
+    padding: 0.75rem 1.5rem; /* Reduced padding */
+    border: none;
+    border-radius: 6px;
+    background-color: #007bff;
+    color: white;
+    font-size: 1rem; /* Reduced font size */
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s, transform 0.1s;
+    justify-self: center;
+    width: 35%; /* Reduced width */
+    margin-top: 0.5rem; /* Reduced margin */
+}
+
+.submit-btn:hover {
+    background-color: #0056b3;
+}
+
+.submit-btn:active {
+    transform: scale(0.98);
+}
+
+.error-message,
+.success-message {
+    padding: 1rem;
+    border-radius: 6px;
+    margin-bottom: 1.5rem;
+    text-align: center;
+    font-weight: 500;
+}
+
+.error-message {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+.success-message {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}

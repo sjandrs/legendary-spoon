@@ -1,0 +1,474 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop, Feature-Bootcamp ]
+  pull_request:
+    branches: [ main, develop, Feature-Bootcamp ]
+  schedule:
+    - cron: '0 12 * * MON' # Every Monday at 12:00 UTC
+  workflow_dispatch:
+    inputs:
+      lint_max_total_delta:
+        description: "Max allowed increase in total ESLint problems"
+        required: false
+        default: "8000"
+      lint_max_rule_delta:
+        description: "Max allowed increase per ESLint rule"
+        required: false
+        default: "250"
+
+jobs:
+  test-backend:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:13
+        env:
+          POSTGRES_PASSWORD: postgres
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+
+    - name: Install system dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y postgresql-client
+
+    - name: Install Python dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install coverage
+
+    - name: Run Django migrations
+      run: |
+        python manage.py migrate
+      env:
+        DATABASE_URL: postgres://postgres:postgres@localhost:5432/test_db
+
+    - name: Run backend tests with coverage
+      run: |
+        python -m coverage run manage.py test
+        python -m coverage report --fail-under=70
+        python -m coverage xml
+
+    - name: Upload coverage reports
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./coverage.xml
+        flags: backend
+        name: Backend Coverage
+
+  test-frontend:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        cache-dependency-path: frontend/package-lock.json
+
+    - name: Install frontend dependencies
+      run: |
+        cd frontend
+        npm ci
+
+    - name: Frontend ESLint (CI parity fail-fast)
+      run: |
+        cd frontend
+        npx eslint --max-warnings=0 --ext .js,.jsx,.ts,.tsx src
+
+    - name: Resolve lint gate thresholds (frontend test job)
+      shell: bash
+      run: |
+        TOTAL="${LINT_MAX_TOTAL_DELTA:-}"
+        RULE="${LINT_MAX_RULE_DELTA:-}"
+        if [ -z "$TOTAL" ]; then TOTAL="${{ github.event.inputs.lint_max_total_delta || '8000' }}"; fi
+        if [ -z "$RULE" ]; then RULE="${{ github.event.inputs.lint_max_rule_delta || '250' }}"; fi
+        echo "LINT_MAX_TOTAL_DELTA=$TOTAL" >> $GITHUB_ENV
+        echo "LINT_MAX_RULE_DELTA=$RULE" >> $GITHUB_ENV
+
+    - name: Run frontend linting
+      run: |
+        cd frontend
+        npm run lint
+
+    - name: Lint baseline diff and gate (report + enforce non-regression)
+      shell: pwsh
+      run: |
+        ./tools/lint_baseline_diff.ps1 -MaxTotalDelta $env:LINT_MAX_TOTAL_DELTA -MaxRuleDelta $env:LINT_MAX_RULE_DELTA -FrontendDir "./frontend" -ReportOut "./docs/reports/lint-baseline-diff.md" -SnapshotOut "./docs/reports/lint-snapshot.json"
+
+    - name: Upload lint baseline artifacts
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: lint-baseline-artifacts
+        path: |
+          docs/reports/lint-baseline-diff.md
+          docs/reports/lint-snapshot.json
+
+    - name: Run frontend unit tests
+      run: |
+        cd frontend
+        npm run test
+
+    - name: Upload frontend coverage
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./frontend/coverage/lcov.info
+        flags: frontend
+        name: Frontend Coverage
+
+  e2e-tests:
+    runs-on: ubuntu-latest
+    needs: [test-backend, test-frontend]
+
+    services:
+      postgres:
+        image: postgres:13
+        env:
+          POSTGRES_PASSWORD: postgres
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        cache-dependency-path: frontend/package-lock.json
+
+    - name: Install system dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y postgresql-client
+
+    - name: Install Python dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Install frontend dependencies
+      run: |
+        cd frontend
+        npm ci
+
+    - name: Set up test database
+      run: |
+        python manage.py migrate
+        python manage.py seed_data
+      env:
+        DATABASE_URL: postgres://postgres:postgres@localhost:5432/test_db
+
+    - name: Build frontend for E2E tests
+      run: |
+        cd frontend
+        npm run build
+
+    - name: Start backend server
+      run: |
+        python manage.py runserver &
+        echo $! > backend.pid
+        sleep 10
+      env:
+        DATABASE_URL: postgres://postgres:postgres@localhost:5432/test_db
+
+    - name: Start frontend server
+      run: |
+        cd frontend
+        npm run preview -- --port 5173 &
+        echo $! > frontend.pid
+        sleep 5
+
+    - name: Wait for servers to be ready
+      run: |
+        npx wait-on http://localhost:8000/api/health/ http://localhost:5173/ --timeout 60000
+
+    - name: Run Cypress E2E tests
+      uses: cypress-io/github-action@v6
+      with:
+        working-directory: frontend
+        browser: chrome
+        record: false
+        config-file: cypress.config.js
+      env:
+        CYPRESS_BASE_URL: http://localhost:5173
+        CYPRESS_API_URL: http://localhost:8000/api
+
+    - name: Upload E2E test screenshots
+      uses: actions/upload-artifact@v3
+      if: failure()
+      with:
+        name: cypress-screenshots
+        path: frontend/cypress/screenshots
+
+    - name: Upload E2E test videos
+      uses: actions/upload-artifact@v3
+      if: failure()
+      with:
+        name: cypress-videos
+        path: frontend/cypress/videos
+
+    - name: Stop servers
+      if: always()
+      run: |
+        if [ -f backend.pid ]; then kill $(cat backend.pid) || true; fi
+        if [ -f frontend.pid ]; then kill $(cat frontend.pid) || true; fi
+
+  quality-checks:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+
+    - name: Install Python quality tools
+      run: |
+        python -m pip install --upgrade pip
+        pip install flake8 black isort mypy
+
+    - name: Run Python linting
+      run: |
+        flake8 main web --max-line-length=100 --extend-ignore=E203,W503
+
+    - name: Check Python formatting with Black
+      run: |
+        black --check --diff main web
+
+    - name: Check Python imports with isort
+      run: |
+        isort --check-only --diff main web
+
+  security-scan:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+
+    - name: Install security tools
+      run: |
+        python -m pip install --upgrade pip
+        pip install bandit safety
+
+    - name: Run Bandit security scan
+      run: |
+        bandit -r main web -f json -o bandit-report.json || true
+
+    - name: Run Safety vulnerability check
+      run: |
+        safety check --output json || true
+
+    - name: Upload security reports
+      uses: actions/upload-artifact@v3
+      with:
+        name: security-reports
+        path: |
+          bandit-report.json
+
+  build-and-deploy:
+    needs: [test-backend, test-frontend, e2e-tests, quality-checks, lint-gates]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+
+    - name: Install Python dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Collect static files
+      run: |
+        python manage.py collectstatic --noinput
+
+    - name: Build frontend
+      run: |
+        cd frontend
+        npm ci
+        npm run build
+
+    - name: Deploy to staging
+      run: |
+        echo "Deploy to staging environment"
+        # Add your deployment commands here
+
+  notify:
+    needs: [test-backend, test-frontend, e2e-tests, quality-checks, security-scan, lint-gates]
+    runs-on: ubuntu-latest
+    if: always()
+
+    steps:
+    - name: Notify on failure
+      if: failure()
+      run: |
+        echo "Tests failed - check the logs above for details"
+
+    - name: Notify on success
+      if: success()
+      run: |
+        echo "All tests passed successfully!"
+
+  lint-gates:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+      pull-requests: write
+    # Lint-only quality gates; runs independently from tests
+    env:
+      # Optional: allow manual dispatch to feed initial values; defaults resolved in step below
+      LINT_MAX_TOTAL_DELTA: ${{ github.event.inputs.lint_max_total_delta }}
+      LINT_MAX_RULE_DELTA: ${{ github.event.inputs.lint_max_rule_delta }}
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        cache-dependency-path: frontend/package-lock.json
+
+    - name: Install frontend dependencies
+      run: |
+        cd frontend
+        npm ci
+
+    - name: Frontend ESLint (CI parity fail-fast)
+      run: |
+        cd frontend
+        npx eslint --max-warnings=0 --ext .js,.jsx,.ts,.tsx src
+
+    - name: Resolve lint gate thresholds (lint-gates job)
+      shell: bash
+      run: |
+        TOTAL="${LINT_MAX_TOTAL_DELTA:-}"
+        RULE="${LINT_MAX_RULE_DELTA:-}"
+        if [ -z "$TOTAL" ]; then TOTAL="${{ github.event.inputs.lint_max_total_delta || '8000' }}"; fi
+        if [ -z "$RULE" ]; then RULE="${{ github.event.inputs.lint_max_rule_delta || '250' }}"; fi
+        # Auto-tightening cadence based on weeks since 2025-10-10 (Mon schedule)
+        BASE_DATE="2025-10-10"
+        NOW_TS=$(date +%s)
+        BASE_TS=$(date -d "$BASE_DATE" +%s)
+        WEEKS=$(( (NOW_TS - BASE_TS) / 604800 ))
+        # Steps: 0:8000, 1:5000, 2:2500, 3:500, 4+:0
+        case $WEEKS in
+          0) DEF_TOTAL=8000; DEF_RULE=250 ;;
+          1) DEF_TOTAL=5000; DEF_RULE=200 ;;
+          2) DEF_TOTAL=2500; DEF_RULE=100 ;;
+          3) DEF_TOTAL=500;  DEF_RULE=50  ;;
+          *) DEF_TOTAL=0;     DEF_RULE=0   ;;
+        esac
+        # Only tighten (never loosen) compared to provided TOTAL/RULE
+        if [ "$TOTAL" -gt "$DEF_TOTAL" ]; then TOTAL="$DEF_TOTAL"; fi
+        if [ "$RULE" -gt "$DEF_RULE" ]; then RULE="$DEF_RULE"; fi
+        echo "LINT_MAX_TOTAL_DELTA=$TOTAL" >> $GITHUB_ENV
+        echo "LINT_MAX_RULE_DELTA=$RULE" >> $GITHUB_ENV
+
+    - name: Lint baseline diff and gate (report + enforce non-regression)
+      shell: pwsh
+      run: |
+        ./tools/lint_baseline_diff.ps1 -MaxTotalDelta $env:LINT_MAX_TOTAL_DELTA -MaxRuleDelta $env:LINT_MAX_RULE_DELTA -FrontendDir "./frontend" -ReportOut "./docs/reports/lint-baseline-diff.md" -SnapshotOut "./docs/reports/lint-snapshot.json"
+
+    - name: Summarize baseline results
+      if: always()
+      shell: bash
+      run: |
+        echo "\n=== Lint Baseline Summary ===\n"
+        if [ -f docs/reports/lint-baseline-diff.md ]; then
+          awk 'NR==1, NR==50 {print}' docs/reports/lint-baseline-diff.md
+          echo "\n(See artifact for full report)\n"
+        else
+          echo "No baseline report found."
+        fi
+
+    - name: Upload lint baseline artifacts
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: lint-baseline-artifacts
+        path: |
+          docs/reports/lint-baseline-diff.md
+          docs/reports/lint-snapshot.json
+
+    # Slack posting is intentionally removed/shelved; tracked in issues.
+
+    - name: Update PR with lint baseline summary
+      if: ${{ github.event_name == 'pull_request' }}
+      uses: actions/github-script@v7
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        script: |
+          const fs = require('fs');
+          const marker = '<!-- lint-baseline-summary -->';
+          let body = 'Lint baseline report not found.';
+          try {
+            const full = fs.readFileSync('docs/reports/lint-baseline-diff.md', 'utf8');
+            body = full.split('\n').slice(0, 60).join('\n');
+          } catch (e) {}
+          const wrapped = `${marker}\n\n${body}\n\nArtifacts: docs/reports/lint-baseline-diff.md`;
+          const pr = context.payload.pull_request;
+          if (!pr) {
+            core.info('No PR context; skipping.');
+            return;
+          }
+          const issue_number = pr.number;
+          const { data: comments } = await github.rest.issues.listComments({ owner: context.repo.owner, repo: context.repo.repo, issue_number, per_page: 100 });
+          const existing = comments.find(c => c.body && c.body.includes(marker));
+          if (existing) {
+            await github.rest.issues.updateComment({ owner: context.repo.owner, repo: context.repo.repo, comment_id: existing.id, body: wrapped });
+            core.info('Updated existing lint baseline summary comment.');
+          } else {
+            await github.rest.issues.createComment({ owner: context.repo.owner, repo: context.repo.repo, issue_number, body: wrapped });
+            core.info('Created new lint baseline summary comment.');
+          }
+
+  workflow-lint:
+    runs-on: ubuntu-latest
+    name: Workflow YAML Lint
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run actionlint
+        uses: reviewdog/action-actionlint@v1

@@ -1,0 +1,9 @@
+{
+  "timestamp": "2025-10-08T00:00:00Z",
+  "eslint": {
+    "unusedVarErrors": 1533,
+    "hookWarnings": 21,
+    "totalProblems": 1554
+  },
+  "notes": "Baseline prior to codemod rollout. Update via future audit step."
+}

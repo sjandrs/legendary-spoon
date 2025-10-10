@@ -9,8 +9,8 @@ const InteractionHistory = ({ interactions }) => {
         <div className="interaction-history">
             <h4>Interaction History</h4>
             <ul>
-                {interactions.map(interaction => (
-                    <li key={interaction.id}>
+                {interactions.map((interaction, index) => (
+                    <li key={interaction.id || index}>
                         <strong>{interaction.get_interaction_type_display}</strong> - {new Date(interaction.interaction_date).toLocaleString()}
                         <p><strong>{interaction.subject}</strong></p>
                         <p>{interaction.body}</p>

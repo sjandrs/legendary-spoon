@@ -20,11 +20,11 @@ const CustomFieldsSettings = () => {
                     { id: 8, name: 'account' }, // Assuming ID 8 is for the Account model
                     { id: 11, name: 'deal' }, // Assuming ID 11 is for the Deal model
                 ]);
-                
+
                 await fetchFields();
                 setError(null);
-            } catch (err) {
-                console.error('Error fetching initial data', err);
+            } catch (_err) {
+                console.error('Error fetching initial data', _err);
                 setError('Failed to load initial data. Please try again.');
             } finally {
                 setLoading(false);
@@ -39,8 +39,8 @@ const CustomFieldsSettings = () => {
             const response = await get('/api/custom-fields/');
             // Handle paginated response from Django REST Framework
             setFields(response.data.results || []);
-        } catch (err) {
-            console.error('Error fetching custom fields', err);
+        } catch (_err) {
+            console.error('Error fetching custom fields', _err);
             setError('Failed to load custom fields.');
             setFields([]); // Ensure fields is an array on error
         }
@@ -62,9 +62,9 @@ const CustomFieldsSettings = () => {
             await post('/api/custom-fields/', newField);
             setNewField({ name: '', field_type: 'text', content_type: '' }); // Reset form
             await fetchFields(); // Refresh the list
-        } catch (err) {
-            console.error('Error creating custom field', err);
-            const errorMessage = err.response?.data ? JSON.stringify(err.response.data) : 'An unknown error occurred.';
+        } catch (_err) {
+            console.error('Error creating custom field', _err);
+            const errorMessage = _err.response?.data ? JSON.stringify(_err.response.data) : 'An unknown error occurred.';
             setError(`Failed to create custom field: ${errorMessage}`);
         }
     };
@@ -75,8 +75,8 @@ const CustomFieldsSettings = () => {
                 // Assuming your API supports DELETE on /api/custom-fields/{id}/
                 await post(`/api/custom-fields/${id}/`, null, { method: 'DELETE' });
                 await fetchFields();
-            } catch (err) {
-                console.error('Error deleting custom field', err);
+            } catch (_err) {
+                console.error('Error deleting custom field', _err);
                 setError('Failed to delete custom field.');
             }
         }
@@ -108,7 +108,7 @@ const CustomFieldsSettings = () => {
     return (
         <div className="custom-fields-settings">
             <h2>Manage Custom Fields</h2>
-            
+
             <form onSubmit={handleSubmit} className="add-field-form">
                 <h3>Add New Field</h3>
                 <div className="form-row">

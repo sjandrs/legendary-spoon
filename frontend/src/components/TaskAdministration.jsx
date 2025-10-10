@@ -15,12 +15,12 @@ const TaskAdministration = () => {
     const fetchTemplates = async () => {
         try {
             setIsLoading(true);
-            const response = await apiClient.get('/api/task-templates/');
+            const response = await apiClient.get('/api/project-templates/');
             setTemplates(response.data.results || response.data);
             setError(null);
-        } catch (err) {
+        } catch (_err) {
             setError('Failed to load templates. You may not have the required permissions.');
-            console.error(err);
+            console.error(_err);
         } finally {
             setIsLoading(false);
         }
@@ -28,27 +28,27 @@ const TaskAdministration = () => {
 
     const handleSaveTemplate = async (templateData) => {
         const isNew = !templateData.id;
-        const url = isNew ? '/api/task-templates/' : `/api/task-templates/${templateData.id}/`;
+        const url = isNew ? '/api/project-templates/' : `/api/project-templates/${templateData.id}/`;
         const method = isNew ? 'post' : 'put';
 
         try {
             await apiClient[method](url, templateData);
             setEditingTemplate(null);
             fetchTemplates();
-        } catch (err) {
-            setError(`Failed to save template. ${err.response?.data?.detail || ''}`);
-            console.error(err);
+        } catch (_err) {
+            setError(`Failed to save template. ${_err.response?.data?.detail || ''}`);
+            console.error(_err);
         }
     };
 
     const handleDeleteTemplate = async (templateId) => {
         if (window.confirm('Are you sure you want to delete this template?')) {
             try {
-                await apiClient.delete(`/api/task-templates/${templateId}/`);
+                await apiClient.delete(`/api/project-templates/${templateId}/`);
                 fetchTemplates();
-            } catch (err) {
+            } catch (_err) {
                 setError('Failed to delete template.');
-                console.error(err);
+                console.error(_err);
             }
         }
     };
@@ -79,7 +79,7 @@ const TaskAdministration = () => {
                     + Create New Template
                 </button>
             </div>
-            
+
             <div className="template-list">
                 {templates.length === 0 ? (
                     <p>No task templates found. Create one to get started.</p>
@@ -111,17 +111,17 @@ const TemplateForm = ({ template, onSave, onCancel }) => {
     useEffect(() => {
         const fetchTaskTypes = async () => {
             try {
-                const response = await apiClient.get('/api/task-types/');
-                const activeTypes = response.data.results 
-                    ? response.data.results.filter(t => t.is_active) 
+                const response = await apiClient.get('/api/project-types/');
+                const activeTypes = response.data.results
+                    ? response.data.results.filter(t => t.is_active)
                     : response.data.filter(t => t.is_active);
                 setTaskTypes(activeTypes);
                 // Set a default if the current one is not set or invalid
                 if (!formData.default_task_type && activeTypes.length > 0) {
                     setFormData(prev => ({ ...prev, default_task_type: activeTypes[0].id }));
                 }
-            } catch (err) {
-                console.error("Failed to fetch task types for template form", err);
+            } catch (_err) {
+                console.error("Failed to fetch task types for template form", _err);
             }
         };
         fetchTaskTypes();
@@ -186,7 +186,7 @@ const TemplateForm = ({ template, onSave, onCancel }) => {
                 <hr />
                 <h4>Default Task Values</h4>
                 <div className="form-group">
-                    <label>Default Task Title</label>
+                    <label>Default Project Title</label>
                     <input
                         type="text"
                         name="default_title"
@@ -196,7 +196,7 @@ const TemplateForm = ({ template, onSave, onCancel }) => {
                     />
                 </div>
                 <div className="form-group">
-                    <label>Default Task Description</label>
+                    <label>Default Project Description</label>
                     <textarea
                         name="default_description"
                         value={formData.default_description || ''}
@@ -215,9 +215,9 @@ const TemplateForm = ({ template, onSave, onCancel }) => {
                     </div>
                     <div className="form-group">
                         <label>Default Task Type</label>
-                        <select 
-                            name="default_task_type" 
-                            value={formData.default_task_type || ''} 
+                        <select
+                            name="default_task_type"
+                            value={formData.default_task_type || ''}
                             onChange={handleChange}
                             required
                         >

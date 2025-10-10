@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import AdvancedSearch from './AdvancedSearch';
 import SearchResults from './SearchResults';
-import { get } from '../api';
+import { get, post } from '../api';
 import './SearchPage.css';
 
 const SearchPage = () => {
@@ -13,7 +13,7 @@ const SearchPage = () => {
     console.log('Executing search with params:', searchParams); // Added for debugging
     setLoading(true);
     setCurrentQuery(searchParams);
-    
+
     try {
       const params = new URLSearchParams();
       if (searchParams.q) params.append('q', searchParams.q);
@@ -30,12 +30,12 @@ const SearchPage = () => {
             }
         });
       }
-      
+
       const response = await get(`/api/search/?${params.toString()}`);
-      
+
       setSearchResults(response.data);
-    } catch (error) {
-      console.error('Search error:', error);
+    } catch (_err) {
+      console.error('Search error:', _err);
       setSearchResults({
         error: 'Search failed. Please try again.',
         results: []
@@ -47,23 +47,23 @@ const SearchPage = () => {
 
   const handleBulkAction = async (action, selectedItems, actionData) => {
     setLoading(true);
-    
+
     try {
-      const response = await post('/api/search/bulk-operations/', {
+      await post('/api/search/bulk-operations/', {
         action,
         items: selectedItems,
         data: actionData
       });
-      
+
       // Refresh search results
       if (currentQuery) {
         await handleSearch(currentQuery);
       }
-      
+
       // Show success message
       alert(`Bulk ${action} completed successfully!`);
-    } catch (error) {
-      console.error('Bulk action error:', error);
+    } catch (_err) {
+      console.error('Bulk action error:', _err);
       alert(`Bulk ${action} failed. Please try again.`);
     } finally {
       setLoading(false);
@@ -72,26 +72,26 @@ const SearchPage = () => {
 
   const handleLoadMore = async () => {
     if (!currentQuery) return;
-    
+
     setLoading(true);
-    
+
     try {
       const offset = searchResults?.results?.length || 0;
       const params = { ...currentQuery, offset };
-      
+
       let response;
       if (currentQuery.query && !currentQuery.filters) {
         response = await post('/api/search/', params);
       } else {
         response = await post('/api/search/advanced/', params);
       }
-      
+
       setSearchResults(prev => ({
         ...prev,
         results: prev.results.concat(response.results)
       }));
-    } catch (error) {
-      console.error('Load more error:', error);
+    } catch (_err) {
+      console.error('Load more error:', _err);
       alert('Failed to load more results. Please try again.');
     } finally {
       setLoading(false);
@@ -102,7 +102,7 @@ const SearchPage = () => {
     <div className="search-page">
       <div className="search-content">
         <div className="search-panel">
-          <AdvancedSearch 
+          <AdvancedSearch
             onSearch={handleSearch}
             loading={loading}
           />
@@ -115,12 +115,12 @@ const SearchPage = () => {
               <p>Searching...</p>
             </div>
           )}
-          
+
           <SearchResults
             results={searchResults}
             onBulkAction={handleBulkAction}
             onLoadMore={
-              searchResults && 
+              searchResults &&
               searchResults.total_count > (searchResults.results?.length || 0)
                 ? handleLoadMore
                 : null

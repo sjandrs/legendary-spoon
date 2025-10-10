@@ -19,9 +19,9 @@ const TaskTypeSettings = () => {
             const response = await apiClient.get('/api/task-types/');
             setTaskTypes(response.data.results || response.data);
             setError(null);
-        } catch (err) {
+        } catch (_err) {
             setError('Failed to load task types. You may not have the required permissions.');
-            console.error(err);
+            console.error(_err);
         } finally {
             setIsLoading(false);
         }
@@ -35,9 +35,9 @@ const TaskTypeSettings = () => {
             await apiClient.post('/api/task-types/', { name: newTypeName, is_active: true });
             setNewTypeName('');
             fetchTaskTypes();
-        } catch (err) {
-            setError(`Failed to create task type. ${err.response?.data?.name?.[0] || ''}`);
-            console.error(err);
+        } catch (_err) {
+            setError(`Failed to create task type. ${_err.response?.data?.name?.[0] || ''}`);
+            console.error(_err);
         }
     };
 
@@ -46,9 +46,9 @@ const TaskTypeSettings = () => {
             await apiClient.put(`/api/task-types/${type.id}/`, type);
             setEditingType(null);
             fetchTaskTypes();
-        } catch (err) {
+        } catch (_err) {
             setError('Failed to update task type.');
-            console.error(err);
+            console.error(_err);
         }
     };
 
@@ -57,9 +57,9 @@ const TaskTypeSettings = () => {
             try {
                 await apiClient.delete(`/api/task-types/${typeId}/`);
                 fetchTaskTypes();
-            } catch (err) {
+            } catch (_err) {
                 setError('Failed to delete task type. It might be in use.');
-                console.error(err);
+                console.error(_err);
             }
         }
     };

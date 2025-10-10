@@ -448,45 +448,45 @@
   .search-results {
     padding: 15px;
   }
-  
+
   .results-header {
     flex-direction: column;
     align-items: stretch;
     gap: 15px;
   }
-  
+
   .bulk-actions {
     justify-content: center;
   }
-  
+
   .result-item {
     padding: 12px;
   }
-  
+
   .result-header {
     flex-direction: column;
     align-items: stretch;
     gap: 8px;
   }
-  
+
   .result-badges {
     justify-content: flex-start;
   }
-  
+
   .result-details {
     font-size: 0.8rem;
     gap: 8px;
   }
-  
+
   .modal-content {
     width: 95%;
     margin: 10px;
   }
-  
+
   .modal-actions {
     flex-direction: column-reverse;
   }
-  
+
   .btn-cancel,
   .btn-confirm {
     width: 100%;
@@ -498,12 +498,12 @@
     flex-direction: column;
     gap: 8px;
   }
-  
+
   .result-checkbox,
   .result-icon {
     margin: 0;
   }
-  
+
   .section-title {
     flex-direction: column;
     align-items: flex-start;

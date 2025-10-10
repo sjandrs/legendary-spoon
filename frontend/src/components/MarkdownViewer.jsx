@@ -18,9 +18,9 @@ const MarkdownViewer = () => {
         const response = await get(`/api/kb/${fileName}/`);
         setMarkdown(response.data.content);
         setError(null);
-      } catch (err) {
+      } catch (_err) {
         setError('Failed to load the document. Please make sure the file exists and the server is running.');
-        console.error(err);
+        console.error(_err);
       } finally {
         setLoading(false);
       }

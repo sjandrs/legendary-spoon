@@ -6,20 +6,31 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('main', '0008_customfield_customfieldvalue'),
+        ("main", "0008_customfield_customfieldvalue"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='account',
-            name='owner',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='owned_accounts', to=settings.AUTH_USER_MODEL),
+            model_name="account",
+            name="owner",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="owned_accounts",
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
         migrations.AddField(
-            model_name='contact',
-            name='owner',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='owned_contacts', to=settings.AUTH_USER_MODEL),
+            model_name="contact",
+            name="owner",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="owned_contacts",
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
     ]

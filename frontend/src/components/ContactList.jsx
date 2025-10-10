@@ -12,12 +12,12 @@ const ContactList = () => {
             try {
                 setLoading(true);
                 // The endpoint /api/my-contacts/ should return contacts for the logged-in user
-                const response = await get('/api/my-contacts/'); 
+                const response = await get('/api/my-contacts/');
                 const contactData = Array.isArray(response.data) ? response.data : [];
                 setContacts(contactData);
                 setError(null);
-            } catch (err) {
-                console.error('There was an error fetching the contacts!', err);
+            } catch (_err) {
+                console.error('There was an error fetching the contacts!', _err);
                 setError('Failed to load contacts.');
                 setContacts([]); // Set to empty array on error
             } finally {
@@ -28,23 +28,35 @@ const ContactList = () => {
         fetchContacts();
     }, []);
 
-    if (loading) return <p>Loading contacts...</p>;
-    if (error) return <p className="error-message">{error}</p>;
+    if (loading) return <p data-testid="loading">Loading contacts...</p>;
+    if (error) return <p data-testid="error-message" className="error-message">{error}</p>;
 
     return (
-        <div>
+        <div data-testid="contacts-page">
             <h2>My Contacts</h2>
             {contacts.length > 0 ? (
-                <ul>
+                <ul data-testid="contacts-list">
                     {contacts.map(contact => (
-                        <li key={contact.id}>
-                            <Link to={`/contacts/${contact.id}`}>{contact.first_name} {contact.last_name}</Link>
+                        <li key={contact.id} data-testid={`contact-item-${contact.id}`}>
+                            <Link
+                                to={`/contacts/${contact.id}`}
+                                data-testid={`contact-link-${contact.id}`}
+                            >
+                                {contact.first_name} {contact.last_name}
+                            </Link>
                         </li>
                     ))}
                 </ul>
             ) : (
-                <p>No contacts found.</p>
+                <p data-testid="no-contacts-message">No contacts found.</p>
             )}
+            <button
+                data-testid="add-contact-button"
+                onClick={() => {}}
+                style={{ marginTop: '1rem', padding: '0.5rem 1rem', backgroundColor: '#007bff', color: 'white', border: 'none', borderRadius: '4px' }}
+            >
+                Add Contact
+            </button>
         </div>
     );
 };

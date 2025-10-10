@@ -4,20 +4,19 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('main', '0003_richtextcontent_approved'),
+        ("main", "0003_richtextcontent_approved"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='richtextcontent',
-            name='moderation_notes',
+            model_name="richtextcontent",
+            name="moderation_notes",
             field=models.TextField(blank=True, null=True),
         ),
         migrations.AddField(
-            model_name='richtextcontent',
-            name='rejection_reason',
+            model_name="richtextcontent",
+            name="rejection_reason",
             field=models.CharField(blank=True, max_length=255, null=True),
         ),
     ]

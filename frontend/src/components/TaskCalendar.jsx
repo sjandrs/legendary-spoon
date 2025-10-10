@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Calendar, momentLocalizer } from 'react-big-calendar';
 import moment from 'moment';
-import apiClient, { getTasks, updateTask, createTask } from '../api';
+import apiClient, { getProjects, updateProject, createProject } from '../api';
 import './TaskCalendar.css';
 
 const localizer = momentLocalizer(moment);
@@ -34,10 +34,10 @@ const TaskCalendar = () => {
 
   const loadTasks = async () => {
     try {
-      const response = await getTasks();
+  const response = await getProjects();
       setTasks(response.data);
-    } catch (error) {
-      console.error('Error loading tasks:', error);
+    } catch (_err) {
+      console.error('Error loading tasks:', _err);
     }
   };
 
@@ -71,22 +71,22 @@ const TaskCalendar = () => {
   const handleSaveTask = async (taskData) => {
     try {
       if (isEditing) {
-        await updateTask(selectedTask.id, taskData);
+        await updateProject(selectedTask.id, taskData);
       } else {
-        await createTask(taskData);
+        await createProject(taskData);
       }
       setShowModal(false);
       setSelectedTask(null);
       loadTasks();
-    } catch (error) {
-      console.error('Error saving task:', error);
+    } catch (_err) {
+      console.error('Error saving task:', _err);
     }
   };
 
   const eventStyleGetter = (event, start, end, isSelected) => {
     const task = event.resource;
     let backgroundColor = '#3174ad';
-    
+
     if (task.status === 'completed') backgroundColor = '#28a745';
     else if (task.is_overdue) backgroundColor = '#dc3545';
     else if (task.priority === 'urgent') backgroundColor = '#fd7e14';
@@ -131,7 +131,7 @@ const TaskCalendar = () => {
           </span>
         </div>
       </div>
-      
+
       <div className="calendar-wrapper">
         <Calendar
           localizer={localizer}
@@ -165,23 +165,36 @@ const TaskCalendar = () => {
 };
 
 const TaskModal = ({ task, isEditing, onSave, onClose }) => {
-  const [formData, setFormData] = useState({ ...task });
+  const defaultTask = {
+    title: '',
+    description: '',
+    due_date: new Date().toISOString().split('T')[0],
+    priority: 'medium',
+    status: 'pending',
+    task_type: ''
+  };
+
+  const [formData, setFormData] = useState({ ...defaultTask, ...task });
   const [taskTypes, setTaskTypes] = useState([]);
+
+  useEffect(() => {
+    setFormData({ ...defaultTask, ...task });
+  }, [task]);
 
   useEffect(() => {
     const fetchTaskTypes = async () => {
         try {
             const response = await apiClient.get('/api/task-types/');
-            const activeTypes = response.data.results 
-                ? response.data.results.filter(t => t.is_active) 
+            const activeTypes = response.data.results
+                ? response.data.results.filter(t => t.is_active)
                 : response.data.filter(t => t.is_active);
             setTaskTypes(activeTypes);
             // Set a default if the current one is not set or invalid
             if (!formData.task_type && activeTypes.length > 0) {
                 setFormData(prev => ({ ...prev, task_type: activeTypes[0].id }));
             }
-        } catch (err) {
-            console.error("Failed to fetch task types for modal", err);
+        } catch (_err) {
+            console.error("Failed to fetch task types for modal", _err);
         }
     };
     fetchTaskTypes();
@@ -202,49 +215,52 @@ const TaskModal = ({ task, isEditing, onSave, onClose }) => {
 
   return (
     <div className="modal-overlay">
-      <div className="modal-content">
+      <div className="modal-content" role="dialog" aria-modal="true">
         <div className="modal-header">
           <h3>{isEditing ? 'Edit Task' : 'Create New Task'}</h3>
           <button onClick={onClose} className="close-btn">&times;</button>
         </div>
-        
+
         <form onSubmit={handleSubmit} className="task-form">
           <div className="form-group">
-            <label>Title</label>
+            <label htmlFor="task-title">Title</label>
             <input
               type="text"
+              id="task-title"
               name="title"
               value={formData.title}
               onChange={handleChange}
               required
             />
           </div>
-          
+
           <div className="form-group">
-            <label>Description</label>
+            <label htmlFor="task-description">Description</label>
             <textarea
+              id="task-description"
               name="description"
               value={formData.description || ''}
               onChange={handleChange}
               rows="3"
             />
           </div>
-          
+
           <div className="form-row">
             <div className="form-group">
-              <label>Due Date</label>
+              <label htmlFor="task-due-date">Due Date</label>
               <input
                 type="date"
+                id="task-due-date"
                 name="due_date"
                 value={formData.due_date}
                 onChange={handleChange}
                 required
               />
             </div>
-            
+
             <div className="form-group">
-              <label>Priority</label>
-              <select name="priority" value={formData.priority} onChange={handleChange}>
+              <label htmlFor="task-priority">Priority</label>
+              <select id="task-priority" name="priority" value={formData.priority || 'medium'} onChange={handleChange}>
                 <option value="low">Low</option>
                 <option value="medium">Medium</option>
                 <option value="high">High</option>
@@ -252,11 +268,11 @@ const TaskModal = ({ task, isEditing, onSave, onClose }) => {
               </select>
             </div>
           </div>
-          
+
           <div className="form-row">
             <div className="form-group">
-              <label>Type</label>
-              <select name="task_type" value={formData.task_type} onChange={handleChange} required>
+              <label htmlFor="task-type">Type</label>
+              <select id="task-type" name="task_type" value={formData.task_type} onChange={handleChange} required>
                 <option value="">Select a Type</option>
                 {taskTypes.map(type => (
                     <option key={type.id} value={type.id}>
@@ -265,10 +281,10 @@ const TaskModal = ({ task, isEditing, onSave, onClose }) => {
                 ))}
               </select>
             </div>
-            
+
             <div className="form-group">
-              <label>Status</label>
-              <select name="status" value={formData.status} onChange={handleChange}>
+              <label htmlFor="task-status">Status</label>
+              <select id="task-status" name="status" value={formData.status || 'pending'} onChange={handleChange}>
                 <option value="pending">Pending</option>
                 <option value="in_progress">In Progress</option>
                 <option value="completed">Completed</option>
@@ -276,7 +292,7 @@ const TaskModal = ({ task, isEditing, onSave, onClose }) => {
               </select>
             </div>
           </div>
-          
+
           <div className="modal-actions">
             <button type="button" onClick={onClose} className="btn-cancel">
               Cancel

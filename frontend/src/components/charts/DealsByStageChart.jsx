@@ -1,13 +1,15 @@
 import React from 'react';
-import { Pie } from 'react-chartjs-2';
-import { Chart as ChartJS, ArcElement, Title, Tooltip, Legend } from 'chart.js';
+import { Bar } from 'react-chartjs-2';
+import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js';
+import { useNavigate } from 'react-router-dom';
 
-ChartJS.register(ArcElement, Title, Tooltip, Legend);
+ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
 const DealsByStageChart = ({ data }) => {
-    // Ensure data is not null or undefined before processing
-    if (!data) {
-        return <div>Loading chart...</div>;
+    const navigate = useNavigate();
+
+    if (!data || data.length === 0) {
+        return <div>Loading chart or no data available...</div>;
     }
 
     const chartData = {
@@ -16,19 +18,51 @@ const DealsByStageChart = ({ data }) => {
             {
                 label: 'Deals by Stage',
                 data: data.map(item => item.count),
-                backgroundColor: [
-                    'rgba(255, 99, 132, 0.6)',
-                    'rgba(54, 162, 235, 0.6)',
-                    'rgba(255, 206, 86, 0.6)',
-                    'rgba(75, 192, 192, 0.6)',
-                    'rgba(153, 102, 255, 0.6)',
-                    'rgba(255, 159, 64, 0.6)',
-                ],
+                backgroundColor: 'rgba(75, 192, 192, 0.6)',
+                borderColor: 'rgba(75, 192, 192, 1)',
+                borderWidth: 1,
             },
         ],
     };
 
-    return <Pie data={chartData} />;
+    const options = {
+        responsive: true,
+        maintainAspectRatio: false,
+        onClick: (event, elements) => {
+            if (elements.length > 0) {
+                const elementIndex = elements[0].index;
+                // The data array is used to build the labels, so the index matches.
+                const stageId = data[elementIndex]?.stage__id;
+                if (stageId) {
+                    navigate(`/deals?stage=${stageId}`);
+                }
+            }
+        },
+        plugins: {
+            legend: {
+                display: false, // The label is clear enough
+            },
+            title: {
+                display: true,
+                text: 'Deals by Stage',
+            },
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                ticks: {
+                    // Ensure only whole numbers are shown for deal counts
+                    stepSize: 1,
+                }
+            }
+        }
+    };
+
+    return (
+        <div style={{ position: 'relative', minHeight: '300px', minWidth: '300px' }}>
+            <Bar data={chartData} options={options} />
+        </div>
+    );
 };
 
 export default DealsByStageChart;

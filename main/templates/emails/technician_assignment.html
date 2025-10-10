@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>New Work Order Assignment</title>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background-color: #007bff; color: white; padding: 20px; text-align: center; }
+        .content { background-color: #f8f9fa; padding: 20px; }
+        .work-order-details { background-color: white; padding: 15px; margin: 15px 0; border-left: 4px solid #007bff; }
+        .field { margin: 10px 0; }
+        .label { font-weight: bold; display: inline-block; width: 120px; }
+        .footer { text-align: center; color: #666; font-size: 12px; margin-top: 20px; }
+        .button { display: inline-block; padding: 10px 20px; background-color: #28a745; color: white; text-decoration: none; border-radius: 5px; margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>New Work Order Assignment</h1>
+            <p>{{ company_name }}</p>
+        </div>
+
+        <div class="content">
+            <p>Hello {{ technician.first_name }},</p>
+
+            <p>You have been assigned a new work order. Please review the details below:</p>
+
+            <div class="work-order-details">
+                <h3>Work Order Details</h3>
+                <div class="field">
+                    <span class="label">Work Order #:</span>
+                    {{ work_order.id }}
+                </div>
+                <div class="field">
+                    <span class="label">Description:</span>
+                    {{ work_order.description }}
+                </div>
+                <div class="field">
+                    <span class="label">Project:</span>
+                    {{ work_order.project.title }}
+                </div>
+                <div class="field">
+                    <span class="label">Priority:</span>
+                    {{ work_order.project.priority|title }}
+                </div>
+                <div class="field">
+                    <span class="label">Scheduled Time:</span>
+                    {{ scheduled_event.start_time|date:"F j, Y" }} at {{ scheduled_event.start_time|time:"g:i A" }}
+                </div>
+                <div class="field">
+                    <span class="label">Duration:</span>
+                    {{ scheduled_event.duration_hours }} hours
+                </div>
+            </div>
+
+            {% if work_order.project.contact %}
+            <div class="work-order-details">
+                <h3>Customer Information</h3>
+                <div class="field">
+                    <span class="label">Name:</span>
+                    {{ work_order.project.contact.first_name }} {{ work_order.project.contact.last_name }}
+                </div>
+                <div class="field">
+                    <span class="label">Email:</span>
+                    {{ work_order.project.contact.email }}
+                </div>
+                <div class="field">
+                    <span class="label">Phone:</span>
+                    {{ work_order.project.contact.phone_number }}
+                </div>
+                {% if work_order.project.account %}
+                <div class="field">
+                    <span class="label">Company:</span>
+                    {{ work_order.project.account.name }}
+                </div>
+                <div class="field">
+                    <span class="label">Address:</span>
+                    {{ work_order.project.account.address }}
+                </div>
+                {% endif %}
+            </div>
+            {% endif %}
+
+            {% if work_order.line_items.all %}
+            <div class="work-order-details">
+                <h3>Required Items/Services</h3>
+                <ul>
+                {% for item in work_order.line_items.all %}
+                    <li>{{ item.description }} (Qty: {{ item.quantity }})</li>
+                {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+
+            <p>Please ensure you have all necessary tools and parts before heading to the customer location.</p>
+
+            <p>If you have any questions or need to reschedule, please contact your supervisor immediately.</p>
+
+            <p>Thank you!</p>
+        </div>
+
+        <div class="footer">
+            <p>This is an automated message from {{ company_name }}.</p>
+            <p>Please do not reply to this email.</p>
+        </div>
+    </div>
+</body>
+</html>

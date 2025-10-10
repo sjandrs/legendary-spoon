@@ -1,0 +1,101 @@
+name: Import Local Issues
+
+on:
+  workflow_dispatch:
+    inputs:
+      label:
+        description: Label to apply to imported issues
+        required: false
+        default: imported-from-md
+      dry_run:
+        description: Do not create issues, just log what would happen
+        required: false
+        default: 'false'
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Ensure label exists
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const label = core.getInput('label') || 'imported-from-md';
+            try {
+              await github.rest.issues.getLabel({ owner: context.repo.owner, repo: context.repo.repo, name: label });
+              core.info(`Label '${label}' already exists.`);
+            } catch (err) {
+              if (err.status === 404) {
+                await github.rest.issues.createLabel({ owner: context.repo.owner, repo: context.repo.repo, name: label, color: '0366d6', description: 'Imported from local Markdown file' });
+                core.info(`Created label '${label}'.`);
+              } else {
+                throw err;
+              }
+            }
+
+      - name: Import issues from issues/*.md
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+            const label = core.getInput('label') || 'imported-from-md';
+            const dryRun = (core.getInput('dry_run') || 'false').toLowerCase() === 'true';
+
+            const dir = path.join(process.cwd(), 'issues');
+            if (!fs.existsSync(dir)) {
+              core.info('No issues/ directory found. Nothing to import.');
+              return;
+            }
+
+            const files = fs.readdirSync(dir).filter(f => f.toLowerCase().endsWith('.md'));
+            if (files.length === 0) {
+              core.info('No Markdown files in issues/. Nothing to import.');
+              return;
+            }
+
+            // Fetch open issues (first 200) to check for duplicates by marker
+            const existing = await github.paginate(github.rest.issues.listForRepo, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              per_page: 100
+            });
+
+            for (const file of files) {
+              const full = path.join(dir, file);
+              const raw = fs.readFileSync(full, 'utf8');
+              const lines = raw.split(/\r?\n/);
+              const firstHeading = lines.find(l => /^\s*#/.test(l));
+              const title = firstHeading ? firstHeading.replace(/^\s*#+\s*/, '').trim() : path.basename(file, path.extname(file));
+              const marker = `<!-- imported-from-md: ${path.posix.join('issues', file)} -->`;
+
+              // Deduplicate by marker in issue body
+              const dup = existing.find(i => (i.body || '').includes(marker));
+              if (dup) {
+                core.info(`Skipping ${file}: already imported as #${dup.number}`);
+                continue;
+              }
+
+              const body = `${raw}\n\n${marker}`;
+              if (dryRun) {
+                core.info(`[DRY RUN] Would create issue: ${title}`);
+                continue;
+              }
+
+              const created = await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title,
+                body,
+                labels: [label]
+              });
+              core.info(`Created issue #${created.data.number} from ${file}`);
+            }

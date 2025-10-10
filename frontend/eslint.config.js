@@ -26,4 +26,18 @@ export default defineConfig([
       'no-unused-vars': ['error', { varsIgnorePattern: '^[A-Z_]' }],
     },
   },
+  // Test files: enable Jest/Node globals and relax unused vars noise in specs
+  {
+    files: ['src/__tests__/**', 'src/**/*.{test,spec}.{js,jsx}', 'cypress/**'],
+    languageOptions: {
+      globals: {
+        ...globals.browser,
+        ...globals.jest,
+        ...globals.node,
+      },
+    },
+    rules: {
+      'no-unused-vars': 'off',
+    },
+  },
 ])

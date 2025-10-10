@@ -1,0 +1,248 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "start-backend",
+			"type": "shell",
+			"command": ".\\venv\\Scripts\\python.exe manage.py runserver",
+			"problemMatcher": [],
+			"presentation": {
+				"group": "dev",
+				"panel": "new",
+				"reveal": "always"
+			},
+			"detail": "Starts the Django backend server."
+		},
+		{
+			"label": "start-frontend",
+			"type": "shell",
+			"command": "npm run dev",
+			"options": {
+				"cwd": "${workspaceFolder}/frontend"
+			},
+			"isBackground": true,
+			"problemMatcher": {
+				"owner": "vite",
+				"pattern": {
+					"regexp": ".*"
+				},
+				"background": {
+					"activeOnStart": true,
+					"beginsPattern": ".*VITE.*",
+					"endsPattern": ".*ready in.*"
+				}
+			},
+			"presentation": {
+				"group": "dev",
+				"panel": "new",
+				"reveal": "always"
+			},
+			"detail": "Starts the Vite frontend development server."
+		},
+		{
+			"label": "run-tests",
+			"type": "shell",
+			"command": ".\\venv\\Scripts\\python.exe manage.py test",
+			"group": {
+				"kind": "test",
+				"isDefault": true
+			},
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": false,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": false
+			},
+			"detail": "Runs all Django backend tests."
+		},
+		{
+			"label": "run-tests-backend",
+			"type": "shell",
+			"command": ".\\venv\\Scripts\\python.exe manage.py test main.tests",
+			"group": "test",
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": false,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": false
+			},
+			"detail": "Runs Django backend tests for the main app."
+		},
+		{
+			"label": "run-tests-coverage",
+			"type": "shell",
+			"command": ".\\venv\\Scripts\\python.exe -m coverage run manage.py test && .\\venv\\Scripts\\python.exe -m coverage report",
+			"group": "test",
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": false,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": false
+			},
+			"detail": "Runs Django tests with coverage reporting."
+		},
+		{
+			"label": "run-tests-frontend",
+			"type": "shell",
+			"command": "npm test",
+			"options": {
+				"cwd": "${workspaceFolder}/frontend"
+			},
+			"group": "test",
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": false,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": false
+			},
+			"detail": "Runs React frontend tests."
+		},
+		{
+			"label": "run-tests-all",
+			"dependsOn": [
+				"run-tests-backend",
+				"run-tests-frontend"
+			],
+			"dependsOrder": "sequence",
+			"group": "test",
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": false,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": false
+			},
+			"detail": "Runs all backend and frontend tests."
+		},
+		{
+			"label": "run-lint-backend",
+			"type": "shell",
+			"command": ".\\venv\\Scripts\\python.exe -m flake8",
+			"group": "test",
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": false,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": false
+			},
+			"detail": "Runs Python linting using .flake8 config (respects excludes)."
+		},
+		{
+			"label": "run-lint-frontend",
+			"type": "shell",
+			"command": "npm run lint",
+			"options": {
+				"cwd": "${workspaceFolder}/frontend"
+			},
+			"group": "test",
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": false,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": false
+			},
+			"detail": "Runs ESLint on frontend code."
+		},
+		{
+			"label": "run-quality-check",
+			"dependsOn": [
+				"run-tests-backend",
+				"run-lint-backend",
+				"run-lint-frontend"
+			],
+			"dependsOrder": "sequence",
+			"group": "test",
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": false,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": false
+			},
+			"detail": "Runs comprehensive quality checks: tests and linting."
+		},
+		{
+			"label": "docs: generate-unreviewed-markdown-todo",
+			"type": "shell",
+			"command": "powershell -NoProfile -ExecutionPolicy Bypass -File \"${workspaceFolder}\\tools\\generate_md_todo.ps1\"",
+			"group": "build",
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": false,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": false
+			},
+			"detail": "Generates docs/reports/UNREVIEWED_MARKDOWN_TODO.md with Markdown files needing review."
+		},
+		{
+			"label": "lint: baseline-diff",
+			"type": "shell",
+			"command": "powershell -NoProfile -ExecutionPolicy Bypass -File \"${workspaceFolder}\\tools\\lint_baseline_diff.ps1\"",
+			"group": "test",
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": false,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": false
+			},
+			"detail": "Runs ESLint and compares results to baselines, writing docs/reports/lint-baseline-diff.md"
+		},
+		{
+			"label": "lint: ci-parity",
+			"type": "shell",
+			"command": "npx eslint --max-warnings=0 --ext .js,.jsx,.ts,.tsx src",
+			"options": {
+				"cwd": "${workspaceFolder}/frontend"
+			},
+			"group": "test",
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": false,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": false
+			},
+			"detail": "Run ESLint in CI-like mode using local config and ignores"
+		},
+		{
+			"label": "lint: gate-baseline",
+			"type": "shell",
+			"command": "powershell -NoProfile -ExecutionPolicy Bypass -File \"${workspaceFolder}\\tools\\lint_baseline_diff.ps1\" -MaxTotalDelta 8000 -MaxRuleDelta 250",
+			"group": "test",
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": false,
+				"panel": "shared",
+				"showReuseMessage": true,
+				"clear": false
+			},
+			"detail": "Quality gate (temporary relaxed): allow limited deltas while legacy backlog is addressed"
+		},
+		{
+			"label": "run-tests-frontend",
+			"type": "shell",
+			"command": "npm test",
+			"group": "test"
+		}
+	]
+}

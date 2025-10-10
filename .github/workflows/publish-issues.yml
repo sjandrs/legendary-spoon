@@ -1,0 +1,66 @@
+name: Publish Issues from Markdown
+
+on:
+  workflow_dispatch:
+    inputs:
+      publish:
+        description: 'Set to true to actually create issues (otherwise dry-run).'
+        required: false
+        default: 'false'
+      include_meta:
+        description: 'Include META epic issue'
+        required: false
+        default: 'false'
+      issue_prefix:
+        description: 'Only publish files starting with this prefix (e.g., 01-)'
+        required: false
+        default: ''
+      assignees:
+        description: 'Comma-separated GitHub usernames to assign'
+        required: false
+        default: ''
+      close_superseded:
+        description: 'Automatically close superseded issues (front-matter supersedes)'
+        required: false
+        default: 'false'
+  schedule:
+    - cron: '0 6 * * 1' # Weekly dry-run every Monday 06:00 UTC
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install minimal deps (node-fetch only if absent)
+        run: |
+          npm init -y > /dev/null 2>&1 || true
+          npm install node-fetch@3 --no-audit --no-fund
+
+      - name: Publish Issues (dry-run or real)
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          PUBLISH: ${{ github.event.inputs.publish == 'true' && '1' || '' }}
+          INCLUDE_META: ${{ github.event.inputs.include_meta == 'true' && '1' || '' }}
+          ISSUE_PREFIX: ${{ github.event.inputs.issue_prefix }}
+          ASSIGNEES: ${{ github.event.inputs.assignees }}
+          CLOSE_SUPERSEDED: ${{ github.event.inputs.close_superseded == 'true' && '1' || '' }}
+        run: |
+          node scripts/automation/publish-issues.mjs
+
+      - name: Upload publish report artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: issue-publish-report
+          path: issues/publish-report.json

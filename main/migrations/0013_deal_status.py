@@ -4,15 +4,22 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('main', '0012_bulkoperation_globalsearchindex_savedsearch'),
+        ("main", "0012_bulkoperation_globalsearchindex_savedsearch"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='deal',
-            name='status',
-            field=models.CharField(choices=[('in_progress', 'In Progress'), ('won', 'Won'), ('lost', 'Lost')], default='in_progress', max_length=20),
+            model_name="deal",
+            name="status",
+            field=models.CharField(
+                choices=[
+                    ("in_progress", "In Progress"),
+                    ("won", "Won"),
+                    ("lost", "Lost"),
+                ],
+                default="in_progress",
+                max_length=20,
+            ),
         ),
     ]

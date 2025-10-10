@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { Link } from 'react-router-dom';
-import { getTasks, getActivityLogs } from '../api';
+import { getProjects } from '../api';
 import TaskCalendar from './TaskCalendar';
 import ActivityTimeline from './ActivityTimeline';
 import AuthContext from '../contexts/AuthContext';
@@ -28,9 +28,9 @@ const TaskDashboard = () => {
     try {
       setLoading(true);
       const [tasksResponse, overdueResponse, upcomingResponse] = await Promise.all([
-        getTasks(),
-        getTasks('/api/tasks/overdue/'),
-        getTasks('/api/tasks/upcoming/')
+        getProjects(),
+        getProjects('/api/projects/overdue/'),
+        getProjects('/api/projects/upcoming/')
       ]);
 
       const tasks = Array.isArray(tasksResponse.data) ? tasksResponse.data : tasksResponse.data.results || [];
@@ -47,15 +47,15 @@ const TaskDashboard = () => {
       };
 
       setTaskStats(stats);
-      
+
       // Get recent tasks (last 5)
       const sortedTasks = tasks
         .sort((a, b) => new Date(b.updated_at || b.created_at) - new Date(a.updated_at || a.created_at))
         .slice(0, 5);
       setRecentTasks(sortedTasks);
 
-    } catch (error) {
-      console.error('Error loading task stats:', error);
+    } catch (_err) {
+      console.error('Error loading task stats:', _err);
     } finally {
       setLoading(false);
     }
@@ -112,8 +112,8 @@ const TaskDashboard = () => {
       <div className="dashboard-header">
         <h1>Task & Activity Management</h1>
         <div className="header-actions">
-          <button 
-            onClick={() => window.location.reload()} 
+          <button
+            onClick={() => window.location.reload()}
             className="refresh-btn"
           >
             🔄 Refresh
@@ -203,7 +203,7 @@ const TaskDashboard = () => {
                 <h3>Recent Tasks</h3>
                 <a href="/tasks" className="view-all-link">View All Tasks →</a>
               </div>
-              
+
               {recentTasks.length === 0 ? (
                 <div className="no-tasks">
                   <p>No tasks found. Create your first task to get started!</p>
@@ -215,27 +215,27 @@ const TaskDashboard = () => {
                       <div className="task-header">
                         <h4 className="task-title">{task.title}</h4>
                         <div className="task-meta">
-                          <span 
+                          <span
                             className="task-priority"
                             style={{ backgroundColor: getPriorityColor(task.priority) }}
                           >
                             {task.priority}
                           </span>
-                          <span 
+                          <span
                             className="task-status"
                             style={{ color: getStatusColor(task.status) }}
                           >
-                            {task.status.replace('_', ' ')}
+                            {task.status ? task.status.replace('_', ' ') : 'No Status'}
                           </span>
                         </div>
                       </div>
-                      
+
                       <div className="task-details">
                         {task.description && (
                           <p className="task-description">{task.description}</p>
                         )}
                         <div className="task-info">
-                          <span className="task-type">📋 {task.task_type.replace('_', ' ')}</span>
+                          <span className="task-type">📋 {task.task_type ? task.task_type.replace('_', ' ') : 'No Type'}</span>
                           {task.due_date && (
                             <span className={`task-due ${task.is_overdue ? 'overdue' : ''}`}>
                               📅 Due: {new Date(task.due_date).toLocaleDateString()}

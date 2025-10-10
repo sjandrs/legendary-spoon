@@ -1,0 +1,15 @@
+[flake8]
+max-line-length = 100
+extend-ignore = E203, W503
+exclude =
+    .git,
+    __pycache__,
+    venv,
+    .venv,
+    node_modules,
+    frontend,
+    main/migrations/*,
+    web/migrations/*
+per-file-ignores =
+    main/migrations/*.py: E501,E111,E114,F401,F841
+    main/tests/test_search_and_routes.py: E115

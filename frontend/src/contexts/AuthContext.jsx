@@ -46,11 +46,11 @@ export const AuthProvider = ({ children }) => {
       } else {
         throw new Error("Invalid login response from server.");
       }
-    } catch (error) {
+    } catch (_err) {
       localStorage.removeItem('authToken');
       delete apiClient.defaults.headers.common['Authorization'];
       setUser(null);
-      throw error;
+      throw _err;
     }
   };
 
