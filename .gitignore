@@ -30,6 +30,8 @@ db.sqlite3-journal
 media/
 staticfiles/
 static/
+!static/kb/**
+!static/ajax_example.js
 
 # Virtual Environment
 venv/
@@ -58,8 +60,10 @@ frontend/build/
 frontend/jest-results.json
 
 # IDE / Editors
-.vscode/
 .idea/
+*.swp
+*.swo
+*~
 *.swp
 *.swo
 *~
@@ -117,6 +121,7 @@ pids/
 # Coverage directory used by tools like istanbul
 coverage/
 lcov.info
+frontend/coverage/
 
 # Dependency directories
 jspm_packages/
