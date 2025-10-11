@@ -89,8 +89,6 @@ class Command(BaseCommand):
                         ("Error processing event " f"{parent_event.id}: {str(e)}")
                     )
                 )
-
-        # Summary
         self.stdout.write("\n" + "=" * 50)
         self.stdout.write("RECURRENCE PROCESSING SUMMARY")
         self.stdout.write("=" * 50)
@@ -201,7 +199,10 @@ class Command(BaseCommand):
                         start_time=current_date,
                         end_time=end_time,
                         status="scheduled",
-                        notes=f"Recurring appointment (Pattern: {getattr(parent_event, 'recurrence_rule', '')})",
+                        notes=(
+                            "Recurring appointment (Pattern: "
+                            f"{getattr(parent_event, 'recurrence_rule', '')})"
+                        ),
                         parent_event=parent_event,
                     )
 
