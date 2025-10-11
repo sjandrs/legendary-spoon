@@ -79,11 +79,14 @@ class Command(BaseCommand):
             except Exception as e:
                 total_errors += 1
                 logger.error(
-                    f"Error processing recurrence for event {parent_event.id}: {str(e)}"
+                    (
+                        "Error processing recurrence for event "
+                        f"{parent_event.id}: {str(e)}"
+                    )
                 )
                 self.stdout.write(
                     self.style.ERROR(
-                        f"Error processing event {parent_event.id}: {str(e)}"
+                        ("Error processing event " f"{parent_event.id}: {str(e)}")
                     )
                 )
 
