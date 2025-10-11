@@ -1,7 +1,8 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Service Appointment Reminder</title>
     <style>
         body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
@@ -56,21 +57,16 @@
 
             <div class="important">
                 <h3>Important Notes</h3>
-                <ul>
-                    <li>Please ensure someone will be available at the scheduled time</li>
-                    <li>Clear access to the work area if possible</li>
-                    <li>Have any relevant documentation or previous service records ready</li>
-                    <li>If you need to reschedule, please call us as soon as possible</li>
-                </ul>
+                <ul><li>Please ensure someone will be available at the scheduled time</li><li>Clear access to the work area if possible</li><li>Have any relevant documentation or previous service records ready</li><li>If you need to reschedule, please call us as soon as possible</li></ul>
             </div>
 
             {% if work_order.line_items.all %}
             <div class="appointment-details">
                 <h3>Planned Services/Items</h3>
                 <ul>
-                {% for item in work_order.line_items.all %}
-                    <li>{{ item.description }}</li>
-                {% endfor %}
+                    {% for item in work_order.line_items.all %}
+                        <li>{{ item.description }}</li>
+                    {% endfor %}
                 </ul>
             </div>
             {% endif %}

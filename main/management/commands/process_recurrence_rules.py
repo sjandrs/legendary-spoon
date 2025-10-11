@@ -79,15 +79,16 @@ class Command(BaseCommand):
             except Exception as e:
                 total_errors += 1
                 logger.error(
-                    f"Error processing recurrence for event {parent_event.id}: {str(e)}"
+                    (
+                        "Error processing recurrence for event "
+                        f"{parent_event.id}: {str(e)}"
+                    )
                 )
                 self.stdout.write(
                     self.style.ERROR(
-                        f"Error processing event {parent_event.id}: {str(e)}"
+                        ("Error processing event " f"{parent_event.id}: {str(e)}")
                     )
                 )
-
-        # Summary
         self.stdout.write("\n" + "=" * 50)
         self.stdout.write("RECURRENCE PROCESSING SUMMARY")
         self.stdout.write("=" * 50)
@@ -198,7 +199,10 @@ class Command(BaseCommand):
                         start_time=current_date,
                         end_time=end_time,
                         status="scheduled",
-                        notes=f"Recurring appointment (Pattern: {getattr(parent_event, 'recurrence_rule', '')})",
+                        notes=(
+                            "Recurring appointment (Pattern: "
+                            f"{getattr(parent_event, 'recurrence_rule', '')})"
+                        ),
                         parent_event=parent_event,
                     )
 

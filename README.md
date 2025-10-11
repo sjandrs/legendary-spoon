@@ -27,6 +27,31 @@ Built with a robust **Django** backend and a dynamic **React** frontend, Converg
 *   **Knowledge Base:** An internal documentation system for storing articles, guides, and changelogs.
 *   **User Roles & Permissions:** Manage user access with roles like "Sales Rep" and "Sales Manager".
 
+## CI Status
+
+![Spec Validation](https://github.com/sjandrs/legendary-spoon/actions/workflows/spec-validate.yml/badge.svg)
+
+### Spec compilation (compiled spec)
+
+You can generate a single compiled specification from all Markdown files in `spec/`.
+
+- Local usage (Windows PowerShell):
+    ```powershell
+    .\venv\Scripts\Activate.ps1
+    python tools/spec_compile.py --src spec --out spec/COMPILED_SPEC.md
+    # Optional: include subfolders
+    python tools/spec_compile.py --src spec --out spec/COMPILED_SPEC.md --recursive
+    ```
+    Notes:
+    - The compiler demotes H1 headings so the compiled document has a single top-level title.
+    - File ordering prioritizes `requirements.md`, `design.md`, `tasks.md`, then any `order: N` front matter, then filename.
+    - The compiled file (`spec/COMPILED_SPEC.md`) is gitignored by default.
+
+- In CI: the workflow `.github/workflows/spec-compile.yml` runs on every push/PR and uploads the compiled doc as an artifact named `compiled-spec`. To download it:
+    1) Open the run in GitHub Actions → Spec Compile job
+    2) Scroll to Artifacts → download `compiled-spec`
+
+
 ## � Documentation
 
 *   **[Testing Automation Guide](docs/TESTING_AUTOMATION.md)**: Comprehensive documentation for automated testing, CI/CD, and quality assurance

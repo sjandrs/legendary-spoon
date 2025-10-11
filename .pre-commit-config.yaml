@@ -49,6 +49,15 @@ repos:
 
   - repo: local
     hooks:
+      - id: spec-validate
+        name: Validate specs (spec-driven workflow)
+        entry: python tools/spec_validate.py
+        language: system
+        pass_filenames: false
+        stages: [pre-commit]
+
+  - repo: local
+    hooks:
       - id: block-forbidden-files
         name: Block committing forbidden files (db.sqlite3, coverage, pyc, backup)
         entry: python tools/block_forbidden_files.py
@@ -81,6 +90,16 @@ repos:
         language: system
         pass_filenames: false
         files: ^frontend/src/.*\.(js|jsx|ts|tsx)$
+        stages: [pre-push]
+
+  - repo: local
+    hooks:
+      - id: backend-tests
+        name: Run Backend Tests
+        entry: powershell -NoProfile -ExecutionPolicy Bypass -Command ".\\venv\\Scripts\\Activate.ps1; python manage.py test main.tests"
+        language: system
+        pass_filenames: false
+        files: ^(main|web)/.*\.py$
         stages: [pre-push]
 
 # Enforce current virtualenv Python version to avoid fallback to missing Store install
