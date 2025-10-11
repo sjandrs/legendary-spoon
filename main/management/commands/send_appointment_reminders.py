@@ -43,7 +43,7 @@ class Command(BaseCommand):
         force = options["force"]
 
         self.stdout.write(
-            f"Processing appointment reminders for {days_ahead} day(s) ahead..."
+            ("Processing appointment reminders for " f"{days_ahead} day(s) ahead...")
         )
 
         # Calculate the target date range
@@ -77,7 +77,8 @@ class Command(BaseCommand):
         for event in scheduled_events:
             # Check if reminder was already sent today (unless forced)
             if not force:
-                # We don't have typed fields for event/type; heuristically match only customer reminder emails
+                # We don't have typed fields for event/type; heuristically match only
+                # customer reminder emails
                 existing_reminder = (
                     NotificationLog.objects.filter(
                         content_type__model="scheduledevent",
@@ -96,8 +97,10 @@ class Command(BaseCommand):
                 if existing_reminder:
                     already_sent_count += 1
                     self.stdout.write(
-                        f"Reminder already sent for appointment {event.id} "
-                        f"({event.work_order.description})"
+                        (
+                            f"Reminder already sent for appointment {event.id} "
+                            f"({event.work_order.description})"
+                        )
                     )
                     continue
 
@@ -120,8 +123,10 @@ class Command(BaseCommand):
                         f"  - Time: {event.start_time.strftime('%Y-%m-%d %H:%M')}"
                     )
                     self.stdout.write(
-                        f"  - Technician: {event.technician.first_name} "
-                        f"{event.technician.last_name}"
+                        (
+                            f"  - Technician: {event.technician.first_name} "
+                            f"{event.technician.last_name}"
+                        )
                     )
                     sent_count += 1
                 else:

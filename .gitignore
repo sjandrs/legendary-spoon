@@ -200,3 +200,6 @@ local_config.py
 reports/generated/
 # Temporary email attachments
 email_attachments/
+
+# Generated spec artifacts
+spec/COMPILED_SPEC.md

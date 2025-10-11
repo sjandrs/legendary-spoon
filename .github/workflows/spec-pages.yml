@@ -1,0 +1,157 @@
+name: Spec Pages
+
+on:
+  push:
+    branches: [ master, Development ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Compile spec and prepare site
+        run: |
+          set -e
+          mkdir -p _site
+          # Compile compiled spec into the site folder
+          python tools/spec_compile.py --src spec --out _site/COMPILED_SPEC.md
+          # Copy repo README for landing page rendering
+          cp README.md _site/README.md
+          # Create a minimal landing page that renders Markdown client-side
+          cat > _site/index.html << 'EOF'
+          <!doctype html>
+          <html lang="en">
+          <head>
+            <meta charset="utf-8" />
+            <meta name="viewport" content="width=device-width, initial-scale=1" />
+            <title>Converge CRM – Documentation</title>
+            <link rel="icon" href="https://github.githubassets.com/favicons/favicon.svg" />
+            <style>
+              :root { color-scheme: light dark; }
+              body { font-family: -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; margin: 0; }
+              header { padding: 16px 24px; background: #0d1117; color: #c9d1d9; }
+              header h1 { margin: 0; font-size: 20px; }
+              nav { display: flex; gap: 12px; padding: 12px 24px; background: #161b22; }
+              nav a { color: #c9d1d9; text-decoration: none; padding: 6px 10px; border-radius: 6px; }
+              nav a.active { background: #238636; color: #fff; }
+              main { padding: 24px; max-width: 1080px; margin: 0 auto; }
+              .content { display: none; }
+              .content.active { display: block; }
+              .card { background: #0d1117; color: #c9d1d9; border: 1px solid #30363d; border-radius: 8px; padding: 16px; }
+              .muted { color: #8b949e; font-size: 14px; }
+              .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+              footer { padding: 24px; text-align: center; color: #8b949e; }
+              @media (prefers-color-scheme: light) {
+                header { background: #0366d6; color: #fff; }
+                nav { background: #e9f2ff; }
+                nav a { color: #0a3069; }
+                .card { background: #fff; color: #24292f; border-color: #d0d7de; }
+              }
+            </style>
+            <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+          </head>
+          <body>
+            <header>
+              <h1>Converge CRM – Documentation</h1>
+              <div class="muted">Compiled spec, repository README, and helpful links</div>
+            </header>
+            <nav>
+              <a href="#home" id="tab-home" class="active">Home</a>
+              <a href="#spec" id="tab-spec">Compiled Spec</a>
+              <a href="#readme" id="tab-readme">Repository README</a>
+            </nav>
+            <main>
+              <section id="home" class="content active">
+                <div class="grid">
+                  <div class="card">
+                    <h2>Quick Links</h2>
+                    <ul>
+                      <li><a href="#spec">View Compiled Spec</a></li>
+                      <li><a href="#readme">View README</a></li>
+                      <li><a href="https://github.com/sjandrs/legendary-spoon" target="_blank" rel="noopener">GitHub Repository</a></li>
+                      <li><a href="https://github.com/sjandrs/legendary-spoon/actions" target="_blank" rel="noopener">GitHub Actions</a></li>
+                    </ul>
+                  </div>
+                  <div class="card">
+                    <h2>About</h2>
+                    <p>This site is automatically published from the repository. The compiled specification is generated on each push from the Markdown sources in <code>spec/</code>.</p>
+                    <p class="muted">Tip: Use the tabs above to switch between content.</p>
+                  </div>
+                </div>
+              </section>
+              <section id="spec" class="content"><article id="spec-md">Loading compiled spec…</article></section>
+              <section id="readme" class="content"><article id="readme-md">Loading README…</article></section>
+            </main>
+            <footer>
+              <small>© <span id="year"></span> Converge CRM · Published via GitHub Pages</small>
+            </footer>
+            <script>
+              const year = new Date().getFullYear();
+              document.getElementById('year').textContent = year;
+              function setActive(tab) {
+                document.querySelectorAll('nav a').forEach(a => a.classList.remove('active'));
+                document.querySelectorAll('.content').forEach(s => s.classList.remove('active'));
+                document.getElementById(tab).classList.add('active');
+                document.getElementById('tab-' + tab).classList.add('active');
+              }
+              async function renderMD(path, elId) {
+                try {
+                  const res = await fetch(path, { cache: 'no-store' });
+                  const md = await res.text();
+                  document.getElementById(elId).innerHTML = marked.parse(md);
+                } catch (e) {
+                  document.getElementById(elId).textContent = 'Failed to load ' + path;
+                }
+              }
+              // Initial loads
+              renderMD('COMPILED_SPEC.md', 'spec-md');
+              renderMD('README.md', 'readme-md');
+              // Tab navigation
+              document.querySelectorAll('nav a').forEach(a => {
+                a.addEventListener('click', (ev) => {
+                  ev.preventDefault();
+                  setActive(a.getAttribute('href').slice(1));
+                });
+              });
+              // Deep link support
+              if (location.hash) {
+                const tab = location.hash.slice(1);
+                if (['home','spec','readme'].includes(tab)) setActive(tab);
+              }
+            </script>
+          </body>
+          </html>
+          EOF
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
