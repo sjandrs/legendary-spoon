@@ -31,6 +31,17 @@ Built with a robust **Django** backend and a dynamic **React** frontend, Converg
 
 ![Spec Validation](https://github.com/sjandrs/legendary-spoon/actions/workflows/spec-validate.yml/badge.svg)
 
+### Branch Protection
+
+The repository enforces quality gates through branch protection rules:
+
+- **Protected Branches:** `master`, `Development`
+- **Required Status Check:** Spec Validation must pass before merge
+- **Policy:** Pull requests cannot be merged if the Spec Validation workflow fails
+- **Configuration:** `strict=false` (allows out-of-date branches), `enforce_admins=false`
+
+This ensures all code changes maintain the spec-driven development workflow standards before being merged into protected branches.
+
 ## � Documentation
 
 *   **[Testing Automation Guide](docs/TESTING_AUTOMATION.md)**: Comprehensive documentation for automated testing, CI/CD, and quality assurance
