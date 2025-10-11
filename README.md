@@ -1,5 +1,7 @@
 # Converge CRM
 
+[![Docs](https://img.shields.io/badge/docs-published-blue)](https://sjandrs.github.io/legendary-spoon/) [![Spec Validation](https://github.com/sjandrs/legendary-spoon/actions/workflows/spec-validate.yml/badge.svg)](https://github.com/sjandrs/legendary-spoon/actions/workflows/spec-validate.yml) [![Spec Pages](https://github.com/sjandrs/legendary-spoon/actions/workflows/spec-pages.yml/badge.svg)](https://github.com/sjandrs/legendary-spoon/actions/workflows/spec-pages.yml) [![Spec Compile](https://github.com/sjandrs/legendary-spoon/actions/workflows/spec-compile.yml/badge.svg)](https://github.com/sjandrs/legendary-spoon/actions/workflows/spec-compile.yml) [![Spec Release](https://github.com/sjandrs/legendary-spoon/actions/workflows/spec-release.yml/badge.svg)](https://github.com/sjandrs/legendary-spoon/actions/workflows/spec-release.yml)
+
 ## 🎯 **COMPREHENSIVE USER STORY VALIDATION COMPLETE**
 
 ### ✅ **PERFECT ACHIEVEMENT: 8/8 Comprehensive User Story Tests PASSING**
@@ -29,7 +31,10 @@ Built with a robust **Django** backend and a dynamic **React** frontend, Converg
 
 ## CI Status
 
-![Spec Validation](https://github.com/sjandrs/legendary-spoon/actions/workflows/spec-validate.yml/badge.svg)
+- [![Spec Validation](https://github.com/sjandrs/legendary-spoon/actions/workflows/spec-validate.yml/badge.svg)](https://github.com/sjandrs/legendary-spoon/actions/workflows/spec-validate.yml)
+- [![Spec Pages](https://github.com/sjandrs/legendary-spoon/actions/workflows/spec-pages.yml/badge.svg)](https://github.com/sjandrs/legendary-spoon/actions/workflows/spec-pages.yml)
+- [![Spec Compile](https://github.com/sjandrs/legendary-spoon/actions/workflows/spec-compile.yml/badge.svg)](https://github.com/sjandrs/legendary-spoon/actions/workflows/spec-compile.yml)
+- [![Spec Release](https://github.com/sjandrs/legendary-spoon/actions/workflows/spec-release.yml/badge.svg)](https://github.com/sjandrs/legendary-spoon/actions/workflows/spec-release.yml)
 
 ### Spec compilation (compiled spec)
 
