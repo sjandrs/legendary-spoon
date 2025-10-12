@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../api';
+import { useLocaleFormatting } from '../hooks/useLocaleFormatting';
 
 const ExpenseList = () => {
   const [expenses, setExpenses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const { formatCurrency: formatCurrencyLocale } = useLocaleFormatting();
 
   useEffect(() => {
     fetchExpenses();
@@ -35,10 +37,7 @@ const ExpenseList = () => {
   };
 
   const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD'
-    }).format(amount);
+    return formatCurrencyLocale(amount, 'USD');
   };
 
   if (loading) return <div>Loading expenses...</div>;

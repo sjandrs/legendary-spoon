@@ -2,6 +2,33 @@
 # API Endpoints Summary (Delta Update)
 
 This document captures recent additions and behavioral changes relevant to accounting and field service APIs.
+
+## Conventions
+
+- Authentication: Token or session auth as configured in DRF settings.
+- Pagination: Paginated list endpoints return an object with `count`, `next`, `previous`, and `results`.
+  - Example:
+    ```json
+    {
+      "count": 123,
+      "next": "https://example/api/accounts/?page=3",
+      "previous": "https://example/api/accounts/?page=1",
+      "results": [{"id": 1, "name": "Acme"}]
+    }
+    ```
+- Error payloads:
+  - Validation errors include a top-level `detail` and optional `errors` list with `{path, message}` items (for batch validations):
+    ```json
+    {
+      "detail": "Invalid distributions",
+      "errors": [
+        {"path": "distributions[0].month", "message": "month 0 out of range (1..12)"},
+        {"path": "<root>", "message": "Total percent must be 100.00 (got 96.00)"}
+      ]
+    }
+    ```
+  - Simple errors use `{ "detail": "..." }`.
+- RBAC: Endpoints enforce role-based access. Tests should exercise 401 (unauthenticated), 403 (authenticated but unauthorized), and success (200/201) for authorized roles.
 ## Schema usage (JSON Schema)
 
 Authoritative data contracts are specified as JSON Schema draft-07. See the JSON Schema Catalog in `spec/spec-design-master.md` for the complete list of schemas and their locations.
@@ -129,13 +156,61 @@ Notes:
     - Serializer normalizes to digits-only and enforces the 14-digit check digit rule.
   - Rationale: Aligns with GS1 GTIN family (GTIN-8/12/13/14) while storing a canonical 14-digit normalized representation when possible.
 
-## Budget V2 (nested writes for distributions)
+## Accounts {#accounts}
+
+- List/Create: GET/POST /api/accounts/
+- Retrieve/Update: GET/PUT/PATCH /api/accounts/{id}/
+- Notes: RBAC (owner vs manager), pagination shape.
+ - Query params:
+   - ordering: supports fields like `name`, `-name`
+   - pagination: `page` (integer)
+ - Examples:
+   - GET /api/accounts/?ordering=-name
+   - GET /api/accounts/?page=2
+
+## Contacts {#contacts}
+
+- List/Create: GET/POST /api/contacts/
+- Retrieve/Update: GET/PUT/PATCH /api/contacts/{id}/
+- Notes: RBAC matrix as described above.
+ - Query params:
+   - owner: filter by owner user id (e.g., `?owner=7`)
+   - search: searches common fields (name/email)
+   - ordering: supports fields like `last_name`, `-last_name`
+ - Examples:
+   - GET /api/contacts/?owner=7
+   - GET /api/contacts/?ordering=last_name
+   - GET /api/contacts/?search=alice@example.com
+
+## Deals {#deals}
+
+- List/Create: GET/POST /api/deals/
+- Retrieve/Update: GET/PUT/PATCH /api/deals/{id}/
+- Query: search, filtering, ordering.
+ - Common filters:
+   - status: e.g., `?status=in_progress|won|lost`
+ - Ordering:
+   - `-value` for high-value first
+   - Default is `-close_date` (most recent first)
+ - Examples:
+   - GET /api/deals/?status=in_progress
+   - GET /api/deals/?ordering=-value
+
+## Budget V2 (nested writes for distributions) {#budget-v2}
 
 - Resources:
   - List/Create: `GET/POST /api/budgets-v2/`
   - Retrieve/Update: `GET/PUT/PATCH /api/budgets-v2/{id}/`
   - Seed defaults: `POST /api/budgets-v2/{id}/seed-default/`
   - Explicit distributions replace: `PUT/PATCH /api/budgets-v2/{id}/distributions/` (existing action)
+
+- Query Parameters (for List endpoint):
+  - `year` - Filter budgets by year (exact match)
+  - `cost_center` - Filter budgets by cost center ID (exact match)
+  - Examples:
+    - `GET /api/budgets-v2/?year=2026` - All budgets for year 2026
+    - `GET /api/budgets-v2/?cost_center=5` - All budgets for cost center ID 5
+    - `GET /api/budgets-v2/?year=2026&cost_center=5` - Budgets for 2026 AND cost center 5
 
 - Nested write behavior (recommended):
   - On create or update, you can include a `distributions` array to atomically replace all 12 months.
@@ -213,12 +288,148 @@ PATCH /api/budgets-v2/42/
 
 - Error response (400) examples:
 ```json
-{ "distributions": ["Exactly 12 months required (got 10)"] }
-{ "distributions": ["Duplicate month 11"] }
-{ "distributions": ["Row 1: month 0 out of range (1..12)"] }
-{ "distributions": ["Total percent must be 100.00 (got 96.00)"] }
+{ "detail": "Exactly 12 months required (got 10)" }
+{ "detail": "Row 1 must include numeric month and percent" }
+{ "detail": "Invalid distributions", "errors": ["Duplicate month 11", "Row 5: month 0 out of range (1..12)", "Total percent must be 100.00 (got 96.00)"] }
 ```
 
 Notes:
 - If no distributions are provided on create, the server seeds 12 months at ~8.33% with a final adjustment to reach exactly 100.00%.
 - A DB-level CheckConstraint enforces basic bounds; cross-row 100% invariant is enforced by model validation and a safety post-save signal.
+
+See also: Budget V2 nested writes (this section) for canonical request/response shapes.
+
+## Payments {#payments}
+
+- List/Create: GET/POST /api/payments/
+- Retrieve/Update/Delete: GET/PUT/PATCH/DELETE /api/payments/{id}/
+- Action: POST /api/payments/{id}/allocate/
+- RBAC: FinancialDataPermission — Managers can manage; non-managers are restricted. See tests in main/tests/test_permissions_*.py.
+
+Allocate example (happy path):
+```
+POST /api/payments/123/allocate/
+200 OK
+{
+  "payment_id": 123,
+  "journal_entry_id": 456,
+  "allocated_amount": 100.0,
+  "allocation_status": "posted",
+  "open_balance": 0.0,
+  "status": "paid"
+}
+```
+
+Idempotency and errors:
+- 409 on re-post of the same payment allocation
+- 400 when payment exceeds open balance
+Example (400):
+```json
+{
+  "error": "Payment exceeds open balance",
+  "total_due": 100.0,
+  "previously_paid": 60.0,
+  "attempted_payment": 50.0
+}
+```
+
+Notes:
+- Default accounts used when missing: Cash 1000 (asset), AR 1100 (asset)
+- Generic relation supports Invoice and WorkOrderInvoice
+
+## Invoices {#invoices}
+
+- List/Create: GET/POST /api/invoices/
+- Retrieve/Update/Delete: GET/PUT/PATCH/DELETE /api/invoices/{id}/
+- Action: POST /api/invoices/{id}/post/
+
+Posting example:
+```
+POST /api/invoices/42/post/
+201 Created
+{
+  "journal_entry_id": 789,
+  "amount": "100.0"
+}
+```
+
+Idempotency and errors:
+- 409 if the invoice has already been posted
+- 200/201 on first successful post
+
+Notes:
+- Creates JournalEntry: DR 1100 Accounts Receivable, CR 4000 Revenue for the invoice total
+- Persists posted_journal and posted_at on the Invoice when available
+
+## Journal Entries {#journal-entries}
+
+- List/Create: GET/POST /api/journal-entries/
+- Retrieve/Update/Delete: GET/PUT/PATCH/DELETE /api/journal-entries/{id}/
+- RBAC: FinancialDataPermission applies; non-managers forbidden for write operations; see tests.
+
+Create example:
+```json
+POST /api/journal-entries/
+{
+  "date": "2025-10-11",
+  "description": "Service revenue recognition",
+  "debit_account_id": 1000,
+  "credit_account_id": 4000,
+  "amount": "2500.00"
+}
+```
+
+## Ledger Accounts {#ledger-accounts}
+
+- List/Create: GET/POST /api/ledger-accounts/
+- Retrieve/Update/Delete: GET/PUT/PATCH/DELETE /api/ledger-accounts/{id}/
+- RBAC: Managers only (IsManager); see tests.
+- Extra: GET /api/ledger-accounts/hierarchy/
+
+Hierarchy example response:
+```json
+{
+  "asset": [
+    {"id": 1, "code": "1000", "name": "Cash"},
+    {"id": 2, "code": "1100", "name": "Accounts Receivable"}
+  ],
+  "revenue": [
+    {"id": 3, "code": "4000", "name": "Revenue"}
+  ]
+}
+```
+
+## Work Orders {#work-orders}
+
+- List/Create: GET/POST /api/work-orders/
+- Retrieve/Update/Delete: GET/PUT/PATCH/DELETE /api/work-orders/{id}/
+- Actions:
+  - POST /api/work-orders/{id}/generate-invoice/
+  - POST /api/work-orders/{id}/complete/
+
+Generate invoice example:
+```
+POST /api/work-orders/55/generate-invoice/
+201 Created
+{
+  "invoice_id": 1001,
+  "amount": 250.0
+}
+```
+
+Complete example and outcomes:
+- Success with consumption posting:
+```
+POST /api/work-orders/55/complete/
+201 Created
+{
+  "message": "Work order completed",
+  "journal_entry_id": 222,
+  "amount": "150.0"
+}
+```
+- Already completed: 409 with `{ "detail": "Work order already completed/posting recorded" }`
+- Insufficient stock: 409 with `{ "error": "<message>" }`
+
+Notes:
+- Inventory is reduced according to linked WarehouseItem quantities; COGS and Inventory accounts are posted (DR 5000 COGS, CR 1200 Inventory)

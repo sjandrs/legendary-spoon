@@ -14,12 +14,13 @@ from django_filters.rest_framework import DjangoFilterBackend
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 from rest_framework import filters, permissions, status, viewsets
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .filters import DealFilter
+from .filters import AnalyticsSnapshotFilter, BudgetV2Filter, DealFilter
 from .models import (
     Account,
     ActivityLog,
@@ -35,7 +36,9 @@ from .models import (
     CustomField,
     CustomFieldValue,
     CustomUser,
+    CustomerLifetimeValue,
     Deal,
+    DealPrediction,
     DealStage,
     DefaultWorkOrderItem,
     DigitalSignature,
@@ -61,6 +64,7 @@ from .models import (
     ProjectType,
     Quote,
     QuoteItem,
+    RevenueForecast,
     RichTextContent,
     ScheduledEvent,
     SchedulingAnalytics,
@@ -81,16 +85,19 @@ from .permissions import (
     IsManager,
     IsOwnerOrManager,
 )
+from .rate_limiting import rate_limit_analytics
 from .reports import FinancialReports
 from .serializers import (
     AccountSerializer,
     AccountWithCustomFieldsSerializer,
     ActivityLogSerializer,
+    AnalyticsSnapshotFilterSerializer,
     AnalyticsSnapshotSerializer,
     AppointmentRequestSerializer,
     BudgetSerializer,
     BudgetV2Serializer,
     CertificationSerializer,
+    CLVParameterSerializer,
     CommentSerializer,
     ContactSerializer,
     ContactWithCustomFieldsSerializer,
@@ -98,6 +105,7 @@ from .serializers import (
     CoverageAreaSerializer,
     CustomFieldSerializer,
     CustomFieldValueSerializer,
+    DealPredictionParameterSerializer,
     DealSerializer,
     DealStageSerializer,
     DefaultWorkOrderItemSerializer,
@@ -124,6 +132,7 @@ from .serializers import (
     ProjectTypeSerializer,
     QuoteItemSerializer,
     QuoteSerializer,
+    RevenueForecastParameterSerializer,
     RichTextContentSerializer,
     ScheduledEventSerializer,
     SchedulingAnalyticsSerializer,
@@ -1654,6 +1663,10 @@ class BudgetV2ViewSet(viewsets.ModelViewSet):
     ).all()
     serializer_class = BudgetV2Serializer
     permission_classes = [FinancialDataPermission]
+    filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
+    filterset_class = BudgetV2Filter
+    ordering_fields = ["year", "name", "created_at"]
+    ordering = ["-created_at"]
 
     @action(detail=True, methods=["post"], url_path="seed-default")
     def seed_default(self, request, pk=None):
@@ -2096,15 +2109,53 @@ def dashboard_analytics(request):
 # (Removed duplicate AnalyticsSnapshotSerializer; use the imported version from serializers.py)
 
 
+class AnalyticsPagination(PageNumberPagination):
+    """Custom pagination for analytics endpoints with configurable page size."""
+    page_size = 50
+    page_size_query_param = 'page_size'
+    max_page_size = 200
+    
+
 class AnalyticsSnapshotViewSet(viewsets.ModelViewSet):
     """
-    ViewSet for analytics snapshots.
+    ViewSet for analytics snapshots with enhanced filtering and pagination.
+    Implements Phase 5: Advanced Analytics with performance optimization.
     """
-
-    queryset = AnalyticsSnapshot.objects.all()
+    
+    queryset = AnalyticsSnapshot.objects.all().order_by("-date")
     serializer_class = AnalyticsSnapshotSerializer
     permission_classes = [IsAuthenticated]
-    filterset_fields = ["date"]
+    filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
+    filterset_class = AnalyticsSnapshotFilter
+    pagination_class = AnalyticsPagination
+    ordering_fields = ["date", "total_revenue", "won_deals", "total_contacts"]
+    ordering = ["-date"]
+    
+    def get_queryset(self):
+        """
+        Optimize queryset for performance with select_related and prefetch_related.
+        Apply default date range if no filters provided to prevent large datasets.
+        """
+        queryset = super().get_queryset()
+        
+        # Check if any date filters are applied
+        request_params = self.request.query_params
+        has_date_filter = any(
+            param in request_params
+            for param in [
+                "date", "date_from", "date_to",
+                "last_7_days", "last_30_days", "last_90_days"
+            ]
+        )
+        
+        # If no date filter is provided, default to last 30 days for performance
+        if not has_date_filter:
+            from django.utils import timezone
+            from datetime import timedelta
+            cutoff_date = timezone.now().date() - timedelta(days=30)
+            queryset = queryset.filter(date__gte=cutoff_date)
+        
+        return queryset
 
     @action(detail=False, methods=["get"])
     def trends(self, request):
@@ -2925,11 +2976,22 @@ def analytics_dashboard(request):
 
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
+@rate_limit_analytics(max_requests=20, window_seconds=60)
 def calculate_clv(request, contact_id):
     """
     Calculate Customer Lifetime Value for a contact.
-    Implements Phase 3: Advanced Analytics.
+    Implements Phase 5: Advanced Analytics with persistent model integration.
     """
+    # Validate parameters
+    serializer = CLVParameterSerializer(data=request.GET)
+    if not serializer.is_valid():
+        return Response(
+            {"error": "Invalid parameters", "details": serializer.errors},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+    
+    params = serializer.validated_data
+    
     try:
         contact = Contact.objects.get(id=contact_id)
     except Contact.DoesNotExist:
@@ -2937,61 +2999,196 @@ def calculate_clv(request, contact_id):
             {"error": "Contact not found"}, status=status.HTTP_404_NOT_FOUND
         )
 
-    # Simple CLV calculation - would be more sophisticated in real implementation
-    total_value = (
-        Deal.objects.filter(primary_contact=contact, status="won").aggregate(
-            total=Sum("value")
-        )["total"]
-        or 0
-    )
+    # Try to get existing CLV calculation from persistent model
+    try:
+        clv_record = CustomerLifetimeValue.objects.get(contact=contact)
+        return Response(
+            {
+                "contact_id": contact_id,
+                "contact_name": f"{contact.first_name} {contact.last_name}",
+                "lifetime_value": float(clv_record.total_revenue),
+                "clv": float(clv_record.predicted_clv),
+                "confidence": float(clv_record.clv_confidence),
+                "average_deal_size": float(clv_record.average_deal_size),
+                "total_deals": clv_record.total_deals,
+                "win_rate": float(clv_record.deal_win_rate),
+                "segments": clv_record.segments,
+                "customer_since": clv_record.customer_since.isoformat(),
+                "last_activity": clv_record.last_activity.isoformat(),
+                "data_source": "persistent_model",
+                "updated_at": clv_record.updated_at.isoformat(),
+            }
+        )
+    except CustomerLifetimeValue.DoesNotExist:
+        # Fallback to heuristic calculation
+        total_value = (
+            Deal.objects.filter(primary_contact=contact, status="won").aggregate(
+                total=Sum("value")
+            )["total"]
+            or 0
+        )
 
-    return Response(
-        {
-            "contact_id": contact_id,
-            "contact_name": f"{contact.first_name} {contact.last_name}",
-            "lifetime_value": total_value,
-            "clv": total_value,
-        }
-    )
+        return Response(
+            {
+                "contact_id": contact_id,
+                "contact_name": f"{contact.first_name} {contact.last_name}",
+                "lifetime_value": total_value,
+                "clv": total_value,
+                "confidence": 0.5,  # Lower confidence for heuristic calculation
+                "data_source": "heuristic_calculation",
+                "message": "Using fallback calculation. Run analytics refresh for "
+                "improved accuracy.",
+            }
+        )
 
 
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
+@rate_limit_analytics(max_requests=20, window_seconds=60)
 def predict_deal_outcome(request, deal_id):
     """
     Predict deal outcome using analytics.
-    Implements Phase 3: Advanced Analytics.
+    Implements Phase 5: Advanced Analytics with persistent model integration.
     """
+    # Validate parameters
+    serializer = DealPredictionParameterSerializer(data=request.GET)
+    if not serializer.is_valid():
+        return Response(
+            {"error": "Invalid parameters", "details": serializer.errors},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+    
+    params = serializer.validated_data
+    
     try:
         deal = Deal.objects.get(id=deal_id)
     except Deal.DoesNotExist:
         return Response({"error": "Deal not found"}, status=status.HTTP_404_NOT_FOUND)
 
-    # Simple prediction - would use ML models in real implementation
-    prediction = "likely_to_win" if deal.value > 50000 else "uncertain"
+    # Try to get existing prediction from persistent model
+    try:
+        prediction_record = DealPrediction.objects.get(deal=deal)
+        return Response(
+            {
+                "deal_id": deal_id,
+                "deal_title": deal.title,
+                "prediction": prediction_record.predicted_outcome,
+                "confidence": float(prediction_record.confidence_score),
+                "confidence_score": float(prediction_record.confidence_score),
+                "predicted_close_date": (
+                    prediction_record.predicted_close_date.isoformat()
+                    if prediction_record.predicted_close_date
+                    else None
+                ),
+                "factors": prediction_record.factors,
+                "model_version": prediction_record.model_version,
+                "data_source": "persistent_model",
+                "updated_at": prediction_record.updated_at.isoformat(),
+            }
+        )
+    except DealPrediction.DoesNotExist:
+        # Fallback to heuristic prediction
+        if deal.value > 50000:
+            prediction = "won"
+            confidence = 0.75
+        elif deal.value > 10000:
+            prediction = "pending"
+            confidence = 0.60
+        else:
+            prediction = "lost"
+            confidence = 0.65
 
-    return Response(
-        {
-            "deal_id": deal_id,
-            "prediction": prediction,
-            "confidence": 0.75,
-            "confidence_score": 0.75,
-        }
-    )
+        return Response(
+            {
+                "deal_id": deal_id,
+                "deal_title": deal.title,
+                "prediction": prediction,
+                "confidence": confidence,
+                "confidence_score": confidence,
+                "factors": {"deal_value": float(deal.value), "heuristic": True},
+                "data_source": "heuristic_calculation",
+                "message": "Using fallback prediction. Run analytics refresh for "
+                "improved accuracy.",
+            }
+        )
 
 
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
+@rate_limit_analytics(max_requests=15, window_seconds=60)
 def generate_revenue_forecast(request):
     """
     Generate revenue forecast.
-    Implements Phase 3: Advanced Analytics.
+    Implements Phase 5: Advanced Analytics with persistent model integration.
     """
-    # Simple forecast - would use time series analysis in real implementation
+    from django.utils import timezone
+    from datetime import timedelta
+
+    # Validate parameters
+    serializer = RevenueForecastParameterSerializer(data=request.GET)
+    if not serializer.is_valid():
+        return Response(
+            {"error": "Invalid parameters", "details": serializer.errors},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+    
+    params = serializer.validated_data
+    forecast_period = params["period"]
+    forecast_method = params["method"]
+
+    # Try to get existing forecast from persistent model
+    try:
+        # Get recent forecasts (within last 7 days)
+        recent_date = timezone.now().date() - timedelta(days=7)
+        forecast_record = (
+            RevenueForecast.objects.filter(
+                forecast_period=forecast_period,
+                forecast_method=forecast_method,
+                forecast_date__gte=recent_date,
+            )
+            .order_by("-forecast_date")
+            .first()
+        )
+
+        if forecast_record:
+            return Response(
+                {
+                    "forecast_period": forecast_record.forecast_period,
+                    "forecast_method": forecast_record.forecast_method,
+                    "predicted_revenue": float(forecast_record.predicted_revenue),
+                    "confidence_interval": {
+                        "lower": float(forecast_record.confidence_interval_lower),
+                        "upper": float(forecast_record.confidence_interval_upper),
+                    },
+                    "factors": forecast_record.factors,
+                    "forecast_date": forecast_record.forecast_date.isoformat(),
+                    "data_source": "persistent_model",
+                    "created_at": forecast_record.created_at.isoformat(),
+                }
+            )
+    except Exception:
+        pass  # Fall back to heuristic calculation
+
+    # Fallback to heuristic forecast
+    if forecast_period == "monthly":
+        base_forecast = 150000
+    elif forecast_period == "quarterly":
+        base_forecast = 450000
+    else:  # annual
+        base_forecast = 1800000
+
     forecast = {
-        "next_month": 150000,
-        "next_quarter": 450000,
-        "next_year": 1800000,
+        "forecast_period": forecast_period,
+        "forecast_method": "heuristic",
+        "predicted_revenue": base_forecast,
+        "confidence_interval": {
+            "lower": base_forecast * 0.8,
+            "upper": base_forecast * 1.2,
+        },
+        "factors": {"method": "heuristic", "base_calculation": True},
+        "data_source": "heuristic_calculation",
+        "message": "Using fallback forecast. Run analytics refresh for "
+        "improved accuracy.",
         "accuracy_metrics": {"historical_accuracy": 0.85, "confidence_interval": 0.95},
     }
 

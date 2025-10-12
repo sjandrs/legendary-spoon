@@ -1079,10 +1079,10 @@ class BudgetV2Serializer(serializers.ModelSerializer):
         from rest_framework.exceptions import ValidationError
 
         if not isinstance(rows, list):
-            raise ValidationError({"distributions": "must be a list of 12 rows"})
+            raise ValidationError({"detail": "distributions must be a list of 12 rows"})
         if len(rows) != 12:
             raise ValidationError(
-                {"distributions": f"Exactly 12 months required (got {len(rows)})"}
+                {"detail": f"Exactly 12 months required (got {len(rows)})"}
             )
 
         seen = set()
@@ -1095,9 +1095,7 @@ class BudgetV2Serializer(serializers.ModelSerializer):
                 p = Decimal(str(r.get("percent")))
             except Exception:
                 raise ValidationError(
-                    {
-                        "distributions": f"Row {idx} must include numeric month and percent"
-                    }
+                    {"detail": f"Row {idx} must include numeric month and percent"}
                 )
             if m < 1 or m > 12:
                 errors.append(f"Row {idx}: month {m} out of range (1..12)")
@@ -1114,7 +1112,7 @@ class BudgetV2Serializer(serializers.ModelSerializer):
             errors.append(f"Total percent must be 100.00 (got {total})")
 
         if errors:
-            raise ValidationError({"distributions": errors})
+            raise ValidationError({"detail": "Invalid distributions", "errors": errors})
 
         # Persist atomically: replace all rows
         from .models import MonthlyDistribution
@@ -1695,3 +1693,89 @@ class SchedulingAnalyticsSerializer(serializers.ModelSerializer):
             "created_at",
         ]
         read_only_fields = ["created_at"]
+
+
+# Analytics Parameter Validation Serializers
+
+
+class CLVParameterSerializer(serializers.Serializer):
+    """Parameter validation for CLV calculations."""
+    
+    include_predictions = serializers.BooleanField(default=True, required=False)
+    refresh_data = serializers.BooleanField(default=False, required=False)
+    confidence_threshold = serializers.DecimalField(
+        max_digits=3, decimal_places=2, min_value=0.0, max_value=1.0,
+        default=0.5, required=False
+    )
+
+
+class DealPredictionParameterSerializer(serializers.Serializer):
+    """Parameter validation for deal predictions."""
+    
+    include_factors = serializers.BooleanField(default=True, required=False)
+    model_version = serializers.CharField(
+        max_length=50, required=False, default="latest"
+    )
+    refresh_prediction = serializers.BooleanField(default=False, required=False)
+
+
+class RevenueForecastParameterSerializer(serializers.Serializer):
+    """Parameter validation for revenue forecasts."""
+    
+    PERIOD_CHOICES = [
+        ("monthly", "Monthly"),
+        ("quarterly", "Quarterly"),
+        ("annual", "Annual"),
+    ]
+    
+    METHOD_CHOICES = [
+        ("linear_regression", "Linear Regression"),
+        ("moving_average", "Moving Average"),
+        ("seasonal_arima", "Seasonal ARIMA"),
+    ]
+    
+    period = serializers.ChoiceField(
+        choices=PERIOD_CHOICES, default="monthly", required=False
+    )
+    method = serializers.ChoiceField(
+        choices=METHOD_CHOICES, default="linear_regression", required=False
+    )
+    start_date = serializers.DateField(required=False)
+    end_date = serializers.DateField(required=False)
+    include_confidence = serializers.BooleanField(default=True, required=False)
+    
+    def validate(self, attrs):
+        """Validate date range parameters."""
+        start_date = attrs.get("start_date")
+        end_date = attrs.get("end_date")
+        
+        if start_date and end_date:
+            if start_date >= end_date:
+                raise serializers.ValidationError(
+                    "start_date must be before end_date"
+                )
+        
+        return attrs
+
+
+class AnalyticsSnapshotFilterSerializer(serializers.Serializer):
+    """Parameter validation for analytics snapshot filtering."""
+    
+    start_date = serializers.DateField(required=False)
+    end_date = serializers.DateField(required=False)
+    page_size = serializers.IntegerField(
+        min_value=1, max_value=100, default=20, required=False
+    )
+    
+    def validate(self, attrs):
+        """Validate date range and pagination parameters."""
+        start_date = attrs.get("start_date")
+        end_date = attrs.get("end_date")
+        
+        if start_date and end_date:
+            if start_date >= end_date:
+                raise serializers.ValidationError(
+                    "start_date must be before end_date"
+                )
+        
+        return attrs

@@ -3,8 +3,12 @@ import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
+import MobileOptimizedCalendar from './MobileOptimizedCalendar';
+import { TouchUtils } from '../utils/mobile-signature-utils';
+import { MobileCalendarUtils, MobileTouchHandlers } from '../utils/mobile-calendar';
 import api from '../api';
 import './SchedulePage.css';
+import '../styles/mobile-scheduling.css';
 
 const SchedulePage = () => {
   const [events, setEvents] = useState([]);
@@ -47,7 +51,7 @@ const SchedulePage = () => {
   };
 
   const formatEventsForCalendar = (events) => {
-    return events.map(event => ({
+    const formattedEvents = events.map(event => ({
       id: event.id,
       title: `${event.title} - ${event.technician_name || 'Unassigned'}`,
       start: event.scheduled_date,
@@ -63,6 +67,11 @@ const SchedulePage = () => {
       backgroundColor: getEventColor(event.status),
       borderColor: getEventColor(event.status)
     }));
+
+    // Apply mobile optimizations if on touch device
+    return TouchUtils.isTouchDevice()
+      ? MobileCalendarUtils.formatEventsForMobile(formattedEvents)
+      : formattedEvents;
   };
 
   const getEventColor = (status) => {
@@ -86,20 +95,66 @@ const SchedulePage = () => {
     setShowEventModal(true);
   };
 
-  const handleEventClick = (clickInfo) => {
-    const event = clickInfo.event;
+  // Calendar navigation handlers for mobile
+  const handleCalendarNavigate = (action, newDate) => {
+    setSelectedDate(newDate);
+  };
+
+  const handleCalendarViewChange = (view) => {
+    // Handle view changes for mobile calendar
+    console.log('View changed to:', view);
+  };
+
+  const handleDateSelect = (slotInfo) => {
+    const startDate = slotInfo.start || slotInfo.date;
+    const endDate = slotInfo.end || new Date(startDate.getTime() + 60 * 60 * 1000); // 1 hour default
+
+    setSelectedDate(startDate);
     setEventForm({
-      title: event.title.split(' - ')[0],
-      description: event.extendedProps.description,
-      start: event.startStr,
-      end: event.endStr,
-      technician: event.extendedProps.technicianId,
-      workOrder: event.extendedProps.workOrderId,
-      customer: event.extendedProps.customer,
-      address: event.extendedProps.address,
-      recurrenceRule: ''
+      ...eventForm,
+      start: startDate.toISOString().slice(0, 16),
+      end: endDate.toISOString().slice(0, 16)
     });
     setShowEventModal(true);
+  };
+
+  const handleEventClick = (clickInfo) => {
+    const event = clickInfo.event || clickInfo; // Support both FullCalendar and mobile calendar
+    const eventData = event.extendedProps || event;
+
+    // Use mobile touch handler if on touch device
+    if (TouchUtils.isTouchDevice()) {
+      MobileTouchHandlers.handleMobileEventSelect(clickInfo, (selectedEvent) => {
+        const evt = selectedEvent.event || selectedEvent;
+        const data = evt.extendedProps || evt;
+
+        setEventForm({
+          title: (evt.title || '').split(' - ')[0],
+          description: data.description,
+          start: evt.start ? evt.start.toISOString().slice(0, 16) : '',
+          end: evt.end ? evt.end.toISOString().slice(0, 16) : '',
+          technician: data.technicianId || '',
+          workOrder: data.workOrderId || '',
+          customer: data.customer || '',
+          address: data.address || ''
+        });
+        setShowEventModal(true);
+      });
+    } else {
+      // Desktop handling
+      setEventForm({
+        title: (event.title || '').split(' - ')[0],
+        description: eventData.description,
+        start: event.startStr || (event.start ? event.start.toISOString().slice(0, 16) : ''),
+        end: event.endStr || (event.end ? event.end.toISOString().slice(0, 16) : ''),
+        technician: eventData.technicianId || '',
+        workOrder: eventData.workOrderId || '',
+        customer: eventData.customer || '',
+        address: eventData.address || '',
+        recurrenceRule: ''
+      });
+      setShowEventModal(true);
+    }
   };
 
   const handleEventDrop = async (eventDropInfo) => {
@@ -185,26 +240,40 @@ const SchedulePage = () => {
 
       <div className="schedule-content">
         <div className="calendar-container">
-          <FullCalendar
-            plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
-            headerToolbar={{
-              left: 'prev,next today',
-              center: 'title',
-              right: 'dayGridMonth,timeGridWeek,timeGridDay'
-            }}
-            initialView="timeGridWeek"
-            editable={true}
-            selectable={true}
-            selectMirror={true}
-            dayMaxEvents={true}
-            weekends={true}
-            events={events}
-            dateClick={handleDateClick}
-            eventClick={handleEventClick}
-            eventDrop={handleEventDrop}
-            eventResize={handleEventDrop}
-            height="auto"
-          />
+          {TouchUtils.isTouchDevice() ? (
+            <MobileOptimizedCalendar
+              events={events}
+              onSelectEvent={handleEventClick}
+              onSelectSlot={handleDateSelect}
+              onEventDrop={handleEventDrop}
+              onEventResize={handleEventDrop}
+              onNavigate={handleCalendarNavigate}
+              onView={handleCalendarViewChange}
+              currentDate={selectedDate || new Date()}
+              currentView="week"
+            />
+          ) : (
+            <FullCalendar
+              plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
+              headerToolbar={{
+                left: 'prev,next today',
+                center: 'title',
+                right: 'dayGridMonth,timeGridWeek,timeGridDay'
+              }}
+              initialView="timeGridWeek"
+              editable={true}
+              selectable={true}
+              selectMirror={true}
+              dayMaxEvents={true}
+              weekends={true}
+              events={events}
+              dateClick={handleDateClick}
+              eventClick={handleEventClick}
+              eventDrop={handleEventDrop}
+              eventResize={handleEventDrop}
+              height="auto"
+            />
+          )}
         </div>
 
         {routeOptimization && (

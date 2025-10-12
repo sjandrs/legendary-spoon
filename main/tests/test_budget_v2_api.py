@@ -139,3 +139,124 @@ class BudgetV2APITests(APITestCase):
         res2 = self.client.patch(detail_url, {"distributions": bad_rows}, format="json")
         self.assertEqual(res2.status_code, 400)
         self.assertIn("100.00", str(res2.content))
+
+    def test_filter_budgets_by_year(self):
+        """Test filtering budgets by year parameter"""
+        url = reverse("budgetv2-list")
+
+        # Create budgets for different years
+        self.client.post(
+            url,
+            {
+                "name": "Budget 2026",
+                "year": 2026,
+                "cost_center": self.cc.id,
+            },
+            format="json",
+        )
+        self.client.post(
+            url,
+            {
+                "name": "Budget 2027",
+                "year": 2027,
+                "cost_center": self.cc.id,
+            },
+            format="json",
+        )
+
+        # Test filter by year 2026
+        res = self.client.get(f"{url}?year=2026")
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(len(res.data["results"]), 1)
+        self.assertEqual(res.data["results"][0]["year"], 2026)
+
+        # Test filter by year 2027
+        res = self.client.get(f"{url}?year=2027")
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(len(res.data["results"]), 1)
+        self.assertEqual(res.data["results"][0]["year"], 2027)
+
+    def test_filter_budgets_by_cost_center(self):
+        """Test filtering budgets by cost_center parameter"""
+        url = reverse("budgetv2-list")
+
+        # Create another cost center
+        cc2, _ = CostCenter.objects.get_or_create(
+            name="Marketing", defaults={"code": "MKT"}
+        )
+
+        # Create budgets for different cost centers
+        self.client.post(
+            url,
+            {
+                "name": "Operations Budget",
+                "year": 2026,
+                "cost_center": self.cc.id,
+            },
+            format="json",
+        )
+        self.client.post(
+            url,
+            {
+                "name": "Marketing Budget",
+                "year": 2026,
+                "cost_center": cc2.id,
+            },
+            format="json",
+        )
+
+        # Test filter by first cost center
+        res = self.client.get(f"{url}?cost_center={self.cc.id}")
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(len(res.data["results"]), 1)
+        self.assertEqual(res.data["results"][0]["cost_center"], self.cc.id)
+
+        # Test filter by second cost center
+        res = self.client.get(f"{url}?cost_center={cc2.id}")
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(len(res.data["results"]), 1)
+        self.assertEqual(res.data["results"][0]["cost_center"], cc2.id)
+
+    def test_filter_budgets_combined_filters(self):
+        """Test combining year and cost_center filters"""
+        url = reverse("budgetv2-list")
+
+        # Create another cost center
+        cc2, _ = CostCenter.objects.get_or_create(
+            name="Sales", defaults={"code": "SAL"}
+        )
+
+        # Create budgets with different combinations
+        self.client.post(
+            url,
+            {
+                "name": "Ops 2026",
+                "year": 2026,
+                "cost_center": self.cc.id,
+            },
+            format="json",
+        )
+        self.client.post(
+            url,
+            {
+                "name": "Sales 2026",
+                "year": 2026,
+                "cost_center": cc2.id,
+            },
+            format="json",
+        )
+        self.client.post(
+            url,
+            {
+                "name": "Ops 2027",
+                "year": 2027,
+                "cost_center": self.cc.id,
+            },
+            format="json",
+        )
+
+        # Test combined filter
+        res = self.client.get(f"{url}?year=2026&cost_center={self.cc.id}")
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(len(res.data["results"]), 1)
+        self.assertEqual(res.data["results"][0]["name"], "Ops 2026")

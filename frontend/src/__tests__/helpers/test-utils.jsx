@@ -390,3 +390,83 @@ export const testLoadingStates = async (renderComponent, apiCall) => {
   // Loading should be gone
   expect(screen.queryByText(/loading/i)).not.toBeInTheDocument();
 };
+
+// Create test wrapper (alias for renderWithProviders for compatibility)
+export const createTestWrapper = (ui, options = {}) => {
+  return renderWithProviders(ui, options);
+};
+
+// Mock technician data factory
+export const mockTechnician = (overrides = {}) => ({
+  id: 1,
+  first_name: 'John',
+  last_name: 'Doe',
+  email: 'john.doe@example.com',
+  phone: '+1-555-0123',
+  employee_id: 'EMP001',
+  address: '123 Main St, City, State 12345',
+  emergency_contact: 'Jane Doe: +1-555-0456',
+  base_hourly_rate: '25.00',
+  hire_date: '2023-01-15',
+  is_active: true,
+  skills: 'HVAC, Plumbing, Electrical',
+  notes: 'Experienced technician with excellent customer service skills',
+  photo: null,
+  certifications: [],
+  coverage_areas: [],
+  availability: [],
+  ...overrides,
+});
+
+// Mock certification data factory
+export const mockCertification = (overrides = {}) => ({
+  id: 1,
+  name: 'HVAC Certification',
+  authority: 'NATE',
+  description: 'North American Technician Excellence certification',
+  expiration_months: 24,
+  is_active: true,
+  created_at: '2023-01-01T00:00:00Z',
+  updated_at: '2023-01-01T00:00:00Z',
+  ...overrides,
+});
+
+// Mock technician certification data factory
+export const mockTechnicianCertification = (overrides = {}) => ({
+  id: 1,
+  technician: 1,
+  certification: mockCertification(),
+  obtained_date: '2023-01-15',
+  expiration_date: '2025-01-15',
+  certificate_number: 'CERT123456',
+  notes: 'Initial certification',
+  ...overrides,
+});
+
+// Mock coverage area data factory
+export const mockCoverageArea = (overrides = {}) => ({
+  id: 1,
+  name: 'Downtown District',
+  description: 'Central business district coverage area',
+  coordinates: [
+    { lat: 40.7128, lng: -74.0060 },
+    { lat: 40.7580, lng: -73.9855 },
+    { lat: 40.7614, lng: -73.9776 },
+    { lat: 40.7484, lng: -73.9857 }
+  ],
+  is_active: true,
+  technicians: [],
+  ...overrides,
+});
+
+// Mock availability data factory
+export const mockAvailability = (overrides = {}) => ({
+  id: 1,
+  technician: 1,
+  day_of_week: 1, // Monday
+  start_time: '08:00',
+  end_time: '17:00',
+  is_available: true,
+  notes: 'Regular business hours',
+  ...overrides,
+});

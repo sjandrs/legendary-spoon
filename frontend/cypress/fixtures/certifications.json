@@ -1,0 +1,77 @@
+{
+  "certifications": [
+    {
+      "id": 1,
+      "name": "HVAC Basic",
+      "issuingAuthority": "HVAC Certification Board",
+      "validityPeriod": 24,
+      "description": "Basic HVAC installation and maintenance",
+      "isRequired": true,
+      "skillLevel": "basic",
+      "totalAssigned": 15,
+      "activeCount": 12,
+      "expiringCount": 3
+    },
+    {
+      "id": 2,
+      "name": "Electrical Safety",
+      "issuingAuthority": "Electrical Safety Board",
+      "validityPeriod": 12,
+      "description": "Electrical safety protocols and procedures",
+      "isRequired": true,
+      "skillLevel": "basic",
+      "totalAssigned": 20,
+      "activeCount": 18,
+      "expiringCount": 5
+    },
+    {
+      "id": 3,
+      "name": "HVAC Advanced",
+      "issuingAuthority": "HVAC Certification Board",
+      "validityPeriod": 36,
+      "description": "Advanced HVAC system repair and diagnostics",
+      "isRequired": false,
+      "skillLevel": "advanced",
+      "totalAssigned": 8,
+      "activeCount": 7,
+      "expiringCount": 1
+    },
+    {
+      "id": 4,
+      "name": "Plumbing Basic",
+      "issuingAuthority": "Plumbing Association",
+      "validityPeriod": 36,
+      "description": "Basic plumbing repair and installation",
+      "isRequired": false,
+      "skillLevel": "intermediate",
+      "totalAssigned": 6,
+      "activeCount": 6,
+      "expiringCount": 0
+    }
+  ],
+  "expiringCertifications": [
+    {
+      "technicianId": 1,
+      "technicianName": "John Doe",
+      "certification": "Electrical Safety",
+      "expirationDate": "2024-03-10",
+      "daysUntilExpiry": 45,
+      "status": "expiring_soon"
+    },
+    {
+      "technicianId": 5,
+      "technicianName": "David Brown",
+      "certification": "HVAC Basic",
+      "expirationDate": "2024-02-15",
+      "daysUntilExpiry": 22,
+      "status": "urgent"
+    }
+  ],
+  "complianceMetrics": {
+    "totalTechnicians": 25,
+    "fullyCompliant": 18,
+    "partiallyCompliant": 5,
+    "nonCompliant": 2,
+    "complianceRate": 72
+  }
+}

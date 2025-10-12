@@ -1,0 +1,154 @@
+{
+  "organizationChart": {
+    "id": "ceo-1",
+    "name": "Robert CEO",
+    "jobTitle": "Chief Executive Officer",
+    "department": "Executive",
+    "email": "ceo@company.com",
+    "profilePhoto": "/images/org/ceo.jpg",
+    "level": 0,
+    "children": [
+      {
+        "id": "coo-1",
+        "name": "Jennifer COO",
+        "jobTitle": "Chief Operating Officer",
+        "department": "Operations",
+        "email": "coo@company.com",
+        "profilePhoto": "/images/org/coo.jpg",
+        "level": 1,
+        "directReports": 3,
+        "children": [
+          {
+            "id": "fs-mgr-1",
+            "name": "Mark FieldService",
+            "jobTitle": "Field Service Manager",
+            "department": "Field Service",
+            "email": "mark.fs@company.com",
+            "profilePhoto": "/images/org/fs-manager.jpg",
+            "level": 2,
+            "directReports": 8,
+            "children": [
+              {
+                "id": "tech-sup-1",
+                "name": "Susan Supervisor",
+                "jobTitle": "Senior Supervisor",
+                "department": "Field Service",
+                "email": "susan.sup@company.com",
+                "profilePhoto": "/images/org/supervisor.jpg",
+                "level": 3,
+                "directReports": 4,
+                "children": [
+                  {
+                    "id": "tech-1",
+                    "name": "John Doe",
+                    "jobTitle": "Senior Technician",
+                    "department": "Field Service",
+                    "email": "john.doe@company.com",
+                    "profilePhoto": "/images/technicians/john-doe.jpg",
+                    "level": 4,
+                    "certifications": ["HVAC Basic", "Electrical Safety"],
+                    "status": "active"
+                  },
+                  {
+                    "id": "tech-2",
+                    "name": "Sarah Johnson",
+                    "jobTitle": "Lead Technician",
+                    "department": "Field Service",
+                    "email": "sarah.johnson@company.com",
+                    "profilePhoto": "/images/technicians/sarah-johnson.jpg",
+                    "level": 4,
+                    "certifications": ["HVAC Advanced", "Plumbing Basic"],
+                    "status": "active"
+                  },
+                  {
+                    "id": "tech-3",
+                    "name": "Mike Wilson",
+                    "jobTitle": "Junior Technician",
+                    "department": "Field Service",
+                    "email": "mike.wilson@company.com",
+                    "level": 4,
+                    "certifications": ["Basic Safety"],
+                    "status": "on_leave"
+                  }
+                ]
+              },
+              {
+                "id": "tech-sup-2",
+                "name": "David Supervisor2",
+                "jobTitle": "Supervisor",
+                "department": "Field Service",
+                "email": "david.sup@company.com",
+                "level": 3,
+                "directReports": 4,
+                "children": [
+                  {
+                    "id": "tech-4",
+                    "name": "Lisa Chen",
+                    "jobTitle": "Senior Technician",
+                    "department": "Field Service",
+                    "email": "lisa.chen@company.com",
+                    "level": 4,
+                    "certifications": ["HVAC Basic", "Electrical Safety"],
+                    "status": "active"
+                  },
+                  {
+                    "id": "tech-5",
+                    "name": "David Brown",
+                    "jobTitle": "Technician",
+                    "department": "Field Service",
+                    "email": "david.brown@company.com",
+                    "level": 4,
+                    "certifications": ["HVAC Basic"],
+                    "status": "active"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "sales-mgr-1",
+        "name": "Amanda Sales",
+        "jobTitle": "Sales Manager",
+        "department": "Sales",
+        "email": "amanda.sales@company.com",
+        "level": 1,
+        "directReports": 5,
+        "children": [
+          {
+            "id": "sales-1",
+            "name": "Carlos Rep",
+            "jobTitle": "Sales Representative",
+            "department": "Sales",
+            "email": "carlos.rep@company.com",
+            "level": 2,
+            "status": "active"
+          }
+        ]
+      }
+    ]
+  },
+  "departments": [
+    {
+      "name": "Executive",
+      "headCount": 2,
+      "level": 0
+    },
+    {
+      "name": "Operations",
+      "headCount": 1,
+      "level": 1
+    },
+    {
+      "name": "Field Service",
+      "headCount": 12,
+      "level": 2
+    },
+    {
+      "name": "Sales",
+      "headCount": 6,
+      "level": 2
+    }
+  ]
+}

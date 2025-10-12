@@ -205,6 +205,8 @@ REST_FRAMEWORK = {
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
     "PAGE_SIZE": 10,
     "DEFAULT_FILTER_BACKENDS": ["django_filters.rest_framework.DjangoFilterBackend"],
+    # Canonical error handling for Phase 1 parity
+    "EXCEPTION_HANDLER": "main.exceptions.custom_exception_handler",
 }
 
 # Search Service Provider

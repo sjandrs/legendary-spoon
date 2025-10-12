@@ -80,8 +80,12 @@ export default function BudgetV2Editor({ budget, onSaved }) {
   const handleCopyLastYear = async () => {
     try {
       if (!budget?.cost_center || !budget?.year) return;
-      const res = await getBudgetsV2();
-      const prev = (res.data || []).find(b => b.cost_center === budget.cost_center && b.year === budget.year - 1);
+      // Fetch budgets filtered by cost center and previous year
+      const res = await getBudgetsV2({
+        cost_center: budget.cost_center,
+        year: budget.year - 1
+      });
+      const prev = (res.data || [])[0]; // Should be only one match with filters
       if (!prev) {
         setToast({ message: 'No prior-year budget found for this cost center.', type: 'info' });
         return;
