@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema#",
+  "$id": "https://converge.local/schemas/expense.schema.json",
+  "title": "Expense",
+  "$comment": "Draft 2020-12 variant. Annotations only; no inferred required. Use unevaluatedProperties/annotation vocabularies as needed.",
+  "description": "Expense record as used in Converge Accounting expansion spec.",
+  "type": "object",
+  "properties": {
+    "id": { "type": "integer" },
+    "date": { "type": "string", "format": "date" },
+    "amount": { "type": "number" },
+    "category": { "type": "string" },
+    "description": { "type": "string" },
+    "receipt_url": { "type": "string", "format": "uri-reference" }
+  },
+  "examples": [
+    {
+      "id": 123,
+      "date": "2025-09-29",
+      "amount": 250.0,
+      "category": "Travel",
+      "description": "Flight to client site",
+      "receipt_url": "/media/receipts/123.pdf"
+    }
+  ]
+}

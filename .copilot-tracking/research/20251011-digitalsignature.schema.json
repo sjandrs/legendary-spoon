@@ -1,0 +1,37 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://converge.local/schemas/digitalsignature.schema.json",
+  "title": "DigitalSignature",
+  "description": "Digital signatures for paperwork with integrity fields.",
+  "type": "object",
+  "$comment": "Aligned with main.models.DigitalSignature; closed schema.",
+  "properties": {
+    "id": { "type": "integer", "readOnly": true },
+    "content_type": { "type": "integer", "minimum": 1 },
+    "object_id": { "type": "integer", "minimum": 1 },
+    "signature_data": { "type": "string", "$comment": "Base64-encoded image data" },
+    "signer_name": { "type": "string" },
+    "signer_email": { "type": "string", "format": "email" },
+    "document_name": { "type": "string" },
+    "paperwork_template": { "type": ["integer", "null"] },
+    "ip_address": { "type": "string", "$comment": "GenericIPAddressField (IPv4/IPv6)" },
+    "user_agent": { "type": "string" },
+    "signed_at": { "type": "string", "format": "date-time", "readOnly": true },
+    "is_valid": { "type": "boolean", "readOnly": true },
+    "document_hash": { "type": "string", "readOnly": true }
+  },
+  "required": ["content_type", "object_id", "signature_data", "signer_name", "document_name", "ip_address"],
+  "additionalProperties": false,
+  "examples": [
+    {
+      "content_type": 22,
+      "object_id": 1001,
+      "signature_data": "data:image/png;base64,iVBORw0...",
+      "signer_name": "Jordan Lee",
+      "signer_email": "jlee@example.com",
+      "document_name": "Service Report #1001",
+      "ip_address": "203.0.113.10",
+      "user_agent": "Mozilla/5.0"
+    }
+  ]
+}

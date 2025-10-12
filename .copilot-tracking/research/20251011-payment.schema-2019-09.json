@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2019-09/schema#",
+  "$id": "https://converge.local/schemas/payment.schema.json",
+  "title": "Payment",
+  "$comment": "Draft 2019-09 variant. Informational wrapper; annotations only.",
+  "description": "Payment against invoice-like objects via GenericForeignKey.",
+  "type": "object",
+  "properties": {
+    "id": { "type": "integer" },
+    "content_type": { "type": "integer" },
+    "object_id": { "type": "integer" },
+    "related_object": { "type": "string" },
+    "amount": { "type": "number" },
+    "payment_date": { "type": "string", "format": "date" },
+    "method": { "type": "string" },
+    "received_by": { "type": "integer" },
+    "created_at": { "type": "string", "format": "date-time" }
+  },
+  "examples": [
+    {
+      "content_type": 27,
+      "object_id": 105,
+      "amount": 123.45,
+      "payment_date": "2025-10-11",
+      "method": "credit_card",
+      "received_by": 3
+    }
+  ]
+}

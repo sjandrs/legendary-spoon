@@ -1,0 +1,37 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://converge.local/schemas/appointmentrequest.schema.json",
+  "title": "AppointmentRequest",
+  "description": "Customer self-service appointment booking requests.",
+  "type": "object",
+  "$comment": "Aligned with main.models.AppointmentRequest; closed schema.",
+  "properties": {
+    "id": { "type": "integer", "readOnly": true },
+    "account": { "type": "integer", "minimum": 1 },
+    "contact": { "type": "integer", "minimum": 1 },
+    "requested_start_time": { "type": "string", "format": "date-time" },
+    "requested_end_time": { "type": "string", "format": "date-time" },
+    "work_description": { "type": "string" },
+    "priority": { "type": "string", "$comment": "Choices mirror Project.PRIORITY_CHOICES; kept as string to avoid drift." },
+    "status": { "type": "string", "enum": ["pending", "approved", "denied", "scheduled"] },
+    "reviewed_by": { "type": ["integer", "null"] },
+    "reviewed_at": { "type": ["string", "null"], "format": "date-time" },
+    "review_notes": { "type": "string" },
+    "scheduled_event": { "type": ["integer", "null"] },
+    "created_at": { "type": "string", "format": "date-time", "readOnly": true },
+    "updated_at": { "type": "string", "format": "date-time", "readOnly": true }
+  },
+  "required": ["account", "contact", "requested_start_time", "requested_end_time", "work_description"],
+  "additionalProperties": false,
+  "examples": [
+    {
+      "account": 3,
+      "contact": 8,
+      "requested_start_time": "2025-10-13T14:00:00Z",
+      "requested_end_time": "2025-10-13T15:00:00Z",
+      "work_description": "WiFi signal issues",
+      "priority": "medium",
+      "status": "pending"
+    }
+  ]
+}

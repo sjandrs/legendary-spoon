@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2019-09/schema#",
+  "$id": "https://converge.local/schemas/monthlydistribution.schema.json",
+  "title": "MonthlyDistribution",
+  "$comment": "Draft 2019-09 informational variant. Annotations only.",
+  "type": "object",
+  "properties": {
+    "id": { "type": "integer" },
+    "distribution_id": { "type": "string" },
+    "fiscal_year": { "type": ["string", "integer"] },
+    "percentages": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "month": { "type": "string" },
+          "percentage_allocation": { "type": "number" }
+        }
+      }
+    }
+  }
+}

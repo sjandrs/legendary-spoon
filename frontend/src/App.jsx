@@ -1,4 +1,4 @@
-import React, { useState, useContext, useEffect, useRef, Suspense, lazy } from 'react';
+import React, { useState, useContext, useRef, Suspense, lazy } from 'react';
 import { Route, Routes, Link, useNavigate, Outlet, useLocation } from 'react-router-dom';
 
 // TASK-084: Core components loaded immediately (critical for initial render)
@@ -91,6 +91,7 @@ const BudgetList = lazy(() => import('./components/BudgetList'));
 const BudgetForm = lazy(() => import('./components/BudgetForm'));
 const TaxReport = lazy(() => import('./components/TaxReport'));
 const EmailCommunication = lazy(() => import('./components/EmailCommunication'));
+const BudgetsV2 = lazy(() => import('./components/BudgetsV2'));
 
 // Field Service Management
 const SchedulePage = lazy(() => import('./components/SchedulePage'));
@@ -118,7 +119,6 @@ const MainLayout = () => {
   const navigate = useNavigate();
   const location = useLocation(); // TASK-082: Track current route for active highlighting
   const [accountingMenuOpen, setAccountingMenuOpen] = useState(false);
-  const [resourcesMenuOpen, setResourcesMenuOpen] = useState(false);
   const [projectsMenuOpen, setProjectsMenuOpen] = useState(false);
   const [staffMenuOpen, setStaffMenuOpen] = useState(false);
   const [fieldServiceMenuOpen, setFieldServiceMenuOpen] = useState(false);
@@ -129,8 +129,9 @@ const MainLayout = () => {
   const [operationsMenuOpen, setOperationsMenuOpen] = useState(false);
 
   // TASK-081: Keyboard navigation support
-  const [focusedMenuIndex, setFocusedMenuIndex] = useState(-1);
-  const menuRefs = useRef([]);
+  // Keyboard support placeholders (reserved for future use)
+  // const [focusedMenuIndex, setFocusedMenuIndex] = useState(-1);
+  // const menuRefs = useRef([]);
 
   // Helper function to check if route is active - TASK-082
   const isRouteActive = (path) => {
@@ -138,20 +139,22 @@ const MainLayout = () => {
   };
 
   // TASK-081: Handle keyboard navigation
-  const handleKeyDown = (e, menuSetter, isOpen, menuLinks) => {
+  const handleKeyDown = (e, menuSetter, isOpen) => {
     switch (e.key) {
-      case 'Escape':
+      case 'Escape': {
         menuSetter(false);
         e.currentTarget.focus();
         break;
+      }
       case 'Enter':
-      case ' ':
+      case ' ': {
         if (!isOpen) {
           e.preventDefault();
           menuSetter(true);
         }
         break;
-      case 'ArrowDown':
+      }
+      case 'ArrowDown': {
         if (!isOpen) {
           e.preventDefault();
           menuSetter(true);
@@ -165,7 +168,8 @@ const MainLayout = () => {
           }
         }
         break;
-      case 'ArrowUp':
+      }
+      case 'ArrowUp': {
         if (isOpen) {
           e.preventDefault();
           // Focus last link in dropdown
@@ -176,6 +180,7 @@ const MainLayout = () => {
           }
         }
         break;
+      }
       default:
         break;
     }
@@ -189,20 +194,22 @@ const MainLayout = () => {
     const currentIndex = links.indexOf(currentLink);
 
     switch (e.key) {
-      case 'Escape':
+      case 'Escape': {
         e.preventDefault();
         menuSetter(false);
         // Focus back on dropdown button
         const button = dropdown.previousElementSibling;
         if (button) button.focus();
         break;
-      case 'ArrowDown':
+      }
+      case 'ArrowDown': {
         e.preventDefault();
         if (currentIndex < links.length - 1) {
           links[currentIndex + 1].focus();
         }
         break;
-      case 'ArrowUp':
+      }
+      case 'ArrowUp': {
         e.preventDefault();
         if (currentIndex > 0) {
           links[currentIndex - 1].focus();
@@ -212,10 +219,12 @@ const MainLayout = () => {
           if (button) button.focus();
         }
         break;
-      case 'Tab':
+      }
+      case 'Tab': {
         // Allow natural tab behavior but close menu
         menuSetter(false);
         break;
+      }
       default:
         break;
     }
@@ -431,6 +440,7 @@ const MainLayout = () => {
                   <Link to="/payments">Payments</Link>
                   <Link to="/expenses">Expenses</Link>
                   <Link to="/budgets">Budgets</Link>
+                  <Link to="/budgets-v2">Budgets V2</Link>
                   <Link to="/tax-report">Tax Reports</Link>
                 </div>
               )}
@@ -572,6 +582,7 @@ function App() {
           <Route path="/budgets" element={<BudgetList />} />
           <Route path="/budgets/new" element={<BudgetForm />} />
           <Route path="/budgets/:id/edit" element={<BudgetForm />} />
+          <Route path="/budgets-v2" element={<BudgetsV2 />} />
           <Route path="/tax-report" element={<TaxReport />} />
 
           {/* Field Service Management Routes - Consolidated */}

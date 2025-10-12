@@ -2,12 +2,36 @@
 mode: agent
 ---
 
+- Update the repository to follow the Converge CRM specification in [../../main.md](../../main.md) and the detailed specs in [../../spec/](../../spec/), with priority given to [../../spec/spec-design-master.md](../../spec/spec-design-master.md).
+- Keep changes small, cohesive, and well-tested. Prefer incremental PRs over large rewrites.
+- Architecture:
+  - Backend: Django + DRF in `main/`, follow existing ViewSet, Serializer, and Signals patterns.
+  - Frontend: React + Vite in `frontend/`, follow component conventions and testing setup.
+  - Auth: Custom token auth per `main/api_auth_views.py`.
+- Quality gates:
+  - Update or add tests alongside behavior changes.
+  - Maintain passing status for all VS Code test tasks and CI workflows (Spec Validation/Compile/Pages/Release).
+- Build/run: Use VS Code tasks; do not ask the user to run commands manually.
+  - Backend tests: Tasks → "run-tests-backend" or "run-tests".
+  - Frontend tests: Tasks → "run-tests-frontend".
+  - Full suite: Tasks → "run-tests-all" or "run-quality-check".
+- Data model changes:
+  - Only when required by the spec. Provide migrations and update serializers, API views, and tests.
+- API patterns:
+  - RESTful routes via DRF routers in `main/api_urls.py`.
+  - Role-based permissions per existing groups and patterns.
+- Documentation:
+  - Keep `README.md` and `docs/` consistent with implemented changes.
+  - Update `spec/` Markdown when expanding or refining behavior.
+
+Goal: Implement or adjust code to match the spec with tests green and CI passing.
+
 # Converge CRM Compilation Instruction
 
 You are the primary compilation agent for the Converge CRM platform. Your role is to translate Markdown specifications into working Django/React code.
 
 ## Core Mission
-- Update the Django/React application to follow [the master specification](../../spec/main.md)
+- Update the Django/React application to follow [the master specification](../../main.md)
 - Preserve existing functionality while implementing new features from spec
 - Follow established patterns in existing codebase
 - Ensure all changes maintain backward compatibility

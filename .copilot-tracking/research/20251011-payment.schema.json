@@ -1,0 +1,31 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://converge.local/schemas/payment.schema.json",
+  "title": "Payment",
+  "description": "Payment against invoice-like objects via GenericForeignKey.",
+  "type": "object",
+  "$comment": "Aligned with PaymentSerializer; content_type and object_id are writeOnly.",
+  "properties": {
+    "id": { "type": "integer", "readOnly": true },
+    "content_type": { "type": "integer", "writeOnly": true, "minimum": 1 },
+    "object_id": { "type": "integer", "writeOnly": true, "minimum": 1 },
+    "related_object": { "type": "string", "readOnly": true },
+    "amount": { "type": "number", "minimum": 0 },
+    "payment_date": { "type": "string", "format": "date" },
+    "method": { "type": "string", "minLength": 1 },
+    "received_by": { "type": "integer" },
+    "created_at": { "type": "string", "format": "date-time", "readOnly": true }
+  },
+  "required": ["content_type", "object_id", "amount", "payment_date", "method"],
+  "additionalProperties": false,
+  "examples": [
+    {
+      "content_type": 27,
+      "object_id": 105,
+      "amount": 123.45,
+      "payment_date": "2025-10-11",
+      "method": "credit_card",
+      "received_by": 3
+    }
+  ]
+}

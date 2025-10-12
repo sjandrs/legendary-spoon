@@ -135,6 +135,12 @@ export const createWarehouseItem = (data) => post('/api/warehouse-items/', data)
 export const updateWarehouseItem = (id, data) => put(`/api/warehouse-items/${id}/`, data);
 export const deleteWarehouseItem = (id) => del(`/api/warehouse-items/${id}/`);
 
+// Utilities — GTIN check digit helper
+export const computeGtinCheckDigit = (gtinOrBase) => {
+    const params = typeof gtinOrBase === 'string' ? { gtin_base: gtinOrBase } : gtinOrBase;
+    return get('/api/utils/gtin/check-digit/', { params });
+};
+
 // Invoice Generation
 export const generateWorkOrderInvoice = (workOrderId, data) => post(`/api/workorders/${workOrderId}/generate-invoice/`, data);
 export const getOverdueInvoices = () => get('/api/invoices/overdue/');
@@ -153,6 +159,20 @@ export const getAdvancedAnalyticsDashboard = () => get('/api/analytics/dashboard
 export const calculateCustomerLifetimeValue = (contactId) => get(`/api/analytics/clv/${contactId}/`);
 export const predictDealOutcome = (dealId) => get(`/api/analytics/predict/${dealId}/`);
 export const generateRevenueForecast = (data) => post('/api/analytics/forecast/', data);
+
+// --- Budget V2 ---
+export const getCostCenters = () => get('/api/cost-centers/');
+export const createCostCenter = (data) => post('/api/cost-centers/', data);
+export const updateCostCenter = (id, data) => put(`/api/cost-centers/${id}/`, data);
+export const deleteCostCenter = (id) => del(`/api/cost-centers/${id}/`);
+
+export const getBudgetsV2 = () => get('/api/budgets-v2/');
+export const getBudgetV2 = (id) => get(`/api/budgets-v2/${id}/`);
+export const createBudgetV2 = (data) => post('/api/budgets-v2/', data);
+export const updateBudgetV2 = (id, data) => put(`/api/budgets-v2/${id}/`, data);
+export const deleteBudgetV2 = (id) => del(`/api/budgets-v2/${id}/`);
+export const seedBudgetV2Default = (id) => post(`/api/budgets-v2/${id}/seed-default/`);
+export const updateBudgetV2Distributions = (id, distributions) => put(`/api/budgets-v2/${id}/distributions/`, { distributions });
 
 // --- Phase 2: Core CRM Features ---
 // Accounts Management

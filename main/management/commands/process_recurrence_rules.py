@@ -207,8 +207,11 @@ class Command(BaseCommand):
 
                     created += 1
                     self.stdout.write(
-                        f"Created recurring event for {current_date.strftime('%Y-%m-%d %H:%M')} "
-                        f"(Parent: {parent_event.id})"
+                        (
+                            "Created recurring event for "
+                            f"{current_date.strftime('%Y-%m-%d %H:%M')} "
+                            f"(Parent: {parent_event.id})"
+                        )
                     )
 
             except Exception as e:

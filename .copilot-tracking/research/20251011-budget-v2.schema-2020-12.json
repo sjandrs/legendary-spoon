@@ -1,0 +1,37 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema#",
+  "$id": "https://converge.local/schemas/budget-v2.schema.json",
+  "title": "Budget (v2 - Dimensional)",
+  "$comment": "Draft 2020-12 informational variant. Annotations only; use unevaluatedProperties on consumers if needed.",
+  "type": "object",
+  "properties": {
+    "id": { "type": "integer" },
+    "name": { "type": "string" },
+    "budget_against": { "type": "string", "enum": ["Cost Center", "Project"] },
+    "dimension_id": { "type": "integer" },
+    "year": { "type": "integer" },
+    "monthly_distribution": { "type": ["integer", "null"] },
+    "accounts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "ledger_account_id": { "type": "integer" },
+          "budget_amount": { "type": "number" }
+        }
+      }
+    }
+  },
+  "examples": [
+    {
+      "name": "FY2025 Engineering Budget",
+      "budget_against": "Cost Center",
+      "dimension_id": 7,
+      "year": 2025,
+      "accounts": [
+        {"ledger_account_id": 5000, "budget_amount": 100000},
+        {"ledger_account_id": 5100, "budget_amount": 35000}
+      ]
+    }
+  ]
+}
