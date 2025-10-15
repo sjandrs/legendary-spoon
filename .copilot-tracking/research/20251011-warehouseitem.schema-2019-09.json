@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2019-09/schema#",
+  "$id": "https://converge.local/schemas/warehouseitem.schema.json",
+  "title": "WarehouseItem",
+  "$comment": "Draft 2019-09 informational variant. Annotations only.",
+  "type": "object",
+  "properties": {
+    "id": { "type": "integer" },
+    "warehouse": { "type": "integer" },
+    "name": { "type": "string" },
+    "description": { "type": "string" },
+    "item_type": { "type": "string" },
+    "sku": { "type": "string" },
+    "quantity": { "type": "number" },
+    "unit_cost": { "type": "number" },
+    "minimum_stock": { "type": "number" },
+    "serial_number": { "type": "string" },
+    "location_in_warehouse": { "type": "string" }
+  }
+}

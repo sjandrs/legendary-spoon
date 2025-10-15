@@ -2,52 +2,13 @@
 
 **Converge** is a Django/React CRM and Business Management platform targeting small-to-medium businesses. This guide covers essential patterns and workflows for productive development.
 
-## ✅ Comprehensive User Story Framework Integration
+## ✅ User Stories Framework
 
-**User Story Coverage**: 130+ comprehensive user stories covering every feature and capability across the entire platform
-**Documentation Location**: `static/kb/user-stories.md` - Complete user story framework driving development and testing
-**Implementation Status**: All Phase 1-4 backend user stories implemented and tested with 23/23 tests passing
+Authoritative user story content has been consolidated into the canonical spec.
 
-### User Story Development Workflow
-1. **Every Feature Requirement**: Must have correspondi### ✅ Frontend Testing Configuration - COMPLETE IMPL### Next Steps for Production Deployment
-1. ✅ **COMPLETE:** All backend tests passing (23/23 - 100% success rate)
-2. ✅ **COMPLETE:** Frontend testing automation infrastructure fully implemented
-3. ✅ **COMPLETE:** Team integration strategy and documentation prepared
-4. **Ready for Execution:** 8-week team adoption implementation plan
-5. **Ready for Deployment:** CI/CD pipeline with automated quality gates
-6. **Monitoring Ready:** Quality metrics dashboard and automated reporting
-
-**The comprehensive testing automation infrastructure with complete team integration strategy is production-ready for deployment!** 🎯🏆🚀ION
-- **Jest + React Testing Library** setup with enhanced configuration
-- **MSW (Mock Service Worker)** for realistic API mocking
-- **Cypress E2E Testing** with custom commands and Page Object Model
-- **Accessibility Testing** with cypress-axe integration
-- **Performance Testing** with Lighthouse CI configuration
-- **Custom Test Utilities** in `frontend/src/__tests__/utils/`
-- **Component Tests** for ContactList, DashboardPage, and App routing
-- **E2E Test Suites** for authentication and contacts management
-- **Coverage Reporting** with Jest coverage thresholds (70%)
-- **Test Scripts** in package.json for all testing scenarioser story with business justification
-2. **API Design**: User stories directly map to RESTful endpoints in `main/api_views.py`
-3. **Test Coverage**: Acceptance criteria translate to automated tests in `main/tests.py`
-4. **Frontend Implementation**: User stories guide React component development patterns
-5. **Business Validation**: Each story includes measurable outcomes and stakeholder value
-
-### Complete Feature Coverage
-- **46+ Django Models**: Every model in `main/models.py` has corresponding user stories
-- **7 Development Phases**: CRM Core, Accounting, Workflow Automation, Analytics, Technician Management, Infrastructure, Enhanced Operations
-- **Cross-Module Integration**: User stories validate complete business process workflows
-- **Quality Assurance**: Acceptance criteria serve as test scenarios with automated validation
-
-### Key User Story Categories
-- **CRM Core (CRM-001→CRM-015)**: Account management, contact tracking, deal pipeline, interaction logging
-- **Financial Management (ALM-001→EPP-010)**: Advanced ledger, journal automation, work orders, payment processing
-- **Workflow Automation**: Time tracking, inventory management, project templates, automated workflows
-- **Analytics & AI (PAI-001→PAI-015)**: Predictive analytics, CLV intelligence, revenue forecasting, business intelligence
-- **Technician Operations (ETO-001→ETO-015)**: Certification management, coverage areas, availability, compliance
-- **Infrastructure (NTF-001→SLM-010)**: Notifications, security, logging, content management
-
-**Development Principle**: Every code change must align with existing user stories or create new user stories following the established framework.
+- Canonical section: see `spec/spec-design-master.md` → “User Stories Framework”.
+- Source of truth for detailed stories: `static/kb/user-stories.md`.
+- Development rule: every change must reference a user story and keep specs/tests in sync.
 
 ## Architecture Overview
 

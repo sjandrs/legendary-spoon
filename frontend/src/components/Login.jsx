@@ -1,5 +1,6 @@
 import React, { useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import AuthContext from '../contexts/AuthContext';
 
 const Login = () => {
@@ -8,6 +9,7 @@ const Login = () => {
     const [error, setError] = useState('');
     const navigate = useNavigate();
     const { login } = useContext(AuthContext);
+    const { t } = useTranslation();
 
     const handleLogin = async (e) => {
         e.preventDefault();
@@ -16,17 +18,17 @@ const Login = () => {
             await login(username, password);
             navigate('/dashboard');
         } catch (_err) {
-            setError('Invalid credentials. Please try again.');
+            setError(t('validation.invalid_credentials'));
             console.error('Login failed:', _err);
         }
     };
 
     return (
         <div data-testid="login-page">
-            <h2>Login</h2>
+            <h2>{t('auth.login')}</h2>
             <form onSubmit={handleLogin}>
                 <div>
-                    <label htmlFor="username">Username:</label>
+                    <label htmlFor="username">{t('auth.username')}:</label>
                     <input
                         id="username"
                         data-testid="username-input"
@@ -34,11 +36,11 @@ const Login = () => {
                         value={username}
                         onChange={(e) => setUsername(e.target.value)}
                         required
-                        aria-label="Username"
+                        aria-label={t('auth.username')}
                     />
                 </div>
                 <div>
-                    <label htmlFor="password">Password:</label>
+                    <label htmlFor="password">{t('auth.password')}:</label>
                     <input
                         id="password"
                         data-testid="password-input"
@@ -46,11 +48,11 @@ const Login = () => {
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         required
-                        aria-label="Password"
+                        aria-label={t('auth.password')}
                     />
                 </div>
                 {error && <p data-testid="error-message" style={{ color: 'red' }}>{error}</p>}
-                <button data-testid="login-button" type="submit">Login</button>
+                <button data-testid="login-button" type="submit">{t('auth.login')}</button>
             </form>
         </div>
     );

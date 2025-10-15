@@ -1,0 +1,7 @@
+category,id,description
+External Systems,EXT-101,"Email delivery service (e.g., SendGrid) for automated communications"
+Third-Party Services,SVC-101,PDF/CSV export library for report generation
+Infrastructure Dependencies,INF-101,Secure file storage for receipts and exports
+Data Dependencies,DAT-101,Accurate and timely transaction data for reporting
+Technology Platform Dependencies,PLT-101,"Django 5.x, React 18+, DRF, PostgreSQL"
+Compliance Dependencies,COM-101,Financial data retention and audit requirements

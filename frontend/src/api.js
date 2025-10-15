@@ -135,6 +135,12 @@ export const createWarehouseItem = (data) => post('/api/warehouse-items/', data)
 export const updateWarehouseItem = (id, data) => put(`/api/warehouse-items/${id}/`, data);
 export const deleteWarehouseItem = (id) => del(`/api/warehouse-items/${id}/`);
 
+// Utilities — GTIN check digit helper
+export const computeGtinCheckDigit = (gtinOrBase) => {
+    const params = typeof gtinOrBase === 'string' ? { gtin_base: gtinOrBase } : gtinOrBase;
+    return get('/api/utils/gtin/check-digit/', { params });
+};
+
 // Invoice Generation
 export const generateWorkOrderInvoice = (workOrderId, data) => post(`/api/workorders/${workOrderId}/generate-invoice/`, data);
 export const getOverdueInvoices = () => get('/api/invoices/overdue/');
@@ -153,6 +159,20 @@ export const getAdvancedAnalyticsDashboard = () => get('/api/analytics/dashboard
 export const calculateCustomerLifetimeValue = (contactId) => get(`/api/analytics/clv/${contactId}/`);
 export const predictDealOutcome = (dealId) => get(`/api/analytics/predict/${dealId}/`);
 export const generateRevenueForecast = (data) => post('/api/analytics/forecast/', data);
+
+// --- Budget V2 ---
+export const getCostCenters = () => get('/api/cost-centers/');
+export const createCostCenter = (data) => post('/api/cost-centers/', data);
+export const updateCostCenter = (id, data) => put(`/api/cost-centers/${id}/`, data);
+export const deleteCostCenter = (id) => del(`/api/cost-centers/${id}/`);
+
+export const getBudgetsV2 = (params) => get('/api/budgets-v2/', { params });
+export const getBudgetV2 = (id) => get(`/api/budgets-v2/${id}/`);
+export const createBudgetV2 = (data) => post('/api/budgets-v2/', data);
+export const updateBudgetV2 = (id, data) => put(`/api/budgets-v2/${id}/`, data);
+export const deleteBudgetV2 = (id) => del(`/api/budgets-v2/${id}/`);
+export const seedBudgetV2Default = (id) => post(`/api/budgets-v2/${id}/seed-default/`);
+export const updateBudgetV2Distributions = (id, distributions) => put(`/api/budgets-v2/${id}/distributions/`, { distributions });
 
 // --- Phase 2: Core CRM Features ---
 // Accounts Management
@@ -184,6 +204,56 @@ export const getCertifications = () => get('/api/certifications/');
 export const createCertification = (data) => post('/api/certifications/', data);
 
 export default apiClient;
+
+// --- Phase 4: Technician & User Management APIs ---
+// Technicians
+export const getTechnicians = (params) => get('/api/technicians/', { params });
+export const getTechnician = (id) => get(`/api/technicians/${id}/`);
+export const createTechnician = (data) => post('/api/technicians/', data);
+export const updateTechnician = (id, data) => put(`/api/technicians/${id}/`, data);
+export const deleteTechnician = (id) => del(`/api/technicians/${id}/`);
+export const getAvailableTechnicians = (params) => get('/api/technicians/available/', { params });
+export const getTechnicianCertificationsById = (id) => get(`/api/technicians/${id}/certifications/`);
+export const getTechnicianPayroll = (id, params) => get(`/api/technicians/${id}/payroll/`, { params });
+
+// Certifications
+// Note: getCertifications already exists, extending with additional methods
+export const getCertification = (id) => get(`/api/certifications/${id}/`);
+export const updateCertification = (id, data) => put(`/api/certifications/${id}/`, data);
+export const deleteCertification = (id) => del(`/api/certifications/${id}/`);
+
+// Technician Certifications (join table)
+export const getTechnicianCertifications = (params) => get('/api/technician-certifications/', { params });
+export const createTechnicianCertification = (data) => post('/api/technician-certifications/', data);
+export const updateTechnicianCertification = (id, data) => put(`/api/technician-certifications/${id}/`, data);
+export const deleteTechnicianCertification = (id) => del(`/api/technician-certifications/${id}/`);
+
+// Coverage Areas
+export const getCoverageAreas = (params) => get('/api/coverage-areas/', { params });
+export const getCoverageArea = (id) => get(`/api/coverage-areas/${id}/`);
+export const createCoverageArea = (data) => post('/api/coverage-areas/', data);
+export const updateCoverageArea = (id, data) => put(`/api/coverage-areas/${id}/`, data);
+export const deleteCoverageArea = (id) => del(`/api/coverage-areas/${id}/`);
+
+// Technician Availability
+export const getTechnicianAvailability = (params) => get('/api/technician-availability/', { params });
+export const getTechnicianAvailabilityById = (id) => get(`/api/technician-availability/${id}/`);
+export const createTechnicianAvailability = (data) => post('/api/technician-availability/', data);
+export const updateTechnicianAvailability = (id, data) => put(`/api/technician-availability/${id}/`, data);
+export const deleteTechnicianAvailability = (id) => del(`/api/technician-availability/${id}/`);
+
+// Enhanced Users (User Hierarchy Management)
+export const getEnhancedUsers = (params) => get('/api/enhanced-users/', { params });
+export const getEnhancedUser = (id) => get(`/api/enhanced-users/${id}/`);
+export const createEnhancedUser = (data) => post('/api/enhanced-users/', data);
+export const updateEnhancedUser = (id, data) => put(`/api/enhanced-users/${id}/`, data);
+export const deleteEnhancedUser = (id) => del(`/api/enhanced-users/${id}/`);
+export const getEnhancedUserSubordinates = (id) => get(`/api/enhanced-users/${id}/subordinates/`);
+export const getEnhancedUserHierarchy = (id) => get(`/api/enhanced-users/${id}/hierarchy/`);
+
+// Work Order Assignment & Matching
+export const findAvailableTechnicians = (workOrderId, params) => get(`/api/work-orders/${workOrderId}/find-technicians/`, { params });
+export const assignTechnicianToWorkOrder = (workOrderId, data) => post(`/api/work-orders/${workOrderId}/assign-technician/`, data);
 
 // --- Auth helpers (align with master spec) ---
 export const login = (credentials) => post('/api/login/', credentials);

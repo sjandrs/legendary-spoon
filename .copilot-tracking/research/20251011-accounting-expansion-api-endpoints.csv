@@ -1,0 +1,11 @@
+path,method,description
+/api/reports/balance-sheet,GET,Retrieve balance sheet report
+/api/reports/pnl,GET,Retrieve profit & loss statement
+/api/reports/cash-flow,GET,Retrieve cash flow statement
+/api/expenses/,CRUD,Manage expenses and receipts
+/api/budgets/,CRUD,Manage budgets and track variances
+/api/tax-reports/,GET,Generate tax-related reports
+/api/workorders/auto,POST,Auto-create WorkOrder from Deal
+/api/billing/time,POST,Log billable time for project billing
+/api/inventory/adjust,POST,Adjust inventory from WorkOrder
+/api/communications/email,POST,"Send automated emails (invoices, reminders)"

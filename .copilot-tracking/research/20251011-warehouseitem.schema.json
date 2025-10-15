@@ -1,0 +1,42 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://converge.local/schemas/warehouseitem.schema.json",
+  "title": "WarehouseItem",
+  "description": "Inventory item stored in a warehouse.",
+  "type": "object",
+  "$comment": "Aligned to main.models.WarehouseItem; no GTIN field yet (see GS1 research).",
+  "properties": {
+    "id": { "type": "integer", "readOnly": true },
+    "warehouse": { "type": "integer", "minimum": 1 },
+    "name": { "type": "string" },
+    "description": { "type": "string" },
+    "item_type": { "type": "string", "enum": ["part","equipment","consumable","finished_good"] },
+    "sku": { "type": "string" },
+    "gtin": {
+      "type": ["string", "null"],
+      "$comment": "Optional digits-only GTIN (8/12/13/14). Check digit validated server-side.",
+      "pattern": "^(?:\\d{8}|\\d{12}|\\d{13}|\\d{14})$"
+    },
+    "quantity": { "type": "number", "minimum": 0 },
+    "unit_cost": { "type": "number", "minimum": 0 },
+    "minimum_stock": { "type": "number", "minimum": 0 },
+    "serial_number": { "type": "string" },
+    "location_in_warehouse": { "type": "string" },
+    "created_at": { "type": "string", "format": "date-time", "readOnly": true },
+    "updated_at": { "type": "string", "format": "date-time", "readOnly": true }
+  },
+  "required": ["warehouse", "name", "item_type", "sku", "quantity", "unit_cost", "minimum_stock"],
+  "additionalProperties": false,
+  "examples": [
+    {
+      "warehouse": 1,
+      "name": "Cat6 Patch Cable 1m",
+      "item_type": "part",
+      "sku": "CAB-1M-CAT6",
+      "gtin": "00012345600012",
+      "quantity": 50,
+      "unit_cost": 2.15,
+      "minimum_stock": 10
+    }
+  ]
+}

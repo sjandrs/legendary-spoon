@@ -1,0 +1,158 @@
+{
+  "technicians": [
+    {
+      "id": 1,
+      "firstName": "John",
+      "lastName": "Doe",
+      "email": "john.doe@company.com",
+      "phone": "555-123-4567",
+      "employeeId": "EMP001",
+      "status": "active",
+      "jobTitle": "Senior Technician",
+      "department": "Field Service",
+      "hireDate": "2022-01-15",
+      "hourlyRate": "35.50",
+      "profilePhoto": "/images/technicians/john-doe.jpg",
+      "workingHours": "8:00 AM - 5:00 PM",
+      "emergencyContact": {
+        "name": "Jane Doe",
+        "phone": "555-987-6543",
+        "relationship": "Spouse"
+      },
+      "certifications": [
+        {
+          "id": 1,
+          "name": "HVAC Basic",
+          "issuingAuthority": "HVAC Board",
+          "obtainedDate": "2023-01-15",
+          "expirationDate": "2025-01-15",
+          "status": "valid"
+        },
+        {
+          "id": 2,
+          "name": "Electrical Safety",
+          "issuingAuthority": "Electrical Board",
+          "obtainedDate": "2023-03-10",
+          "expirationDate": "2024-03-10",
+          "status": "expiring_soon"
+        }
+      ],
+      "coverageAreas": [
+        {
+          "id": 1,
+          "name": "Downtown District",
+          "priority": "primary"
+        },
+        {
+          "id": 3,
+          "name": "North Suburbs",
+          "priority": "secondary"
+        }
+      ],
+      "availability": [
+        {
+          "date": "2024-12-15",
+          "startTime": "08:00",
+          "endTime": "17:00",
+          "type": "regular",
+          "isRecurring": true
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "firstName": "Sarah",
+      "lastName": "Johnson",
+      "email": "sarah.johnson@company.com",
+      "phone": "555-234-5678",
+      "employeeId": "EMP002",
+      "status": "active",
+      "jobTitle": "Lead Technician",
+      "department": "Field Service",
+      "hireDate": "2021-06-01",
+      "hourlyRate": "42.00",
+      "profilePhoto": "/images/technicians/sarah-johnson.jpg",
+      "workingHours": "7:00 AM - 4:00 PM",
+      "emergencyContact": {
+        "name": "Mike Johnson",
+        "phone": "555-876-5432",
+        "relationship": "Spouse"
+      },
+      "certifications": [
+        {
+          "id": 3,
+          "name": "HVAC Advanced",
+          "issuingAuthority": "HVAC Board",
+          "obtainedDate": "2022-05-20",
+          "expirationDate": "2025-05-20",
+          "status": "valid"
+        },
+        {
+          "id": 4,
+          "name": "Plumbing Basic",
+          "issuingAuthority": "Plumbing Association",
+          "obtainedDate": "2023-02-15",
+          "expirationDate": "2026-02-15",
+          "status": "valid"
+        }
+      ],
+      "coverageAreas": [
+        {
+          "id": 2,
+          "name": "East Side",
+          "priority": "primary"
+        }
+      ],
+      "availability": [
+        {
+          "date": "2024-12-15",
+          "startTime": "07:00",
+          "endTime": "16:00",
+          "type": "regular",
+          "isRecurring": true
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "firstName": "Mike",
+      "lastName": "Wilson",
+      "email": "mike.wilson@company.com",
+      "phone": "555-345-6789",
+      "employeeId": "EMP003",
+      "status": "on_leave",
+      "jobTitle": "Junior Technician",
+      "department": "Field Service",
+      "hireDate": "2023-09-01",
+      "hourlyRate": "28.00",
+      "profilePhoto": null,
+      "workingHours": "9:00 AM - 6:00 PM",
+      "emergencyContact": {
+        "name": "Lisa Wilson",
+        "phone": "555-765-4321",
+        "relationship": "Sister"
+      },
+      "certifications": [
+        {
+          "id": 5,
+          "name": "Basic Safety",
+          "issuingAuthority": "Safety Board",
+          "obtainedDate": "2023-09-15",
+          "expirationDate": "2025-09-15",
+          "status": "valid"
+        }
+      ],
+      "coverageAreas": [
+        {
+          "id": 4,
+          "name": "West District",
+          "priority": "backup"
+        }
+      ],
+      "availability": []
+    }
+  ],
+  "total": 3,
+  "page": 1,
+  "pageSize": 10
+}

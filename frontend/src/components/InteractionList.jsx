@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../api';
 import LoadingSkeleton from './LoadingSkeleton'; // TASK-083
+import { useLocaleFormatting } from '../hooks/useLocaleFormatting';
 import './InteractionList.css';
 
 function InteractionList() {
@@ -11,6 +12,7 @@ function InteractionList() {
   const [typeFilter, setTypeFilter] = useState('all');
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const { formatDate, formatDateTime } = useLocaleFormatting();
 
   const fetchInteractions = useCallback(async () => {
     try {
@@ -69,7 +71,8 @@ function InteractionList() {
     return <span className={typeInfo.className}>{typeInfo.label}</span>;
   };
 
-  const formatDate = (dateString) => {
+  // Custom formatDate for relative time display, using locale-aware formatting for older dates
+  const formatDateWithRelative = (dateString) => {
     if (!dateString) return 'N/A';
     const date = new Date(dateString);
     const now = new Date();
@@ -80,23 +83,14 @@ function InteractionList() {
     if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`;
     if (diffInSeconds < 604800) return `${Math.floor(diffInSeconds / 86400)}d ago`;
 
-    return date.toLocaleDateString('en-US', {
+    return formatDate(dateString, {
       year: 'numeric',
       month: 'short',
       day: 'numeric',
     });
   };
 
-  const formatDateTime = (dateString) => {
-    if (!dateString) return 'N/A';
-    return new Date(dateString).toLocaleString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-  };
+  // formatDateTime now comes from useLocaleFormatting hook with locale awareness
 
   const displayContactName = (name, type) => {
     if (!name) return 'Unknown';
@@ -186,7 +180,7 @@ function InteractionList() {
                       </span>
                     </div>
                     <span className="interaction-time">
-                      {formatDate(interaction.interaction_date)}
+                      {formatDateWithRelative(interaction.interaction_date)}
                     </span>
                   </div>
 

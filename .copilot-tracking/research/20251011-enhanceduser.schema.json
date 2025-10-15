@@ -1,0 +1,47 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://converge.local/schemas/enhanceduser.schema.json",
+  "title": "EnhancedUser",
+  "description": "User with hierarchical management and optional technician link.",
+  "type": "object",
+  "$comment": "Aligned to main.models.EnhancedUser; some fields are server-managed.",
+  "properties": {
+    "id": { "type": "integer", "readOnly": true },
+    "username": { "type": "string" },
+    "email": { "type": "string", "format": "email" },
+    "first_name": { "type": "string" },
+    "last_name": { "type": "string" },
+    "manager": { "type": ["integer", "null"] },
+    "technician": { "type": ["integer", "null"] },
+    "employee_id": { "type": ["string", "null"] },
+    "department": { "type": "string" },
+    "job_title": { "type": "string" },
+    "phone": { "type": "string" },
+    "hire_date": { "type": ["string", "null"], "format": "date" },
+    "custom_fields": { "type": "object" },
+    "is_active": { "type": "boolean" },
+    "is_staff": { "type": "boolean" },
+    "is_superuser": { "type": "boolean" },
+    "last_login": { "type": ["string", "null"], "format": "date-time", "readOnly": true },
+    "last_login_ip": { "type": ["string", "null"] },
+    "failed_login_attempts": { "type": "integer", "minimum": 0, "readOnly": true },
+    "account_locked_until": { "type": ["string", "null"], "format": "date-time", "readOnly": true },
+    "date_joined": { "type": "string", "format": "date-time", "readOnly": true },
+    "created_at": { "type": "string", "format": "date-time", "readOnly": true },
+    "updated_at": { "type": "string", "format": "date-time", "readOnly": true }
+  },
+  "required": ["username", "email", "first_name", "last_name"],
+  "additionalProperties": false,
+  "examples": [
+    {
+      "username": "mmartinez",
+      "email": "mmartinez@example.com",
+      "first_name": "Maria",
+      "last_name": "Martinez",
+      "department": "Field Service",
+      "job_title": "Scheduler",
+      "is_active": true,
+      "is_staff": true
+    }
+  ]
+}

@@ -1,0 +1,520 @@
+/* Mobile-Optimized Digital Signature Styles */
+
+.mobile-signature-container {
+  position: relative;
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 1rem;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* Device-specific optimizations */
+.mobile-signature-container.touch-device {
+  padding: 0.75rem;
+  min-height: 400px;
+}
+
+.mobile-signature-container.mouse-device {
+  padding: 1.25rem;
+}
+
+/* Orientation-specific layouts */
+.mobile-signature-container.landscape {
+  max-width: 90vw;
+}
+
+.mobile-signature-container.portrait {
+  max-width: 95vw;
+}
+
+/* Header styling */
+.signature-header {
+  text-align: center;
+  margin-bottom: 1.5rem;
+  border-bottom: 2px solid #e5e5e5;
+  padding-bottom: 1rem;
+}
+
+.signature-header h3 {
+  margin: 0 0 0.5rem 0;
+  color: #2c3e50;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.customer-info {
+  margin: 0.5rem 0;
+  font-size: 1rem;
+  color: #555;
+}
+
+.customer-info strong {
+  color: #2c3e50;
+  font-weight: 600;
+}
+
+.signature-required {
+  margin: 0.5rem 0 0 0;
+  color: #e74c3c;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+/* Tab navigation */
+.signature-tabs {
+  display: flex;
+  margin-bottom: 1rem;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #f8f9fa;
+}
+
+.tab-button {
+  flex: 1;
+  padding: 0.75rem 1rem;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  color: #666;
+}
+
+.tab-button.active {
+  background: #3498db;
+  color: white;
+  font-weight: 600;
+}
+
+.tab-button:hover:not(.active) {
+  background: #e9ecef;
+  color: #333;
+}
+
+/* Touch-specific tab styling */
+.touch-device .tab-button {
+  padding: 1rem;
+  font-size: 1.1rem;
+  min-height: 48px; /* Apple HIG minimum touch target */
+}
+
+/* Canvas container */
+.signature-canvas-container {
+  margin-bottom: 1rem;
+}
+
+.canvas-instructions {
+  text-align: center;
+  margin-bottom: 1rem;
+  padding: 0.75rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.mobile-instructions {
+  padding: 1rem;
+}
+
+.canvas-instructions p {
+  margin: 0.25rem 0;
+  color: #555;
+  font-size: 0.95rem;
+}
+
+.touch-tip {
+  color: #3498db !important;
+  font-size: 0.85rem !important;
+  font-style: italic;
+  margin-top: 0.5rem !important;
+}
+
+/* Signature canvas wrapper */
+.signature-canvas-wrapper {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1rem;
+  background: #ffffff;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.signature-canvas-wrapper:focus-within {
+  border-color: #3498db;
+  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+}
+
+/* Canvas styling */
+.signature-canvas {
+  display: block;
+  cursor: crosshair;
+  background: #ffffff;
+  touch-action: none; /* Prevent browser gestures */
+}
+
+.signature-canvas.mobile-optimized {
+  cursor: pointer; /* Better for touch devices */
+  width: 100% !important;
+  height: auto !important;
+}
+
+/* Drawing indicator */
+.drawing-indicator {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: rgba(52, 152, 219, 0.9);
+  color: white;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  pointer-events: none;
+}
+
+/* Text signature container */
+.text-signature-container {
+  margin-bottom: 1rem;
+}
+
+.text-instructions {
+  text-align: center;
+  margin-bottom: 1rem;
+  padding: 0.75rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.text-instructions p {
+  margin: 0;
+  color: #555;
+  font-size: 0.95rem;
+}
+
+/* Text input styling */
+.text-signature-input {
+  width: 100%;
+  padding: 1rem;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-family: Georgia, serif;
+  text-align: center;
+  background: #ffffff;
+  transition: border-color 0.2s ease;
+}
+
+.text-signature-input.mobile-input {
+  padding: 1.25rem;
+  font-size: 1.2rem;
+  min-height: 48px;
+}
+
+.text-signature-input:focus {
+  outline: none;
+  border-color: #3498db;
+  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+}
+
+.text-signature-input::placeholder {
+  color: #999;
+  font-style: italic;
+}
+
+/* Text signature preview */
+.text-signature-preview {
+  margin: 1rem 0;
+  padding: 1rem;
+  min-height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px dashed #ddd;
+  border-radius: 8px;
+  background: #fafafa;
+}
+
+.signature-preview {
+  font-family: 'Brush Script MT', cursive, Georgia, serif;
+  font-size: 2rem;
+  color: #2c3e50;
+  text-align: center;
+}
+
+/* Control buttons */
+.signature-controls {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin-top: 1rem;
+}
+
+.mobile-controls {
+  gap: 0.75rem;
+}
+
+.mobile-button {
+  flex: 1;
+  padding: 0.75rem 1.5rem;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: #ffffff;
+  color: #555;
+  min-height: 48px;
+}
+
+.mobile-button:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.mobile-button:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.mobile-button.primary {
+  background: #3498db;
+  border-color: #3498db;
+  color: white;
+}
+
+.mobile-button.primary:hover:not(:disabled) {
+  background: #2980b9;
+  border-color: #2980b9;
+}
+
+.clear-button {
+  background: #e74c3c;
+  border-color: #e74c3c;
+  color: white;
+}
+
+.clear-button:hover:not(:disabled) {
+  background: #c0392b;
+  border-color: #c0392b;
+}
+
+.mobile-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: #f5f5f5;
+  border-color: #ddd;
+  color: #999;
+  transform: none;
+}
+
+/* Error messaging */
+.error-message {
+  margin: 1rem 0;
+  padding: 1rem;
+  background: #fdf2f2;
+  border: 1px solid #f5c6cb;
+  border-radius: 8px;
+  color: #721c24;
+  font-weight: 500;
+  text-align: center;
+}
+
+.mobile-error {
+  padding: 1.25rem;
+  font-size: 1rem;
+}
+
+.retry-info {
+  display: block;
+  margin-top: 0.5rem;
+  font-size: 0.9rem;
+  color: #6c757d;
+  font-weight: normal;
+}
+
+/* Mobile tips */
+.mobile-tips {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  background: #e8f4fd;
+  border-radius: 8px;
+  border-left: 4px solid #3498db;
+}
+
+.mobile-tips h4 {
+  margin: 0 0 0.75rem 0;
+  color: #2c3e50;
+  font-size: 1.1rem;
+}
+
+.mobile-tips ul {
+  margin: 0;
+  padding-left: 1.5rem;
+}
+
+.mobile-tips li {
+  margin: 0.5rem 0;
+  color: #555;
+  font-size: 0.95rem;
+}
+
+/* Signature confirmation */
+.signature-confirmation {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.signature-confirmation h4 {
+  margin: 0 0 1rem 0;
+  color: #2c3e50;
+  font-size: 1.1rem;
+}
+
+.signature-preview-image {
+  max-width: 100%;
+  height: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background: #ffffff;
+  margin-bottom: 1rem;
+}
+
+.confirmation-text {
+  margin: 0;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+/* Responsive breakpoints */
+@media (max-width: 480px) {
+  .mobile-signature-container {
+    padding: 0.5rem;
+    margin: 0.5rem;
+    border-radius: 8px;
+  }
+
+  .signature-header h3 {
+    font-size: 1.3rem;
+  }
+
+  .signature-controls {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .mobile-button {
+    padding: 1rem;
+    font-size: 1.1rem;
+  }
+}
+
+@media (max-height: 600px) and (orientation: landscape) {
+  .mobile-signature-container {
+    padding: 0.5rem;
+  }
+
+  .signature-header {
+    margin-bottom: 0.75rem;
+  }
+
+  .canvas-instructions {
+    margin-bottom: 0.5rem;
+    padding: 0.5rem;
+  }
+
+  .mobile-tips {
+    display: none; /* Hide tips in landscape to save space */
+  }
+}
+
+/* High DPI displays */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 2dppx) {
+  .signature-canvas {
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: optimize-contrast;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .mobile-signature-container {
+    background: #2c3e50;
+    color: #ecf0f1;
+  }
+
+  .signature-header {
+    border-bottom-color: #4a4a4a;
+  }
+
+  .signature-header h3,
+  .customer-info strong {
+    color: #ecf0f1;
+  }
+
+  .canvas-instructions,
+  .text-instructions {
+    background: #34495e;
+    color: #ecf0f1;
+  }
+
+  .signature-canvas-wrapper {
+    border-color: #4a4a4a;
+    background: #ffffff;
+  }
+
+  .text-signature-input {
+    background: #34495e;
+    border-color: #4a4a4a;
+    color: #ecf0f1;
+  }
+
+  .mobile-tips {
+    background: #34495e;
+    border-left-color: #3498db;
+  }
+}
+
+/* Accessibility improvements */
+@media (prefers-reduced-motion: reduce) {
+  .mobile-button,
+  .tab-button {
+    transition: none;
+  }
+
+  .mobile-button:hover:not(:disabled) {
+    transform: none;
+  }
+}
+
+/* Focus visible improvements for keyboard navigation */
+.mobile-button:focus-visible,
+.tab-button:focus-visible,
+.text-signature-input:focus-visible {
+  outline: 3px solid #3498db;
+  outline-offset: 2px;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .mobile-signature-container {
+    border: 2px solid currentColor;
+  }
+
+  .mobile-button {
+    border-width: 3px;
+  }
+
+  .signature-canvas-wrapper {
+    border-width: 3px;
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2019-09/schema#",
+  "$id": "https://converge.local/schemas/scheduled-event.schema.json",
+  "title": "ScheduledEvent",
+  "$comment": "Draft 2019-09 informational variant. Annotations only.",
+  "type": "object",
+  "properties": {
+    "id": { "type": "integer" },
+    "work_order": { "type": "integer" },
+    "technician": { "type": "integer" },
+    "start_time": { "type": "string", "format": "date-time" },
+    "end_time": { "type": "string", "format": "date-time" },
+    "recurrence_rule": { "type": "string" },
+    "parent_event": { "type": ["integer", "null"] },
+    "status": { "type": "string" },
+    "notes": { "type": "string" }
+  }
+}

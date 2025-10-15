@@ -9,9 +9,11 @@ from django.utils.safestring import mark_safe
 from .models import (
     Account,
     AppointmentRequest,
+    BudgetV2,
     Category,
     Comment,
     Contact,
+    CostCenter,
     CustomField,
     CustomFieldValue,
     CustomUser,
@@ -26,6 +28,7 @@ from .models import (
     JournalEntry,
     LedgerAccount,
     LineItem,
+    MonthlyDistribution,
     NotificationLog,
     Page,
     PaperworkTemplate,
@@ -40,6 +43,8 @@ from .models import (
     ScheduledEvent,
     SchedulingAnalytics,
     Tag,
+    Warehouse,
+    WarehouseItem,
     WorkOrder,
     WorkOrderInvoice,
 )
@@ -379,6 +384,30 @@ class WorkOrderAdmin(HistoryPaginationMixin, admin.ModelAdmin):
     search_fields = ("description",)
 
 
+@admin.register(Warehouse)
+class WarehouseAdmin(HistoryPaginationMixin, admin.ModelAdmin):
+    list_display = ("name", "location", "manager", "is_active", "created_at")
+    search_fields = ("name", "location")
+    list_filter = ("is_active",)
+
+
+@admin.register(WarehouseItem)
+class WarehouseItemAdmin(HistoryPaginationMixin, admin.ModelAdmin):
+    list_display = (
+        "name",
+        "sku",
+        "gtin",
+        "item_type",
+        "warehouse",
+        "quantity",
+        "minimum_stock",
+        "unit_cost",
+        "created_at",
+    )
+    search_fields = ("name", "sku", "gtin")
+    list_filter = ("item_type", "warehouse")
+
+
 @admin.register(LineItem)
 class LineItemAdmin(HistoryPaginationMixin, admin.ModelAdmin):
     list_display = ("work_order", "description", "quantity", "unit_price", "total")
@@ -405,6 +434,34 @@ class PaymentAdmin(HistoryPaginationMixin, admin.ModelAdmin):
         )  # Defensive: handle missing related object
 
     invoice_object_display.short_description = "Invoice/Reference"
+
+
+@admin.register(CostCenter)
+class CostCenterAdmin(HistoryPaginationMixin, admin.ModelAdmin):
+    list_display = ("name", "code", "description")
+    search_fields = ("name", "code")
+
+
+class MonthlyDistributionInline(admin.TabularInline):
+    model = MonthlyDistribution
+    extra = 0
+    fields = ("month", "percent")
+    ordering = ("month",)
+
+
+@admin.register(BudgetV2)
+class BudgetV2Admin(HistoryPaginationMixin, admin.ModelAdmin):
+    list_display = (
+        "name",
+        "year",
+        "cost_center",
+        "project",
+        "created_by",
+        "created_at",
+    )
+    list_filter = ("year", "cost_center")
+    search_fields = ("name",)
+    inlines = [MonthlyDistributionInline]
 
 
 @admin.register(CustomField)

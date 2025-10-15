@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import api from '../api';
+import { useLocaleFormatting } from '../hooks/useLocaleFormatting';
 import './QuoteDetail.css';
 
 function QuoteDetail() {
@@ -12,6 +13,7 @@ function QuoteDetail() {
   const [error, setError] = useState(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [converting, setConverting] = useState(false);
+  const { formatCurrency: formatCurrencyLocale, formatDate: formatDateLocale } = useLocaleFormatting();
 
   useEffect(() => {
     fetchQuoteDetails();
@@ -76,19 +78,12 @@ function QuoteDetail() {
   };
 
   const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-    }).format(amount || 0);
+    return formatCurrencyLocale(amount || 0, 'USD');
   };
 
   const formatDate = (dateString) => {
     if (!dateString) return 'N/A';
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    });
+    return formatDateLocale(dateString);
   };
 
   const calculateSubtotal = () => {

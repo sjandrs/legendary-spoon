@@ -2,17 +2,23 @@ import js from '@eslint/js'
 import globals from 'globals'
 import reactHooks from 'eslint-plugin-react-hooks'
 import reactRefresh from 'eslint-plugin-react-refresh'
-import { defineConfig, globalIgnores } from 'eslint/config'
+import importPlugin from 'eslint-plugin-import'
 
-export default defineConfig([
-  globalIgnores(['dist']),
+export default [
+  // Global ignores
+  {
+    ignores: ['dist/**', 'build/**', 'node_modules/**']
+  },
+
+  // Main source files
   {
     files: ['**/*.{js,jsx}'],
-    extends: [
-      js.configs.recommended,
-      reactHooks.configs['recommended-latest'],
-      reactRefresh.configs.vite,
-    ],
+    ...js.configs.recommended,
+    plugins: {
+      'react-hooks': reactHooks,
+      'react-refresh': reactRefresh,
+      'import': importPlugin,
+    },
     languageOptions: {
       ecmaVersion: 2020,
       globals: globals.browser,
@@ -23,12 +29,37 @@ export default defineConfig([
       },
     },
     rules: {
-      'no-unused-vars': ['error', { varsIgnorePattern: '^[A-Z_]' }],
+      ...reactHooks.configs.recommended.rules,
+      ...importPlugin.configs.recommended.rules,
+      'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
+      'no-unused-vars': ['error', {
+        varsIgnorePattern: '^[A-Z_]',
+        argsIgnorePattern: '^_',
+        ignoreRestSiblings: true
+      }],
+      'import/no-unresolved': 'off', // Handle by TypeScript/Vite
+      'import/no-extraneous-dependencies': ['error', {
+        'devDependencies': [
+          '**/*.test.{js,jsx}',
+          '**/*.spec.{js,jsx}',
+          'src/__tests__/**',
+          'cypress/**',
+          'src/setupTests.js',
+          '*.config.{js,cjs,mjs}',
+          'scripts/**'
+        ]
+      }],
     },
   },
-  // Test files: enable Jest/Node globals and relax unused vars noise in specs
+
+  // Test files configuration (Jest)
   {
-    files: ['src/__tests__/**', 'src/**/*.{test,spec}.{js,jsx}', 'cypress/**'],
+    files: [
+      'src/**/*.{test,spec}.{js,jsx}',
+      'src/__tests__/**/*.{js,jsx}',
+      'src/setupTests.js',
+      'src/__mocks__/**/*.js'
+    ],
     languageOptions: {
       globals: {
         ...globals.browser,
@@ -38,6 +69,48 @@ export default defineConfig([
     },
     rules: {
       'no-unused-vars': 'off',
+      'react-refresh/only-export-components': 'off',
     },
   },
-])
+
+  // Cypress E2E test files
+  {
+    files: [
+      'cypress/**/*.{js,jsx}',
+      'cypress.config.js'
+    ],
+    languageOptions: {
+      globals: {
+        ...globals.browser,
+        ...globals.node,
+        cy: 'readonly',
+        Cypress: 'readonly',
+        expect: 'readonly',
+        assert: 'readonly',
+        chai: 'readonly',
+      },
+    },
+    rules: {
+      'no-unused-vars': 'off',
+      'react-refresh/only-export-components': 'off',
+    },
+  },
+
+  // Node.js configuration files
+  {
+    files: [
+      '*.config.{js,cjs,mjs}',
+      'scripts/**/*.js',
+      'src/test-utils/**/*.js'
+    ],
+    languageOptions: {
+      globals: {
+        ...globals.node,
+      },
+    },
+    rules: {
+      'no-unused-vars': 'off',
+      'react-refresh/only-export-components': 'off',
+    },
+  },
+]

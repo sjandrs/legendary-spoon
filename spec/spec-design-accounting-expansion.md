@@ -37,6 +37,15 @@ This document provides requirements, constraints, and design guidelines for expa
 - **CON-101**: Reports must be exportable as PDF and CSV
 - **GUD-101**: UI must provide clear navigation between accounting features
 
+### Budget v2 and MonthlyDistribution (Dimensional Budgeting)
+- **REQ-107**: Introduce Budget v2 with dimensions: Cost Center (required) and Project (optional).
+- **REQ-108**: Implement MonthlyDistribution as a separate document linking to a Budget v2 to represent 12-month allocation percentages that sum to 100%.
+- **REQ-109**: Provide a migration mapping table (admin-manageable) to map legacy Budget records to v2 with default dimensions.
+- **CON-107**: Default Cost Center must be "General Operations" when source data lacks a value.
+- **CON-108**: Default MonthlyDistribution must be 12 equal allocations of 8.33% each (tolerate rounding to 100%).
+- **SEC-107**: Only finance-role users may create or modify Budget v2 and distributions; all changes activity-logged.
+- **PAT-107**: Use JSON Schema draft-07 as the authoritative contract for Budget v2 and MonthlyDistribution; provide 2019-09/2020-12 variants as informational only.
+
 ### Phase 2: Enhanced Workflow Automation
 - **REQ-201**: Implement automatic WorkOrder creation upon Deal closure
 - **REQ-202**: Enable project billing: time tracking → billable hours → invoicing
@@ -60,6 +69,8 @@ This document provides requirements, constraints, and design guidelines for expa
 | /api/billing/time          | POST   | Log billable time for project billing       |
 | /api/inventory/adjust      | POST   | Adjust inventory from WorkOrder             |
 | /api/communications/email  | POST   | Send automated emails (invoices, reminders) |
+| /api/budgets-v2/           | CRUD   | Manage dimensional budgets (Cost Center, Project) |
+| /api/monthly-distributions/| CRUD   | Manage monthly allocation templates for budgets     |
 
 **Data Contract Example: Expense**
 ```json
@@ -70,6 +81,27 @@ This document provides requirements, constraints, and design guidelines for expa
   "category": "Travel",
   "description": "Flight to client site",
   "receipt_url": "/media/receipts/123.pdf"
+}
+```
+
+**Data Contract Example: Budget v2 (request)**
+```json
+{
+    "name": "FY2026 Field Service Ops",
+    "period_start": "2026-01-01",
+    "period_end": "2026-12-31",
+    "amount": "120000.00",
+    "cost_center": "General Operations",
+    "project_id": null,
+    "monthly_distribution_id": 7
+}
+```
+
+**Data Contract Example: MonthlyDistribution**
+```json
+{
+    "name": "Equal-12",
+    "percentages": [8.33,8.33,8.33,8.33,8.33,8.33,8.33,8.33,8.33,8.33,8.33,8.37]
 }
 ```
 

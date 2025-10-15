@@ -1,0 +1,602 @@
+/* Mobile Calendar Optimization Styles */
+
+.mobile-calendar-container {
+  position: relative;
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  padding: 1rem;
+  background: #ffffff;
+  border-radius: 8px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.mobile-calendar-container.touch-device {
+  padding: 0.75rem;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  user-select: none; /* Prevent text selection during gestures */
+}
+
+/* Loading overlay */
+.calendar-loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  border-radius: 8px;
+}
+
+.loading-spinner {
+  padding: 1rem 2rem;
+  background: #3498db;
+  color: white;
+  border-radius: 6px;
+  font-weight: 500;
+}
+
+/* Mobile instructions */
+.mobile-calendar-instructions {
+  background: #e8f4fd;
+  padding: 0.75rem;
+  margin-bottom: 1rem;
+  border-radius: 6px;
+  text-align: center;
+  border-left: 4px solid #3498db;
+}
+
+.mobile-calendar-instructions p {
+  margin: 0;
+  color: #2c3e50;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+/* Custom toolbar styles */
+.mobile-calendar-toolbar {
+  margin-bottom: 1rem;
+  padding: 0.75rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+}
+
+.toolbar-navigation {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.nav-button {
+  padding: 0.5rem 1rem;
+  border: 1px solid #ddd;
+  background: #ffffff;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  color: #495057;
+  transition: all 0.2s ease;
+}
+
+.mobile-nav-button {
+  padding: 0.75rem 1.25rem;
+  font-size: 1rem;
+  min-height: 44px; /* Touch target minimum */
+  min-width: 80px;
+}
+
+.nav-button:hover:not(:disabled) {
+  background: #e9ecef;
+  border-color: #adb5bd;
+}
+
+.nav-button:active {
+  background: #dee2e6;
+  transform: translateY(1px);
+}
+
+.current-date-display {
+  flex: 1;
+  text-align: center;
+  margin: 0 1rem;
+}
+
+.current-date-display h3 {
+  margin: 0;
+  color: #2c3e50;
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+/* View buttons */
+.toolbar-views {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.view-button {
+  padding: 0.5rem 1rem;
+  border: 1px solid #ddd;
+  background: #ffffff;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  color: #495057;
+  transition: all 0.2s ease;
+  text-transform: capitalize;
+}
+
+.mobile-view-button {
+  padding: 0.75rem 1rem;
+  font-size: 0.95rem;
+  min-height: 44px;
+  min-width: 70px;
+}
+
+.view-button.active {
+  background: #3498db;
+  border-color: #3498db;
+  color: white;
+}
+
+.view-button:hover:not(.active) {
+  background: #e9ecef;
+  border-color: #adb5bd;
+}
+
+/* Override react-big-calendar styles for mobile */
+.rbc-calendar {
+  font-family: inherit !important;
+  font-size: 14px !important;
+}
+
+.touch-device .rbc-calendar {
+  font-size: 15px !important;
+}
+
+/* Month view optimizations */
+.rbc-month-view {
+  border: 1px solid #e9ecef !important;
+  border-radius: 6px !important;
+  overflow: hidden;
+}
+
+.rbc-header {
+  background: #f8f9fa !important;
+  border-bottom: 1px solid #e9ecef !important;
+  padding: 0.75rem 0.5rem !important;
+  font-weight: 600 !important;
+  color: #495057 !important;
+}
+
+.touch-device .rbc-header {
+  padding: 1rem 0.75rem !important;
+  font-size: 0.9rem !important;
+}
+
+.rbc-date-cell {
+  padding: 0.5rem !important;
+  border-right: 1px solid #e9ecef !important;
+}
+
+.touch-device .rbc-date-cell {
+  padding: 0.75rem !important;
+  min-height: 50px !important;
+}
+
+.rbc-date-cell button {
+  font-size: 1rem !important;
+  font-weight: 500 !important;
+  color: #495057 !important;
+  width: 32px !important;
+  height: 32px !important;
+  border-radius: 50% !important;
+  border: none !important;
+  background: transparent !important;
+  cursor: pointer !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.touch-device .rbc-date-cell button {
+  width: 40px !important;
+  height: 40px !important;
+  font-size: 1.1rem !important;
+}
+
+.rbc-date-cell button:hover {
+  background: #e9ecef !important;
+}
+
+.rbc-date-cell button.rbc-current {
+  background: #3498db !important;
+  color: white !important;
+  font-weight: 600 !important;
+}
+
+.rbc-off-range {
+  color: #adb5bd !important;
+}
+
+/* Event styling */
+.rbc-event {
+  border-radius: 4px !important;
+  border: none !important;
+  padding: 2px 6px !important;
+  font-size: 12px !important;
+  font-weight: 500 !important;
+  line-height: 1.2 !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+}
+
+.touch-device .rbc-event {
+  padding: 4px 8px !important;
+  font-size: 13px !important;
+  min-height: 28px !important;
+  border-radius: 6px !important;
+}
+
+.mobile-calendar-event {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.event-title {
+  font-weight: 600;
+  line-height: 1.1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.event-customer {
+  font-size: 0.85em;
+  opacity: 0.9;
+  line-height: 1;
+  margin-top: 2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rbc-event:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.rbc-event.rbc-selected {
+  box-shadow: 0 0 0 2px #ffffff, 0 0 0 4px #3498db !important;
+}
+
+/* Week and day view optimizations */
+.rbc-time-view {
+  border: 1px solid #e9ecef !important;
+  border-radius: 6px !important;
+}
+
+.rbc-time-header {
+  border-bottom: 1px solid #e9ecef !important;
+}
+
+.rbc-time-content {
+  border-top: none !important;
+}
+
+.rbc-timeslot-group {
+  border-bottom: 1px solid #f1f3f4 !important;
+}
+
+.rbc-time-slot {
+  border-top: 1px solid #f8f9fa !important;
+}
+
+.touch-device .rbc-time-slot {
+  min-height: 40px !important;
+}
+
+.rbc-current-time-indicator {
+  background-color: #e74c3c !important;
+  height: 2px !important;
+  z-index: 3 !important;
+}
+
+.rbc-current-time-indicator::before {
+  background-color: #e74c3c !important;
+  width: 8px !important;
+  height: 8px !important;
+  border-radius: 50% !important;
+  left: -4px !important;
+  top: -3px !important;
+}
+
+/* Agenda view optimizations */
+.rbc-agenda-view {
+  border: 1px solid #e9ecef !important;
+  border-radius: 6px !important;
+}
+
+.rbc-agenda-view table {
+  width: 100% !important;
+}
+
+.rbc-agenda-date-cell {
+  padding: 1rem !important;
+  background: #f8f9fa !important;
+  font-weight: 600 !important;
+  color: #495057 !important;
+}
+
+.rbc-agenda-time-cell {
+  padding: 0.75rem !important;
+  font-weight: 500 !important;
+  color: #6c757d !important;
+}
+
+.rbc-agenda-event-cell {
+  padding: 0.75rem !important;
+}
+
+/* Mobile control buttons */
+.mobile-calendar-controls {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e9ecef;
+}
+
+.mobile-control-button {
+  padding: 0.75rem 1.5rem;
+  border: 1px solid #ddd;
+  background: #ffffff;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  color: #495057;
+  transition: all 0.2s ease;
+  font-size: 1rem;
+  min-height: 48px;
+  min-width: 100px;
+}
+
+.mobile-control-button:hover {
+  background: #f8f9fa;
+  border-color: #adb5bd;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.mobile-control-button:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.today-button {
+  background: #28a745 !important;
+  border-color: #28a745 !important;
+  color: white !important;
+}
+
+.today-button:hover {
+  background: #218838 !important;
+  border-color: #218838 !important;
+}
+
+.refresh-button {
+  background: #17a2b8 !important;
+  border-color: #17a2b8 !important;
+  color: white !important;
+}
+
+.refresh-button:hover {
+  background: #138496 !important;
+  border-color: #138496 !important;
+}
+
+/* Screen reader only content */
+.sr-only {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+/* Responsive breakpoints */
+@media (max-width: 768px) {
+  .mobile-calendar-container {
+    padding: 0.5rem;
+    margin: 0;
+  }
+
+  .mobile-calendar-toolbar {
+    padding: 0.5rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .toolbar-navigation {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .toolbar-views {
+    gap: 0.25rem;
+  }
+
+  .mobile-view-button {
+    padding: 0.5rem 0.75rem;
+    min-width: 60px;
+    font-size: 0.85rem;
+  }
+
+  .mobile-calendar-controls {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .mobile-control-button {
+    padding: 1rem;
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .current-date-display h3 {
+    font-size: 1rem;
+  }
+
+  .mobile-nav-button {
+    padding: 0.5rem 0.75rem;
+    min-width: 60px;
+    font-size: 0.9rem;
+  }
+
+  .rbc-calendar {
+    font-size: 13px !important;
+  }
+
+  .rbc-header {
+    padding: 0.5rem 0.25rem !important;
+    font-size: 0.8rem !important;
+  }
+
+  .rbc-date-cell {
+    padding: 0.25rem !important;
+    min-height: 40px !important;
+  }
+
+  .rbc-date-cell button {
+    width: 28px !important;
+    height: 28px !important;
+    font-size: 0.9rem !important;
+  }
+}
+
+/* Landscape orientation optimizations */
+@media (max-height: 600px) and (orientation: landscape) {
+  .mobile-calendar-container {
+    padding: 0.25rem;
+  }
+
+  .mobile-calendar-instructions {
+    display: none; /* Save space in landscape */
+  }
+
+  .mobile-calendar-toolbar {
+    margin-bottom: 0.5rem;
+    padding: 0.5rem;
+  }
+
+  .toolbar-navigation {
+    margin-bottom: 0.5rem;
+  }
+
+  .mobile-calendar-controls {
+    margin-top: 0.5rem;
+    padding-top: 0.5rem;
+  }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  .rbc-calendar,
+  .mobile-calendar-toolbar {
+    border-width: 2px !important;
+  }
+
+  .nav-button,
+  .view-button,
+  .mobile-control-button {
+    border-width: 2px !important;
+  }
+
+  .rbc-event {
+    border: 2px solid currentColor !important;
+  }
+}
+
+/* Reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  .nav-button,
+  .view-button,
+  .mobile-control-button,
+  .rbc-event {
+    transition: none !important;
+  }
+
+  .mobile-control-button:hover,
+  .nav-button:active {
+    transform: none !important;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .mobile-calendar-container {
+    background: #2c3e50;
+    color: #ecf0f1;
+  }
+
+  .mobile-calendar-toolbar {
+    background: #34495e;
+    border-color: #4a4a4a;
+  }
+
+  .nav-button,
+  .view-button,
+  .mobile-control-button {
+    background: #34495e;
+    border-color: #4a4a4a;
+    color: #ecf0f1;
+  }
+
+  .nav-button:hover,
+  .view-button:hover:not(.active),
+  .mobile-control-button:hover {
+    background: #4a4a4a;
+    border-color: #5a5a5a;
+  }
+
+  .rbc-calendar {
+    background: #34495e !important;
+    color: #ecf0f1 !important;
+  }
+
+  .rbc-header {
+    background: #4a4a4a !important;
+    border-color: #5a5a5a !important;
+    color: #ecf0f1 !important;
+  }
+
+  .rbc-date-cell {
+    border-color: #4a4a4a !important;
+  }
+
+  .rbc-date-cell button {
+    color: #ecf0f1 !important;
+  }
+
+  .rbc-date-cell button:hover {
+    background: #4a4a4a !important;
+  }
+}

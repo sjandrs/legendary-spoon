@@ -1,0 +1,1 @@
+﻿Research Phase 5: Advanced Analytics Parity & Docs - Verify endpoints (/api/analytics/predict/, /api/analytics/clv/, /api/analytics/forecast/, /api/analytics-snapshots/), create frontend analytics UI components, implement date-range filters, and complete documentation with examples and limits

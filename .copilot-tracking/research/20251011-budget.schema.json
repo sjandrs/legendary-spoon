@@ -1,0 +1,61 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://converge.local/schemas/budget.schema.json",
+  "title": "Budget",
+  "description": "Category-based budget allocation for a specific period. Matches Converge API /api/budgets/ (draft-07).",
+  "type": "object",
+  "$comment": "Server-managed fields (readOnly): id, created_by, created_by_name, created_at.",
+  "properties": {
+    "id": { "type": "integer", "readOnly": true },
+    "name": { "type": "string", "minLength": 1 },
+    "budget_type": { "type": "string", "enum": ["monthly", "quarterly", "annual"] },
+    "year": { "type": "integer", "minimum": 1900, "maximum": 3000 },
+    "month": { "type": "integer", "minimum": 1, "maximum": 12 },
+    "quarter": { "type": "integer", "minimum": 1, "maximum": 4 },
+    "categories": {
+      "type": "object",
+      "description": "Mapping of category name to budgeted amount.",
+      "additionalProperties": {
+        "type": "number",
+        "minimum": 0
+      }
+    },
+    "created_by": { "type": "integer", "readOnly": true },
+    "created_by_name": { "type": "string", "readOnly": true },
+    "created_at": { "type": "string", "format": "date-time", "readOnly": true }
+  },
+  "required": ["name", "budget_type", "year", "categories"],
+  "allOf": [
+    {
+      "if": { "properties": { "budget_type": { "const": "monthly" } } },
+      "then": { "required": ["month"] }
+    },
+    {
+      "if": { "properties": { "budget_type": { "const": "quarterly" } } },
+      "then": { "required": ["quarter"] }
+    }
+  ],
+  "additionalProperties": false,
+  "examples": [
+    {
+      "name": "Operating Budget",
+      "budget_type": "monthly",
+      "year": 2025,
+      "month": 10,
+      "categories": { "marketing": 5000, "software": 1200, "rent": 3000 }
+    },
+    {
+      "name": "Q1 Budget",
+      "budget_type": "quarterly",
+      "year": 2026,
+      "quarter": 1,
+      "categories": { "professional_services": 8000, "equipment": 2500 }
+    },
+    {
+      "name": "Annual Budget",
+      "budget_type": "annual",
+      "year": 2026,
+      "categories": { "utilities": 6000, "software": 2400, "marketing": 20000 }
+    }
+  ]
+}

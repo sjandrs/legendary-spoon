@@ -10,6 +10,7 @@ isort>=5.13.0
 bandit>=1.7.0
 safety>=2.3.0
 pre-commit>=3.6.0
+jsonschema>=4.23.0
 
 # Advanced Field Service Management Dependencies
 weasyprint>=61.0

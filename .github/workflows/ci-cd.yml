@@ -38,7 +38,7 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
-        python-version: '3.11'
+        python-version: '3.x'
 
     - name: Install system dependencies
       run: |
@@ -155,7 +155,7 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
-        python-version: '3.11'
+        python-version: '3.x'
 
     - name: Set up Node.js
       uses: actions/setup-node@v4
@@ -250,7 +250,7 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
-        python-version: '3.11'
+        python-version: '3.x'
 
     - name: Install Python quality tools
       run: |
@@ -278,7 +278,7 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
-        python-version: '3.11'
+        python-version: '3.x'
 
     - name: Install security tools
       run: |
@@ -311,7 +311,7 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
-        python-version: '3.11'
+        python-version: '3.x'
 
     - name: Install Python dependencies
       run: |

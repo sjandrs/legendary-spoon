@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2019-09/schema#",
+  "$id": "https://converge.local/schemas/digitalsignature.schema.json",
+  "title": "DigitalSignature",
+  "$comment": "Draft 2019-09 informational variant. Annotations only.",
+  "type": "object",
+  "properties": {
+    "id": { "type": "integer" },
+    "content_type": { "type": "integer" },
+    "object_id": { "type": "integer" },
+    "signature_data": { "type": "string" },
+    "signer_name": { "type": "string" },
+    "signer_email": { "type": "string" },
+    "document_name": { "type": "string" },
+    "paperwork_template": { "type": ["integer", "null"] },
+    "ip_address": { "type": "string" },
+    "user_agent": { "type": "string" }
+  }
+}

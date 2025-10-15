@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2019-09/schema#",
+  "$id": "https://converge.local/schemas/technician.schema.json",
+  "title": "Technician",
+  "$comment": "Draft 2019-09 informational variant. Annotations only.",
+  "type": "object",
+  "properties": {
+    "id": { "type": "integer" },
+    "user": { "type": ["integer", "null"] },
+    "employee_id": { "type": "string" },
+    "first_name": { "type": "string" },
+    "last_name": { "type": "string" },
+    "phone": { "type": "string" },
+    "email": { "type": "string" },
+    "hire_date": { "type": ["string", "null"] },
+    "is_active": { "type": "boolean" },
+    "base_hourly_rate": { "type": ["number", "null"] },
+    "emergency_contact": { "type": "object" }
+  }
+}

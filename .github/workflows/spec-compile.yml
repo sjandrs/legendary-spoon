@@ -28,3 +28,4 @@ jobs:
         with:
           name: compiled-spec
           path: spec/COMPILED_SPEC.md
+          if-no-files-found: error

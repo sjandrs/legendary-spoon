@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import api from '../api';
+import { useLocaleFormatting } from '../hooks/useLocaleFormatting';
 
 const TaxReport = () => {
   const [taxData, setTaxData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+  const { formatCurrency: formatCurrencyLocale } = useLocaleFormatting();
 
   useEffect(() => {
     fetchTaxData();
@@ -25,10 +27,7 @@ const TaxReport = () => {
   };
 
   const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD'
-    }).format(amount);
+    return formatCurrencyLocale(amount, 'USD');
   };
 
   const generateYearOptions = () => {

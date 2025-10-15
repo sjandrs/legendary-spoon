@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2019-09/schema#",
+  "$id": "https://converge.local/schemas/workorderinvoice.schema.json",
+  "title": "WorkOrderInvoice",
+  "$comment": "Draft 2019-09 variant. Informational wrapper; annotations only.",
+  "description": "Invoice generated from a WorkOrder.",
+  "type": "object",
+  "properties": {
+    "id": { "type": "integer" },
+    "work_order": { "type": "integer" },
+    "work_order_description": { "type": "string" },
+    "issued_date": { "type": "string", "format": "date" },
+    "due_date": { "type": "string", "format": "date" },
+    "payment_terms": { "type": "string", "enum": ["net_15", "net_30", "net_60", "due_on_receipt"] },
+    "total_amount": { "type": "number" },
+    "is_paid": { "type": "boolean" },
+    "paid_date": { "type": "string", "format": "date" },
+    "is_overdue": { "type": "boolean" },
+    "days_overdue": { "type": "integer" },
+    "created_at": { "type": "string", "format": "date-time" }
+  },
+  "examples": [
+    {
+      "work_order": 42,
+      "issued_date": "2025-10-11",
+      "due_date": "2025-11-10",
+      "payment_terms": "net_30",
+      "is_paid": false
+    }
+  ]
+}

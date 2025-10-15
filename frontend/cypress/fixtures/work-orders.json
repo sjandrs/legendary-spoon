@@ -1,0 +1,111 @@
+{
+  "workOrders": [
+    {
+      "id": 1,
+      "title": "HVAC System Repair - Downtown Office",
+      "description": "Central air conditioning system not cooling properly",
+      "priority": "high",
+      "status": "unassigned",
+      "customer": {
+        "name": "ABC Corporation",
+        "address": "123 Main Street, Downtown",
+        "phone": "555-111-2222"
+      },
+      "requiredCertifications": ["HVAC Basic", "Electrical Safety"],
+      "estimatedDuration": 4,
+      "scheduledDate": null,
+      "createdDate": "2024-12-10",
+      "qualifiedTechnicians": [
+        {
+          "id": 1,
+          "name": "John Doe",
+          "qualificationScore": 95,
+          "availabilityStatus": "available",
+          "missingCertifications": [],
+          "coverageAreaMatch": "primary",
+          "estimatedArrival": "30 minutes"
+        },
+        {
+          "id": 4,
+          "name": "Lisa Chen",
+          "qualificationScore": 90,
+          "availabilityStatus": "available",
+          "missingCertifications": [],
+          "coverageAreaMatch": "backup",
+          "estimatedArrival": "45 minutes"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "title": "Plumbing Leak Emergency",
+      "description": "Water leak in main conference room",
+      "priority": "urgent",
+      "status": "unassigned",
+      "customer": {
+        "name": "XYZ Company",
+        "address": "456 Business Ave, East Side",
+        "phone": "555-333-4444"
+      },
+      "requiredCertifications": ["Plumbing Basic", "Basic Safety"],
+      "estimatedDuration": 2,
+      "scheduledDate": null,
+      "createdDate": "2024-12-11",
+      "qualifiedTechnicians": [
+        {
+          "id": 2,
+          "name": "Sarah Johnson",
+          "qualificationScore": 100,
+          "availabilityStatus": "available",
+          "missingCertifications": [],
+          "coverageAreaMatch": "primary",
+          "estimatedArrival": "20 minutes"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "title": "Electrical Panel Upgrade",
+      "description": "Upgrade electrical panel to modern standards",
+      "priority": "medium",
+      "status": "assigned",
+      "assignedTechnician": {
+        "id": 1,
+        "name": "John Doe"
+      },
+      "customer": {
+        "name": "Small Business LLC",
+        "address": "789 Commerce St, North District",
+        "phone": "555-555-6666"
+      },
+      "requiredCertifications": ["Electrical Safety", "Advanced Electrical"],
+      "estimatedDuration": 6,
+      "scheduledDate": "2024-12-15",
+      "scheduledTime": "09:00",
+      "createdDate": "2024-12-05"
+    }
+  ],
+  "availableTechnicians": [
+    {
+      "id": 1,
+      "name": "John Doe",
+      "status": "available",
+      "currentLocation": "Downtown District",
+      "nextAvailableSlot": "2024-12-12 14:00"
+    },
+    {
+      "id": 2,
+      "name": "Sarah Johnson",
+      "status": "available",
+      "currentLocation": "East Side",
+      "nextAvailableSlot": "2024-12-12 08:00"
+    },
+    {
+      "id": 4,
+      "name": "Lisa Chen",
+      "status": "busy",
+      "currentLocation": "Downtown District",
+      "nextAvailableSlot": "2024-12-12 16:00"
+    }
+  ]
+}

@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema#",
+  "$id": "https://converge.local/schemas/enhanceduser.schema.json",
+  "title": "EnhancedUser",
+  "$comment": "Draft 2020-12 informational variant. Annotations only.",
+  "type": "object",
+  "properties": {
+    "id": { "type": "integer" },
+    "username": { "type": "string" },
+    "email": { "type": "string" },
+    "first_name": { "type": "string" },
+    "last_name": { "type": "string" },
+    "manager": { "type": ["integer", "null"] },
+    "technician": { "type": ["integer", "null"] },
+    "employee_id": { "type": ["string", "null"] },
+    "department": { "type": "string" },
+    "job_title": { "type": "string" },
+    "phone": { "type": "string" },
+    "hire_date": { "type": ["string", "null"] },
+    "custom_fields": { "type": "object" },
+    "is_active": { "type": "boolean" },
+    "is_staff": { "type": "boolean" },
+    "is_superuser": { "type": "boolean" }
+  }
+}

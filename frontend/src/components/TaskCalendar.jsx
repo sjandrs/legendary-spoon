@@ -83,7 +83,7 @@ const TaskCalendar = () => {
     }
   };
 
-  const eventStyleGetter = (event, start, end, isSelected) => {
+  const eventStyleGetter = (event, _start, _end, _isSelected) => {
     const task = event.resource;
     let backgroundColor = '#3174ad';
 

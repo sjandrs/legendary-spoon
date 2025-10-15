@@ -1,0 +1,8 @@
+id,description
+AC-101,"Given a set of transactions, when a user requests a Balance Sheet, then the correct report is generated and downloadable"
+AC-102,"When a WorkOrder is completed, an invoice can be generated automatically with correct line items"
+AC-103,"When an expense is logged, a receipt can be uploaded and categorized"
+AC-201,"When a Deal is marked as closed, a WorkOrder is created and linked"
+AC-202,"When time is logged on a Project, it can be billed and invoiced"
+AC-203,"When a WorkOrder is fulfilled, inventory is decremented accordingly"
+AC-204,"When an invoice is overdue, an automated reminder email is sent"
