@@ -286,7 +286,8 @@ def work_order_status_changed_celery_handler(sender, instance, created, **kwargs
             process_post_appointment_workflow.delay(instance.id)
 
             # Log the signal trigger
-            # Prefer to log with a real user when available to avoid null constraints in some schemas
+            # Prefer to log with a real user when available to avoid null
+            # constraints in some schemas
             user = getattr(instance.project, "created_by", None)
             if user:
                 ActivityLog.objects.create(

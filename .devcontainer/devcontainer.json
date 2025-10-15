@@ -15,7 +15,8 @@
 		"vscode": {
 			"extensions": [
 				"GitHub.remotehub",
-				"timheuer.awesome-copilot"
+				"timheuer.awesome-copilot",
+				"eamodio.gitlens"
 			]
 		}
 	}
