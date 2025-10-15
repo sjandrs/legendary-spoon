@@ -10,6 +10,7 @@ import {
   deleteWarehouseItem
 } from '../api';
 import './Warehouse.css';
+import GtinInput from './GtinInput';
 
 const Warehouse = () => {
   const [warehouses, setWarehouses] = useState([]);
@@ -32,6 +33,7 @@ const Warehouse = () => {
     name: '',
     description: '',
     sku: '',
+    gtin: '',
     quantity: '',
     minimum_stock: '',
     unit_cost: '',
@@ -114,6 +116,7 @@ const Warehouse = () => {
       name: item.name,
       description: item.description,
       sku: item.sku,
+      gtin: item.gtin || '',
       quantity: item.quantity.toString(),
       minimum_stock: item.minimum_stock.toString(),
       unit_cost: item.unit_cost.toString(),
@@ -260,6 +263,14 @@ const Warehouse = () => {
                       value={itemFormData.sku}
                       onChange={(e) => setItemFormData({...itemFormData, sku: e.target.value})}
                       required
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label htmlFor="item-gtin">GTIN:</label>
+                    <GtinInput
+                      id="item-gtin"
+                      value={itemFormData.gtin}
+                      onChange={(e) => setItemFormData({ ...itemFormData, gtin: e.target.value })}
                     />
                   </div>
                 </div>

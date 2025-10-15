@@ -153,7 +153,9 @@ class Command(BaseCommand):
             except Exception as e:
                 error_count += 1
                 logger.error(
-                    f"Error sending reminder for appointment {event.id}: {str(e)}"
+                    "Error sending reminder for appointment %s: %s",
+                    event.id,
+                    str(e),
                 )
                 self.stdout.write(
                     self.style.ERROR(

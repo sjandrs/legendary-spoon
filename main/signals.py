@@ -7,6 +7,7 @@ from .models import (
     Contact,
     Deal,
     Interaction,
+    MonthlyDistribution,
     Project,
     ScheduledEvent,
     WorkOrder,
@@ -293,8 +294,8 @@ def work_order_status_changed_celery_handler(sender, instance, created, **kwargs
                     action="complete",
                     content_object=instance,
                     description=(
-                        "Triggered post-appointment workflow "
-                        f"for WorkOrder #{instance.id}"
+                        "Triggered post-appointment "
+                        f"workflow for WorkOrder #{instance.id}"
                     ),
                 )
 
@@ -304,3 +305,48 @@ def work_order_status_changed_celery_handler(sender, instance, created, **kwargs
 
             logger = logging.getLogger(__name__)
             logger.warning("Celery not available, using synchronous workflow")
+
+
+# ---------------------------------------------------------------------------
+# Budget V2 safety: ensure 12-month distributions sum to 100.00%
+# ---------------------------------------------------------------------------
+
+
+@receiver(post_save, sender=MonthlyDistribution)
+def monthly_distribution_post_save(sender, instance, created, **kwargs):
+    """When a budget reaches 12 distribution rows, enforce total == 100.00.
+
+    This complements model.clean() (which enforces on insertion of the 12th row)
+    and the serializer/view validations. It acts as a last-line safety net when
+    data changes bypass application paths.
+    """
+    from decimal import ROUND_HALF_UP, Decimal
+
+    from django.core.exceptions import ValidationError
+    from django.db.models import Sum
+
+    budget = instance.budget
+    qs = budget.monthly_distributions.all()
+    if qs.count() == 12:
+        total = (
+            qs.aggregate(total=Sum("percent")).get("total") or Decimal("0.00")
+        ).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+        if total != Decimal("100.00"):
+            raise ValidationError(
+                {
+                    "non_field_errors": [
+                        f"Monthly distributions must sum to 100.00% across 12 months (got {total})."
+                    ]
+                }
+            )
+
+
+@receiver(post_save, sender=MonthlyDistribution)
+def monthly_distribution_post_delete(sender, instance, created, **kwargs):
+    """Alias for symmetry: No-op on save for delete logic; provided for clarity.
+
+    Django signals don't provide post_delete here; if needed, a separate receiver
+    can be added to handle deletions. For now, save path suffices as API replaces
+    rows atomically inside a transaction.
+    """
+    return

@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import api from '../api';
+import { useLocaleFormatting } from '../hooks/useLocaleFormatting';
 import './CustomerPortal.css';
 
 const CustomerPortal = () => {
   const [activeTab, setActiveTab] = useState('booking');
   const [availableSlots, setAvailableSlots] = useState([]);
   const [selectedSlot, setSelectedSlot] = useState(null);
+  const { formatDate: formatDateLocale } = useLocaleFormatting();
   const [appointmentRequest, setAppointmentRequest] = useState({
     preferred_date: '',
     preferred_time: '',
@@ -128,9 +130,9 @@ const CustomerPortal = () => {
 
   const formatSlotDisplay = (slot) => {
     const date = new Date(slot.datetime);
-    const dayName = date.toLocaleDateString('en-US', { weekday: 'long' });
-    const monthDay = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-    const time = date.toLocaleTimeString('en-US', { hour: 'numeric', hour12: true });
+    const dayName = formatDateLocale(date, { weekday: 'long' });
+    const monthDay = formatDateLocale(date, { month: 'short', day: 'numeric' });
+    const time = date.toLocaleTimeString(undefined, { hour: 'numeric', hour12: true });
 
     return `${dayName}, ${monthDay} at ${time}`;
   };

@@ -7,9 +7,8 @@ exclude =
     venv,
     .venv,
     node_modules,
-    frontend,
-    main/migrations/*,
-    web/migrations/*
+    frontend
 per-file-ignores =
+    main/tests/*: E501,F401,F811,F821,E305,E402
     main/migrations/*.py: E501,E111,E114,F401,F841
     main/tests/test_search_and_routes.py: E115

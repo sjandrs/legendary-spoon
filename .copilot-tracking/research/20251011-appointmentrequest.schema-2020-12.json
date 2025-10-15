@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema#",
+  "$id": "https://converge.local/schemas/appointmentrequest.schema.json",
+  "title": "AppointmentRequest",
+  "$comment": "Draft 2020-12 informational variant. Annotations only.",
+  "type": "object",
+  "properties": {
+    "id": { "type": "integer" },
+    "account": { "type": "integer" },
+    "contact": { "type": "integer" },
+    "requested_start_time": { "type": "string", "format": "date-time" },
+    "requested_end_time": { "type": "string", "format": "date-time" },
+    "work_description": { "type": "string" },
+    "priority": { "type": "string" },
+    "status": { "type": "string" }
+  }
+}

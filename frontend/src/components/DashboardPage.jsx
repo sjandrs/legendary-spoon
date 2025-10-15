@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import apiClient, { getDashboardAnalytics } from '../api'; // Import the configured axios instance
+// import apiClient from '../api'; // Ready for enhanced dashboard API calls // Import the configured axios instance
 import DealsByStageChart from './charts/DealsByStageChart';
 import SalesPerformanceChart from './charts/SalesPerformanceChart';
 import './DashboardPage.css';

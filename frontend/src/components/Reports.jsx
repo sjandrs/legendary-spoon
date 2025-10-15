@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import api, { get as apiGetNamed } from '../api';
+import { get as apiGetNamed } from '../api';
+import { useLocaleFormatting } from '../hooks/useLocaleFormatting';
 
 const Reports = () => {
   const [activeTab, setActiveTab] = useState('balance-sheet');
@@ -8,6 +9,7 @@ const Reports = () => {
   const [cashFlow, setCashFlow] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const { formatCurrency } = useLocaleFormatting();
 
   const [dateFilters, setDateFilters] = useState({
     asOfDate: new Date().toISOString().split('T')[0],
@@ -61,12 +63,7 @@ const Reports = () => {
     window.print(); // Simple print-to-PDF functionality
   };
 
-  const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD'
-    }).format(amount);
-  };
+  // formatCurrency now comes from useLocaleFormatting hook
 
   const generateCSVData = (reportType) => {
     let csv = "Category,Amount\n";

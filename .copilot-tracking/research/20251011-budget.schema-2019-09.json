@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2019-09/schema#",
+  "$id": "https://converge.local/schemas/budget.schema.json",
+  "title": "Budget",
+  "$comment": "Draft 2019-09 variant. Informational wrapper: annotations only; do not infer required. Use unevaluatedProperties for closed schemas if needed.",
+  "description": "Category-based budget allocation for a specific period. Matches Converge API /api/budgets/ (informational 2019-09).",
+  "type": "object",
+  "properties": {
+    "id": { "type": "integer" },
+    "name": { "type": "string" },
+    "budget_type": { "type": "string", "enum": ["monthly", "quarterly", "annual"] },
+    "year": { "type": "integer" },
+    "month": { "type": "integer" },
+    "quarter": { "type": "integer" },
+    "categories": {
+      "type": "object",
+      "additionalProperties": { "type": "number" }
+    },
+    "created_by": { "type": "integer" },
+    "created_by_name": { "type": "string" },
+    "created_at": { "type": "string", "format": "date-time" }
+  },
+  "examples": [
+    {
+      "name": "Operating Budget",
+      "budget_type": "monthly",
+      "year": 2025,
+      "month": 10,
+      "categories": { "marketing": 5000, "software": 1200, "rent": 3000 }
+    }
+  ]
+}

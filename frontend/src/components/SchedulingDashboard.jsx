@@ -1,6 +1,18 @@
-import React, { useState, useEffect } from 'react';
+import React, {
+  memo,
+  useMemo,
+  useCallback,
+  useState,
+  useEffect,
+  useRef,
+  startTransition
+} from 'react';
 import { Line, Bar, Doughnut } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, BarElement, ArcElement, Title, Tooltip, Legend } from 'chart.js';
+import { useFieldServiceOptimization, useChartOptimization } from '../hooks/useFieldServiceOptimization';
+import { VirtualizationUtils } from '../utils/component-performance';
+import AdvancedMetricsChart from './charts/AdvancedMetricsChartSimplified';
+import InteractiveVisualizationDashboard from './charts/InteractiveVisualization';
 import api from '../api';
 import './SchedulingDashboard.css';
 
@@ -25,11 +37,54 @@ const SchedulingDashboard = () => {
   const [selectedTechnician, setSelectedTechnician] = useState('all');
   const [technicians, setTechnicians] = useState([]);
 
+  // Advanced metrics data
+  const [workOrders, setWorkOrders] = useState([]);
+  const [timeEntries, setTimeEntries] = useState([]);
+  const [expenses, setExpenses] = useState([]);
+  const [feedbackData, setFeedbackData] = useState([]);
+  const [warehouseItems, setWarehouseItems] = useState([]);
+
   useEffect(() => {
     loadDashboardData();
     loadAnalyticsData();
     loadTechnicians();
+    loadAdvancedMetricsData();
   }, [selectedPeriod, selectedTechnician]);
+
+  const loadAdvancedMetricsData = async () => {
+    try {
+      // Load work orders
+      const workOrdersResponse = await api.get('/api/work-orders/', {
+        params: { period: selectedPeriod }
+      });
+      setWorkOrders(workOrdersResponse.data.results || workOrdersResponse.data);
+
+      // Load time entries
+      const timeEntriesResponse = await api.get('/api/time-entries/', {
+        params: { period: selectedPeriod }
+      });
+      setTimeEntries(timeEntriesResponse.data.results || timeEntriesResponse.data);
+
+      // Load expenses
+      const expensesResponse = await api.get('/api/expenses/', {
+        params: { period: selectedPeriod }
+      });
+      setExpenses(expensesResponse.data.results || expensesResponse.data);
+
+      // Load warehouse items
+      const warehouseResponse = await api.get('/api/warehouse-items/');
+      setWarehouseItems(warehouseResponse.data.results || warehouseResponse.data);
+
+      // Mock feedback data for now
+      setFeedbackData([
+        { workOrderId: 1, rating: 4.5, comments: 'Great service' },
+        { workOrderId: 2, rating: 5.0, comments: 'Excellent work' },
+        { workOrderId: 3, rating: 4.2, comments: 'Good job' }
+      ]);
+    } catch (_err) {
+      console.error('Error loading advanced metrics data:', _err);
+    }
+  };
 
   const loadDashboardData = async () => {
     try {
@@ -240,6 +295,28 @@ const SchedulingDashboard = () => {
             +{dashboardData?.revenue_growth || 0}% vs last period
           </div>
         </div>
+      </div>
+
+      {/* Advanced Metrics Dashboard */}
+      <div className="advanced-analytics-section">
+        <AdvancedMetricsChart
+          workOrders={workOrders}
+          timeEntries={timeEntries}
+          expenses={expenses}
+          warehouseItems={warehouseItems}
+          feedbackData={feedbackData}
+          realTimeEnabled={true}
+        />
+      </div>
+
+      {/* Interactive Visualization Dashboard */}
+      <div className="interactive-visualization-section">
+        <InteractiveVisualizationDashboard
+          workOrders={workOrders}
+          timeEntries={timeEntries}
+          expenses={expenses}
+          realTimeEnabled={true}
+        />
       </div>
 
       {/* Charts Grid */}

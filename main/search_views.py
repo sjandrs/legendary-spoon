@@ -28,6 +28,20 @@ class SearchAPIView(APIView):
         offset = int(request.query_params.get("offset", 0))
         limit = int(request.query_params.get("limit", 50))
 
+        # Lightweight guard: empty query should not error — return empty results
+        if not query:
+            return Response(
+                {
+                    "results": [],
+                    "total_count": 0,
+                    "offset": offset,
+                    "limit": limit,
+                    "query": query,
+                    "type": search_type,
+                    "message": "Empty query returns no results.",
+                }
+            )
+
         # Extract filters from query parameters
         filters = {}
         for key, value in request.query_params.items():
@@ -46,9 +60,8 @@ class SearchAPIView(APIView):
 
             if search_type == "global":
                 # Restore global search by aggregating results from key entity providers.
-                results, total_count = search_service.global_search(
-                    query, filters, sort_by, sort_order, offset, limit
-                )
+                results = search_service.global_search(query, filters, limit)
+                total_count = sum(len(v) for v in results.values())
                 return Response(
                     {
                         "results": results,

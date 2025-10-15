@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema#",
+  "$id": "https://converge.local/schemas/journalentry.schema.json",
+  "title": "JournalEntry",
+  "$comment": "Draft 2020-12 variant. Informational wrapper; annotations only.",
+  "description": "Simple journal entry model (single amount with debit and credit accounts).",
+  "type": "object",
+  "properties": {
+    "id": { "type": "integer" },
+    "date": { "type": "string", "format": "date" },
+    "description": { "type": "string" },
+    "debit_account": { "type": "string" },
+    "debit_account_id": { "type": "integer" },
+    "credit_account": { "type": "string" },
+    "credit_account_id": { "type": "integer" },
+    "amount": { "type": "number" },
+    "created_at": { "type": "string", "format": "date-time" }
+  },
+  "examples": [
+    {
+      "date": "2025-10-12",
+      "description": "Reverse accrual",
+      "debit_account_id": 1,
+      "credit_account_id": 4,
+      "amount": 300.0
+    }
+  ]
+}

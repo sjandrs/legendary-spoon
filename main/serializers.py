@@ -9,10 +9,12 @@ from .models import (
     AnalyticsSnapshot,
     AppointmentRequest,
     Budget,
+    BudgetV2,
     Category,
     Certification,
     Comment,
     Contact,
+    CostCenter,
     CoverageArea,
     CustomerLifetimeValue,
     CustomField,
@@ -33,6 +35,7 @@ from .models import (
     LedgerAccount,
     LineItem,
     LogEntry,
+    MonthlyDistribution,
     Notification,
     NotificationLog,
     Page,
@@ -161,6 +164,7 @@ class AccountSerializer(serializers.ModelSerializer):
             "industry",
             "website",
             "phone_number",
+            "phone",  # back-compat exposure
             "address",
             "notes",
             "owner",
@@ -173,7 +177,7 @@ class AccountSerializer(serializers.ModelSerializer):
 
 
 class ContactSerializer(serializers.ModelSerializer):
-    owner = UserSerializer(read_only=True)
+    owner = serializers.PrimaryKeyRelatedField(read_only=True)
     account = AccountSerializer(read_only=True)
     account_id = serializers.PrimaryKeyRelatedField(
         queryset=Account.objects.all(),
@@ -204,6 +208,7 @@ class ContactSerializer(serializers.ModelSerializer):
             "last_name",
             "email",
             "phone_number",
+            "phone",  # back-compat exposure
             "title",
             "owner",
             "created_at",
@@ -292,12 +297,15 @@ class DealSerializer(serializers.ModelSerializer):
     account_name = serializers.CharField(source="account.name", read_only=True)
     primary_contact_name = serializers.SerializerMethodField()
     stage_name = serializers.CharField(source="stage.name", read_only=True)
+    # Back-compat: accept legacy 'name' and 'title' interchangeably
+    name = serializers.CharField(source="title", required=False, allow_blank=True)
 
     class Meta:
         model = Deal
         fields = [
             "id",
             "title",
+            "name",
             "account",
             "primary_contact",
             "stage",
@@ -325,6 +333,22 @@ class DealSerializer(serializers.ModelSerializer):
         if obj.primary_contact:
             return f"{obj.primary_contact.first_name} {obj.primary_contact.last_name}"
         return None
+
+    def validate(self, attrs):
+        # Map legacy 'title'/'name' interplay: if provided name and not title, set title
+        data = super().validate(attrs)
+        try:
+            title = data.get("title")
+        except Exception:
+            title = None
+        legacy_name = None
+        try:
+            legacy_name = getattr(self, "initial_data", {}).get("name")
+        except Exception:
+            legacy_name = None
+        if (title is None or title == "") and legacy_name:
+            data["title"] = legacy_name
+        return data
 
 
 class InteractionSerializer(serializers.ModelSerializer):
@@ -917,6 +941,7 @@ class WarehouseItemSerializer(serializers.ModelSerializer):
             "description",
             "item_type",
             "sku",
+            "gtin",
             "quantity",
             "unit_cost",
             "minimum_stock",
@@ -928,6 +953,173 @@ class WarehouseItemSerializer(serializers.ModelSerializer):
             "updated_at",
         ]
         read_only_fields = ["created_at", "updated_at"]
+
+    def validate_gtin(self, value):
+        """Normalize and validate GTIN rules:
+        - Accept 7–14 digits only
+        - If 14 digits, validate GS1 check digit
+        - Store digits-only value as provided (no zero-padding persisted)
+        """
+        if value in (None, ""):
+            return value
+        if not isinstance(value, str):
+            value = str(value)
+        value = value.strip()
+        if not value.isdigit():
+            raise serializers.ValidationError("GTIN must be digits-only")
+        length = len(value)
+        if length < 7 or length > 14:
+            raise serializers.ValidationError("GTIN must be 7 to 14 digits long")
+
+        if length == 14:
+            base = value[:-1]
+            # compute GS1 check digit (weights 3,1 from right)
+            total = 0
+            for i, ch in enumerate(reversed(base), start=1):
+                d = ord(ch) - 48
+                total += d * (3 if (i % 2 == 1) else 1)
+            mod = total % 10
+            check_digit = 0 if mod == 0 else 10 - mod
+            if (ord(value[-1]) - 48) != check_digit:
+                raise serializers.ValidationError("Invalid GTIN check digit")
+
+        return value
+
+
+class CostCenterSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CostCenter
+        fields = ["id", "name", "code", "description"]
+
+
+class MonthlyDistributionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MonthlyDistribution
+        fields = ["id", "month", "percent"]
+
+
+class BudgetV2Serializer(serializers.ModelSerializer):
+    created_by_name = serializers.CharField(
+        source="created_by.get_full_name", read_only=True
+    )
+    cost_center_name = serializers.CharField(source="cost_center.name", read_only=True)
+    # Read-only view of persisted distributions; accept nested writes via create/update overrides
+    distributions = MonthlyDistributionSerializer(
+        source="monthly_distributions", many=True, read_only=True
+    )
+
+    class Meta:
+        model = BudgetV2
+        fields = [
+            "id",
+            "name",
+            "year",
+            "cost_center",
+            "cost_center_name",
+            "project",
+            "created_by",
+            "created_by_name",
+            "created_at",
+            "distributions",
+        ]
+        read_only_fields = ["created_by", "created_at", "distributions"]
+
+    def create(self, validated_data):
+        from django.db import transaction
+
+        # Try to get nested distributions from validated_data (if a write-only field
+        # maps it) or fall back to raw initial_data for convenience
+        rows = validated_data.pop("distributions", None)
+        if rows is None:
+            data = getattr(self, "initial_data", None)
+            if isinstance(data, dict):
+                rows = data.get("distributions")
+
+        validated_data["created_by"] = self.context["request"].user
+        with transaction.atomic():
+            instance = super().create(validated_data)
+            if rows:
+                self._replace_distributions(instance, rows)
+            else:
+                # Seed default 12-month distribution upon create
+                try:
+                    instance.seed_default_distribution()
+                except Exception:
+                    pass
+        return instance
+
+    def update(self, instance, validated_data):
+        from django.db import transaction
+
+        # Same nested write semantics on update: if 'distributions' present,
+        # validate and replace atomically; otherwise leave as-is.
+        rows = validated_data.pop("distributions", None)
+        if rows is None:
+            data = getattr(self, "initial_data", None)
+            if isinstance(data, dict):
+                rows = data.get("distributions")
+
+        with transaction.atomic():
+            instance = super().update(instance, validated_data)
+            if rows is not None:
+                self._replace_distributions(instance, rows)
+        return instance
+
+    # Internal helpers -----------------------------------------------------
+    def _replace_distributions(self, budget: BudgetV2, rows):
+        """Validate and replace distributions for a budget.
+
+        Validation rules (mirrors endpoint behavior):
+          - must be a list of exactly 12 items
+          - months must be unique and in 1..12
+          - percent 0..100 and total exactly 100.00 (rounded to 2 dp)
+        """
+        from decimal import ROUND_HALF_UP, Decimal
+
+        from rest_framework.exceptions import ValidationError
+
+        if not isinstance(rows, list):
+            raise ValidationError({"detail": "distributions must be a list of 12 rows"})
+        if len(rows) != 12:
+            raise ValidationError(
+                {"detail": f"Exactly 12 months required (got {len(rows)})"}
+            )
+
+        seen = set()
+        total = Decimal("0.00")
+        cleaned: list[tuple[int, Decimal]] = []
+        errors: list[str] = []
+        for idx, r in enumerate(rows, start=1):
+            try:
+                m = int(r.get("month"))
+                p = Decimal(str(r.get("percent")))
+            except Exception:
+                raise ValidationError(
+                    {"detail": f"Row {idx} must include numeric month and percent"}
+                )
+            if m < 1 or m > 12:
+                errors.append(f"Row {idx}: month {m} out of range (1..12)")
+            if m in seen:
+                errors.append(f"Duplicate month {m}")
+            seen.add(m)
+            if p < Decimal("0.00") or p > Decimal("100.00"):
+                errors.append(f"Row {idx}: percent {p} out of bounds (0..100)")
+            total += p
+            cleaned.append((m, p))
+
+        total = total.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+        if total != Decimal("100.00"):
+            errors.append(f"Total percent must be 100.00 (got {total})")
+
+        if errors:
+            raise ValidationError({"detail": "Invalid distributions", "errors": errors})
+
+        # Persist atomically: replace all rows
+        from .models import MonthlyDistribution
+
+        MonthlyDistribution.objects.filter(budget=budget).delete()
+        for m, p in sorted(cleaned, key=lambda t: t[0]):
+            MonthlyDistribution.objects.create(budget=budget, month=m, percent=p)
 
 
 # Phase 3: Advanced Analytics Serializers
@@ -1501,3 +1693,89 @@ class SchedulingAnalyticsSerializer(serializers.ModelSerializer):
             "created_at",
         ]
         read_only_fields = ["created_at"]
+
+
+# Analytics Parameter Validation Serializers
+
+
+class CLVParameterSerializer(serializers.Serializer):
+    """Parameter validation for CLV calculations."""
+    
+    include_predictions = serializers.BooleanField(default=True, required=False)
+    refresh_data = serializers.BooleanField(default=False, required=False)
+    confidence_threshold = serializers.DecimalField(
+        max_digits=3, decimal_places=2, min_value=0.0, max_value=1.0,
+        default=0.5, required=False
+    )
+
+
+class DealPredictionParameterSerializer(serializers.Serializer):
+    """Parameter validation for deal predictions."""
+    
+    include_factors = serializers.BooleanField(default=True, required=False)
+    model_version = serializers.CharField(
+        max_length=50, required=False, default="latest"
+    )
+    refresh_prediction = serializers.BooleanField(default=False, required=False)
+
+
+class RevenueForecastParameterSerializer(serializers.Serializer):
+    """Parameter validation for revenue forecasts."""
+    
+    PERIOD_CHOICES = [
+        ("monthly", "Monthly"),
+        ("quarterly", "Quarterly"),
+        ("annual", "Annual"),
+    ]
+    
+    METHOD_CHOICES = [
+        ("linear_regression", "Linear Regression"),
+        ("moving_average", "Moving Average"),
+        ("seasonal_arima", "Seasonal ARIMA"),
+    ]
+    
+    period = serializers.ChoiceField(
+        choices=PERIOD_CHOICES, default="monthly", required=False
+    )
+    method = serializers.ChoiceField(
+        choices=METHOD_CHOICES, default="linear_regression", required=False
+    )
+    start_date = serializers.DateField(required=False)
+    end_date = serializers.DateField(required=False)
+    include_confidence = serializers.BooleanField(default=True, required=False)
+    
+    def validate(self, attrs):
+        """Validate date range parameters."""
+        start_date = attrs.get("start_date")
+        end_date = attrs.get("end_date")
+        
+        if start_date and end_date:
+            if start_date >= end_date:
+                raise serializers.ValidationError(
+                    "start_date must be before end_date"
+                )
+        
+        return attrs
+
+
+class AnalyticsSnapshotFilterSerializer(serializers.Serializer):
+    """Parameter validation for analytics snapshot filtering."""
+    
+    start_date = serializers.DateField(required=False)
+    end_date = serializers.DateField(required=False)
+    page_size = serializers.IntegerField(
+        min_value=1, max_value=100, default=20, required=False
+    )
+    
+    def validate(self, attrs):
+        """Validate date range and pagination parameters."""
+        start_date = attrs.get("start_date")
+        end_date = attrs.get("end_date")
+        
+        if start_date and end_date:
+            if start_date >= end_date:
+                raise serializers.ValidationError(
+                    "start_date must be before end_date"
+                )
+        
+        return attrs

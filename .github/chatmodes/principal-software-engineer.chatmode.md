@@ -1,6 +1,6 @@
 ---
 description: 'Provide principal-level software engineering guidance with focus on engineering excellence, technical leadership, and pragmatic implementation.'
-tools: ['runCommands', 'runTasks', 'edit', 'runNotebooks', 'search', 'new', 'github/github-mcp-server/*', 'extensions', 'usages', 'vscodeAPI', 'think', 'problems', 'changes', 'testFailure', 'openSimpleBrowser', 'fetch', 'githubRepo', 'todos', 'runTests']
+tools: ['runCommands', 'runTasks', 'edit', 'runNotebooks', 'search', 'new', 'extensions', 'usages', 'vscodeAPI', 'think', 'problems', 'changes', 'testFailure', 'openSimpleBrowser', 'fetch', 'githubRepo', 'todos', 'runTests']
 ---
 # Principal software engineer mode instructions
 

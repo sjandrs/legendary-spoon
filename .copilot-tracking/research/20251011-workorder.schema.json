@@ -1,0 +1,42 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://converge.local/schemas/workorder.schema.json",
+  "title": "WorkOrder",
+  "description": "Work order linking to a Project with status and line items.",
+  "type": "object",
+  "$comment": "Matches main.models.WorkOrder and WorkOrderSerializer. Scheduling and technician assignment are modeled via ScheduledEvent; invoices via WorkOrderInvoice.",
+  "properties": {
+    "id": { "type": "integer", "readOnly": true },
+    "project": { "type": "integer", "$comment": "Project ID" },
+    "description": { "type": "string", "minLength": 1 },
+    "status": { "type": "string", "enum": ["open", "in_progress", "completed", "cancelled"], "$comment": "Model default is 'open'; other statuses may be set by workflow." },
+    "created_at": { "type": "string", "format": "date-time", "readOnly": true },
+    "updated_at": { "type": "string", "format": "date-time", "readOnly": true },
+    "line_items": {
+      "type": "array",
+      "readOnly": true,
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer", "readOnly": true },
+          "work_order": { "type": "integer", "readOnly": true },
+          "description": { "type": "string" },
+          "quantity": { "type": "number", "minimum": 0 },
+          "unit_price": { "type": "number", "minimum": 0 },
+          "total": { "type": "number", "minimum": 0, "readOnly": true }
+        },
+        "required": ["description", "quantity", "unit_price"],
+        "additionalProperties": true
+      }
+    }
+  },
+  "required": ["project", "description"],
+  "additionalProperties": false,
+  "examples": [
+    {
+      "project": 101,
+      "description": "Install router and configure network",
+      "status": "open"
+    }
+  ]
+}

@@ -31,23 +31,15 @@ Built with a robust **Django** backend and a dynamic **React** frontend, Converg
 
 ![Spec Validation](https://github.com/sjandrs/legendary-spoon/actions/workflows/spec-validate.yml/badge.svg)
 
-### Branch Protection
-
-The repository enforces quality gates through branch protection rules:
-
-- **Protected Branches:** `master`, `Development`
-- **Required Status Check:** Spec Validation must pass before merge
-- **Policy:** Pull requests cannot be merged if the Spec Validation workflow fails
-- **Configuration:** `strict=false` (allows out-of-date branches), `enforce_admins=false`
-
-This ensures all code changes maintain the spec-driven development workflow standards before being merged into protected branches.
-
-## � Documentation
+## 📚 Documentation
 
 *   **[Testing Automation Guide](docs/TESTING_AUTOMATION.md)**: Comprehensive documentation for automated testing, CI/CD, and quality assurance
 *   **[API Documentation](docs/API.md)**: REST API endpoints and usage examples
 *   **[Development Guide](docs/DEVELOPMENT.md)**: Setup, conventions, and development workflows
-*   **[Field Service Management](docs/FIELD_SERVICE_MANAGEMENT.md)**: Complete guide to advanced scheduling and service management features
+*   **Field Service Management**: See the canonical specs
+    - Master Spec API sections: [Technician & User Management](spec/spec-design-master.md#tech-user-api) • [Field Service API](spec/spec-design-master.md#field-service-api)
+    - Domain overview: [Minimal ER Diagram](spec/spec-design-master.md#er-diagram)
+    - Detailed module spec: [Field Service Management](spec/spec-design-field-service-management.md)
 *   **[Status Report (2025-10-09)](docs/STATUS_2025-10-09.md)**: Current progress, quality gates, risks, and next steps
 *   **[ADR-001 Migration Checklist](docs/ADR-001-migration-checklist.md)**: Operational plan to consolidate EnhancedUser → CustomUser
 
@@ -204,6 +196,25 @@ python -m flake8 main web               # Python linting
 npm run lint                           # JavaScript linting
 pre-commit run --all-files             # All pre-commit checks
 ```
+
+## Spec-driven development (AI-assisted)
+### Quick Links (Specs)
+
+- Canonical Master Spec: `spec/spec-design-master.md`
+    - API: [Technician & User Management](spec/spec-design-master.md#tech-user-api) • [Field Service](spec/spec-design-master.md#field-service-api)
+    - Model graph: [Minimal ER Diagram](spec/spec-design-master.md#er-diagram)
+    - Acceptance Mapping: `#acceptance-mapping`
+
+
+This repo supports a spec-driven workflow:
+
+- Master spec: `main.md` (AI-facing master specification)
+- Detailed specs: `spec/` (compiled via `tools/spec_compile.py` → `spec/COMPILED_SPEC.md`)
+- Copilot prompt files:
+    - `.github/prompts/compile.prompt.md` — compile spec into code changes
+    - `.github/prompts/lint.prompt.md` — lint/optimize the Markdown spec
+
+Use Copilot Chat’s “/” command to invoke these prompts. Keep `main.md` and `spec/` as sources of truth; update tests and docs alongside changes. CI validates specs, compiles artifacts, publishes Pages, and attaches the compiled spec to releases.
 
 ### CI/CD Pipeline
 

@@ -1,5 +1,7 @@
-import React, { useState, useContext, useEffect, useRef, Suspense, lazy } from 'react';
+import React, { useState, useContext, Suspense, lazy } from 'react';
 import { Route, Routes, Link, useNavigate, Outlet, useLocation } from 'react-router-dom';
+import { I18nextProvider } from 'react-i18next';
+import i18n from './i18n';
 
 // TASK-084: Core components loaded immediately (critical for initial render)
 import Login from './components/Login';
@@ -8,6 +10,7 @@ import HomePage from './components/HomePage';
 import DashboardPage from './components/DashboardPage';
 import UtilityNavigation from './components/UtilityNavigation';
 import LoadingSkeleton from './components/LoadingSkeleton';
+import LanguageSelector from './components/LanguageSelector';
 import './App.css';
 import AuthContext from './contexts/AuthContext';
 
@@ -50,6 +53,15 @@ const CertificationForm = lazy(() => import('./components/CertificationForm'));
 const TechnicianManagement = lazy(() => import('./components/TechnicianManagement'));
 const TechnicianPayroll = lazy(() => import('./components/TechnicianPayroll'));
 
+// Phase 4 Components - Technician Management (Phase 1 & 2 Components)
+const TechnicianList = lazy(() => import('./components/TechnicianList'));
+const TechnicianDetail = lazy(() => import('./components/TechnicianDetail'));
+const TechnicianForm = lazy(() => import('./components/TechnicianForm'));
+const CertificationDashboard = lazy(() => import('./components/CertificationDashboard'));
+const AvailabilityCalendar = lazy(() => import('./components/AvailabilityCalendar'));
+const OrgChart = lazy(() => import('./components/OrgChart'));
+const CoverageAreaMap = lazy(() => import('./components/CoverageAreaMap'));
+
 // Phase 4 Components - CMS & Admin
 const BlogPostList = lazy(() => import('./components/BlogPostList'));
 const BlogPostForm = lazy(() => import('./components/BlogPostForm'));
@@ -91,6 +103,7 @@ const BudgetList = lazy(() => import('./components/BudgetList'));
 const BudgetForm = lazy(() => import('./components/BudgetForm'));
 const TaxReport = lazy(() => import('./components/TaxReport'));
 const EmailCommunication = lazy(() => import('./components/EmailCommunication'));
+const BudgetsV2 = lazy(() => import('./components/BudgetsV2'));
 
 // Field Service Management
 const SchedulePage = lazy(() => import('./components/SchedulePage'));
@@ -117,8 +130,8 @@ const SuspenseFallback = () => (
 const MainLayout = () => {
   const navigate = useNavigate();
   const location = useLocation(); // TASK-082: Track current route for active highlighting
+  const { t } = useTranslation();
   const [accountingMenuOpen, setAccountingMenuOpen] = useState(false);
-  const [resourcesMenuOpen, setResourcesMenuOpen] = useState(false);
   const [projectsMenuOpen, setProjectsMenuOpen] = useState(false);
   const [staffMenuOpen, setStaffMenuOpen] = useState(false);
   const [fieldServiceMenuOpen, setFieldServiceMenuOpen] = useState(false);
@@ -129,8 +142,9 @@ const MainLayout = () => {
   const [operationsMenuOpen, setOperationsMenuOpen] = useState(false);
 
   // TASK-081: Keyboard navigation support
-  const [focusedMenuIndex, setFocusedMenuIndex] = useState(-1);
-  const menuRefs = useRef([]);
+  // Keyboard support placeholders (reserved for future use)
+  // const [focusedMenuIndex, setFocusedMenuIndex] = useState(-1);
+  // const menuRefs = useRef([]);
 
   // Helper function to check if route is active - TASK-082
   const isRouteActive = (path) => {
@@ -138,20 +152,22 @@ const MainLayout = () => {
   };
 
   // TASK-081: Handle keyboard navigation
-  const handleKeyDown = (e, menuSetter, isOpen, menuLinks) => {
+  const handleKeyDown = (e, menuSetter, isOpen) => {
     switch (e.key) {
-      case 'Escape':
+      case 'Escape': {
         menuSetter(false);
         e.currentTarget.focus();
         break;
+      }
       case 'Enter':
-      case ' ':
+      case ' ': {
         if (!isOpen) {
           e.preventDefault();
           menuSetter(true);
         }
         break;
-      case 'ArrowDown':
+      }
+      case 'ArrowDown': {
         if (!isOpen) {
           e.preventDefault();
           menuSetter(true);
@@ -165,7 +181,8 @@ const MainLayout = () => {
           }
         }
         break;
-      case 'ArrowUp':
+      }
+      case 'ArrowUp': {
         if (isOpen) {
           e.preventDefault();
           // Focus last link in dropdown
@@ -176,6 +193,7 @@ const MainLayout = () => {
           }
         }
         break;
+      }
       default:
         break;
     }
@@ -189,20 +207,22 @@ const MainLayout = () => {
     const currentIndex = links.indexOf(currentLink);
 
     switch (e.key) {
-      case 'Escape':
+      case 'Escape': {
         e.preventDefault();
         menuSetter(false);
         // Focus back on dropdown button
         const button = dropdown.previousElementSibling;
         if (button) button.focus();
         break;
-      case 'ArrowDown':
+      }
+      case 'ArrowDown': {
         e.preventDefault();
         if (currentIndex < links.length - 1) {
           links[currentIndex + 1].focus();
         }
         break;
-      case 'ArrowUp':
+      }
+      case 'ArrowUp': {
         e.preventDefault();
         if (currentIndex > 0) {
           links[currentIndex - 1].focus();
@@ -212,10 +232,12 @@ const MainLayout = () => {
           if (button) button.focus();
         }
         break;
-      case 'Tab':
+      }
+      case 'Tab': {
         // Allow natural tab behavior but close menu
         menuSetter(false);
         break;
+      }
       default:
         break;
     }
@@ -236,8 +258,8 @@ const MainLayout = () => {
         <ul>
           <div className="nav-links">
             {/* Core Navigation */}
-            <li><Link to="/dashboard" data-testid="nav-dashboard">Dashboard</Link></li>
-            <li><Link to="/analytics" data-testid="nav-analytics">Analytics</Link></li>
+            <li><Link to="/dashboard" data-testid="nav-dashboard">{t('navigation.dashboard')}</Link></li>
+            <li><Link to="/analytics" data-testid="nav-analytics">{t('navigation.analytics')}</Link></li>
 
             {/* Advanced Analytics Dropdown */}
             <li
@@ -245,7 +267,7 @@ const MainLayout = () => {
               onMouseEnter={() => setAdvancedMenuOpen(true)}
               onMouseLeave={() => setAdvancedMenuOpen(false)}
             >
-              <button className="dropdown-button" data-testid="nav-advanced">Advanced</button>
+              <button className="dropdown-button" data-testid="nav-advanced">{t('navigation.advanced')}</button>
               {advancedMenuOpen && (
                 <div className="dropdown-menu-content">
                   <Link to="/analytics/deal-predictions">Deal Predictions</Link>
@@ -269,7 +291,7 @@ const MainLayout = () => {
                 aria-haspopup="true"
                 aria-expanded={crmMenuOpen}
               >
-                CRM
+                {t('navigation.crm')}
               </button>
               {crmMenuOpen && (
                 <div className="dropdown-menu-content" role="menu">
@@ -331,7 +353,7 @@ const MainLayout = () => {
               onMouseEnter={() => setSalesMarketingMenuOpen(true)}
               onMouseLeave={() => setSalesMarketingMenuOpen(false)}
             >
-              <button className="dropdown-button">Sales & Marketing</button>
+              <button className="dropdown-button">{t('navigation.sales_marketing')}</button>
               {salesMarketingMenuOpen && (
                 <div className="dropdown-menu-content">
                   <Link to="/blog">Blog Posts</Link>
@@ -347,7 +369,7 @@ const MainLayout = () => {
               onMouseEnter={() => setProjectsMenuOpen(true)}
               onMouseLeave={() => setProjectsMenuOpen(false)}
             >
-              <button className="dropdown-button">Projects & Tasks</button>
+              <button className="dropdown-button">{t('navigation.projects_tasks')}</button>
               {projectsMenuOpen && (
                 <div className="dropdown-menu-content">
                   <Link to="/tasks">Task Dashboard</Link>
@@ -366,7 +388,7 @@ const MainLayout = () => {
               onMouseEnter={() => setOperationsMenuOpen(true)}
               onMouseLeave={() => setOperationsMenuOpen(false)}
             >
-              <button className="dropdown-button">Operations</button>
+              <button className="dropdown-button">{t('navigation.operations')}</button>
               {operationsMenuOpen && (
                 <div className="dropdown-menu-content">
                   <Link to="/orders">Orders</Link>
@@ -383,12 +405,17 @@ const MainLayout = () => {
               onMouseEnter={() => setStaffMenuOpen(true)}
               onMouseLeave={() => setStaffMenuOpen(false)}
             >
-              <button className="dropdown-button">Staff & Resources</button>
+              <button className="dropdown-button">{t('navigation.staff_resources')}</button>
               {staffMenuOpen && (
                 <div className="dropdown-menu-content">
                   <Link to="/staff">User Management</Link>
                   <Link to="/settings/user-roles">User Role Management</Link>
-                  <Link to="/technicians">Technicians</Link>
+                  <Link to="/staff/technicians">Technicians</Link>
+                  <Link to="/staff/technician-detail">Technician Details</Link>
+                  <Link to="/staff/certifications">Certification Dashboard</Link>
+                  <Link to="/staff/organization">Organization Chart</Link>
+                  <Link to="/staff/coverage-areas">Coverage Areas</Link>
+                  <Link to="/staff/availability">Availability Calendar</Link>
                   <Link to="/technician-payroll">Technician Payroll</Link>
                   <Link to="/certifications">Certifications</Link>
                   <Link to="/resources">Company Resources</Link>
@@ -402,7 +429,7 @@ const MainLayout = () => {
                 onMouseEnter={() => setFieldServiceMenuOpen(true)}
                 onMouseLeave={() => setFieldServiceMenuOpen(false)}
             >
-              <button className="dropdown-button">Field Service</button>
+              <button className="dropdown-button">{t('navigation.field_service')}</button>
               {fieldServiceMenuOpen && (
                 <div className="dropdown-menu-content">
                   <Link to="/schedule">Schedule</Link>
@@ -420,7 +447,7 @@ const MainLayout = () => {
                 onMouseEnter={() => setAccountingMenuOpen(true)}
                 onMouseLeave={() => setAccountingMenuOpen(false)}
             >
-              <button className="dropdown-button">Accounting</button>
+              <button className="dropdown-button">{t('navigation.accounting')}</button>
               {accountingMenuOpen && (
                 <div className="dropdown-menu-content">
                   <Link to="/reports">Financial Reports</Link>
@@ -431,6 +458,7 @@ const MainLayout = () => {
                   <Link to="/payments">Payments</Link>
                   <Link to="/expenses">Expenses</Link>
                   <Link to="/budgets">Budgets</Link>
+                  <Link to="/budgets-v2">Budgets V2</Link>
                   <Link to="/tax-report">Tax Reports</Link>
                 </div>
               )}
@@ -441,7 +469,7 @@ const MainLayout = () => {
                 onMouseEnter={() => setSettingsMenuOpen(true)}
                 onMouseLeave={() => setSettingsMenuOpen(false)}
             >
-              <button className="dropdown-button">Settings</button>
+              <button className="dropdown-button">{t('navigation.settings')}</button>
               {settingsMenuOpen && (
                 <div className="dropdown-menu-content">
                   <Link to="/settings/custom-fields">Custom Fields</Link>
@@ -452,7 +480,10 @@ const MainLayout = () => {
               )}
             </li>
           </div>
-          <li><button onClick={handleLogout} className="logout-button" data-testid="logout-button">Logout</button></li>
+          <li className="language-selector-nav">
+            <LanguageSelector />
+          </li>
+          <li><button onClick={handleLogout} className="logout-button" data-testid="logout-button">{t('navigation.logout')}</button></li>
         </ul>
       </nav>
       <main>
@@ -473,7 +504,8 @@ function App() {
   }
 
   return (
-    <Routes>
+    <I18nextProvider i18n={i18n}>
+      <Routes>
       {/* Public Routes */}
       <Route path="/login" element={<Login />} />
       <Route path="/" element={<HomePage />} />
@@ -542,6 +574,17 @@ function App() {
           <Route path="/certifications" element={<CertificationList />} />
           <Route path="/certifications/new" element={<CertificationForm />} />
           <Route path="/certifications/:id/edit" element={<CertificationForm />} />
+
+          {/* Phase 4: Technician Management Routes (Phase 1 & 2 Components) */}
+          <Route path="/staff/technicians" element={<TechnicianList />} />
+          <Route path="/staff/technicians/new" element={<TechnicianForm />} />
+          <Route path="/staff/technicians/:id" element={<TechnicianDetail />} />
+          <Route path="/staff/technicians/:id/edit" element={<TechnicianForm />} />
+          <Route path="/staff/certifications" element={<CertificationDashboard />} />
+          <Route path="/staff/organization" element={<OrgChart />} />
+          <Route path="/staff/coverage-areas" element={<CoverageAreaMap />} />
+          <Route path="/staff/availability" element={<AvailabilityCalendar />} />
+          <Route path="/staff/technician-detail/:id" element={<TechnicianDetail />} />
           <Route path="/chat" element={<Chat />} />
           <Route path="/resources" element={<Resources />} />
           <Route path="/orders" element={<Orders />} />
@@ -572,6 +615,7 @@ function App() {
           <Route path="/budgets" element={<BudgetList />} />
           <Route path="/budgets/new" element={<BudgetForm />} />
           <Route path="/budgets/:id/edit" element={<BudgetForm />} />
+          <Route path="/budgets-v2" element={<BudgetsV2 />} />
           <Route path="/tax-report" element={<TaxReport />} />
 
           {/* Field Service Management Routes - Consolidated */}
@@ -613,6 +657,7 @@ function App() {
       {/* This is a catch-all for any routes not defined above */}
       <Route path="*" element={<div>Page Not Found</div>} />
     </Routes>
+    </I18nextProvider>
   );
 }
 

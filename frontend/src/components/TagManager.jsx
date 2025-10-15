@@ -6,7 +6,7 @@ import './TagManager.css';
 const TagManager = ({ associatedTags, onTagsUpdate, entityId, entityType }) => {
     const [allTags, setAllTags] = useState([]);
     const [newTagName, setNewTagName] = useState('');
-    const [selectedTagId, setSelectedTagId] = useState('');
+    // const [selectedTagId, setSelectedTagId] = useState(''); // Reserved for future tag selection feature
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 

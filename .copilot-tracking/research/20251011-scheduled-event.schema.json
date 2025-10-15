@@ -1,0 +1,32 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://converge.local/schemas/scheduled-event.schema.json",
+  "title": "ScheduledEvent",
+  "description": "Scheduled events linking work orders to technicians with date/time and optional recurrence.",
+  "type": "object",
+  "$comment": "Aligned to main.models.ScheduledEvent; closed schema.",
+  "properties": {
+    "id": { "type": "integer", "readOnly": true },
+    "work_order": { "type": "integer", "minimum": 1 },
+    "technician": { "type": "integer", "minimum": 1 },
+    "start_time": { "type": "string", "format": "date-time" },
+    "end_time": { "type": "string", "format": "date-time" },
+    "recurrence_rule": { "type": "string", "maxLength": 255 },
+    "parent_event": { "type": ["integer", "null"] },
+    "status": { "type": "string", "enum": ["scheduled","in_progress","completed","cancelled","rescheduled"] },
+    "notes": { "type": "string" },
+    "created_at": { "type": "string", "format": "date-time", "readOnly": true },
+    "updated_at": { "type": "string", "format": "date-time", "readOnly": true }
+  },
+  "required": ["work_order", "technician", "start_time", "end_time"],
+  "additionalProperties": false,
+  "examples": [
+    {
+      "work_order": 42,
+      "technician": 7,
+      "start_time": "2025-10-12T09:00:00Z",
+      "end_time": "2025-10-12T10:30:00Z",
+      "status": "scheduled"
+    }
+  ]
+}

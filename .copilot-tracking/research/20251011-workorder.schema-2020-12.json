@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema#",
+  "$id": "https://converge.local/schemas/workorder.schema.json",
+  "title": "WorkOrder",
+  "$comment": "Draft 2020-12 variant. Informational wrapper; annotations only.",
+  "description": "Work order linking to a Project with status and line items.",
+  "type": "object",
+  "properties": {
+    "id": { "type": "integer" },
+    "project": { "type": "integer" },
+    "description": { "type": "string" },
+    "status": { "type": "string", "enum": ["open", "in_progress", "completed", "cancelled"] },
+    "created_at": { "type": "string", "format": "date-time" },
+    "updated_at": { "type": "string", "format": "date-time" },
+    "line_items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer" },
+          "work_order": { "type": "integer" },
+          "description": { "type": "string" },
+          "quantity": { "type": "number" },
+          "unit_price": { "type": "number" },
+          "total": { "type": "number" }
+        },
+        "additionalProperties": true
+      }
+    }
+  },
+  "examples": [
+    {
+      "project": 202,
+      "description": "Replace failed switch",
+      "status": "in_progress"
+    }
+  ]
+}

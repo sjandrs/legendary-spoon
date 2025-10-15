@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema#",
+  "$id": "https://converge.local/schemas/notificationlog.schema.json",
+  "title": "NotificationLog",
+  "$comment": "Draft 2020-12 informational variant. Annotations only.",
+  "type": "object",
+  "properties": {
+    "id": { "type": "integer" },
+    "content_type": { "type": ["integer", "null"] },
+    "object_id": { "type": ["integer", "null"] },
+    "recipient": { "type": "string" },
+    "channel": { "type": "string" },
+    "subject": { "type": "string" },
+    "message": { "type": "string" },
+    "status": { "type": "string" }
+  }
+}

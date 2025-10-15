@@ -2438,3 +2438,125 @@ class UserStoryCoverageReport(TestCase):
 # ============================================================================
 
 # Phase 2 test classes are imported at the top of the file
+
+
+# ============================================================================
+# GTIN Utilities and WarehouseItem.gtin Tests (integrated)
+# ============================================================================
+
+
+class GTINUtilsTests(APITestCase):
+    def setUp(self):
+        self.user = CustomUser.objects.create_user(
+            username="tester", password="pass12345"
+        )
+        self.client = APIClient()
+        self.client.force_authenticate(self.user)
+        self.url = "/api/utils/gtin/check-digit/"
+
+    def test_get_requires_param(self):
+        resp = self.client.get(self.url)
+        self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
+        # DRF Response will include JSON body with 'detail'
+        self.assertIn("detail", getattr(resp, "data", {}))
+
+    def test_compute_from_7_digits(self):
+        # Example base 1234567 -> compute check digit and normalized
+        resp = self.client.get(self.url, {"gtin_base": "1234567"})
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        self.assertEqual(resp.data["length"], 7)
+        self.assertTrue(resp.data["normalized"].isdigit())
+        self.assertEqual(len(resp.data["normalized"]), 14)
+
+    def test_post_accepts_gtin_or_base(self):
+        resp = self.client.post(self.url, {"gtin_base": "1234567"}, format="json")
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        resp2 = self.client.post(self.url, {"gtin": "1234567"}, format="json")
+        self.assertEqual(resp2.status_code, status.HTTP_200_OK)
+
+    def test_validate_14_digit_correct(self):
+        # Compute a valid GTIN-14 via the API and then validate
+        comp = self.client.post(self.url, {"gtin_base": "1234567890123"}, format="json")
+        self.assertEqual(comp.status_code, 200)
+        full = comp.data["normalized"]
+        resp = self.client.post(self.url, {"gtin": full}, format="json")
+        self.assertEqual(resp.status_code, 200)
+        self.assertTrue(resp.data["is_valid"])
+
+    def test_invalid_non_digits(self):
+        resp = self.client.post(self.url, {"gtin": "ABC123"}, format="json")
+        self.assertEqual(resp.status_code, 400)
+        self.assertIn("detail", resp.data)
+
+    def test_invalid_length(self):
+        resp = self.client.post(self.url, {"gtin": "1234"}, format="json")
+        self.assertEqual(resp.status_code, 400)
+        self.assertIn("detail", resp.data)
+
+
+class WarehouseItemGTINTests(APITestCase):
+    def setUp(self):
+        self.user = CustomUser.objects.create_user(username="inv", password="pass12345")
+        self.client = APIClient()
+        self.client.force_authenticate(self.user)
+        self.warehouse = Warehouse.objects.create(name="Main", manager=self.user)
+
+    def _create_item(self, **extra):
+        payload = {
+            "warehouse": self.warehouse.id,
+            "name": "Widget",
+            "item_type": "part",
+            "sku": "WIDG-1",
+            "quantity": 1,
+            "unit_cost": 1.0,
+            "minimum_stock": 0,
+            **extra,
+        }
+        return self.client.post("/api/warehouse-items/", payload, format="json")
+
+    def test_accepts_7_to_13_digits(self):
+        # 7 digits (no check digit enforcement)
+        r1 = self._create_item(gtin="1234567")
+        self.assertEqual(r1.status_code, status.HTTP_201_CREATED)
+        # 13 digits
+        r2 = self.client.post(
+            "/api/warehouse-items/",
+            {
+                "warehouse": self.warehouse.id,
+                "name": "Widget2",
+                "item_type": "part",
+                "sku": "WIDG-2",
+                "quantity": 1,
+                "unit_cost": 1.0,
+                "minimum_stock": 0,
+                "gtin": "1234567890123",
+            },
+            format="json",
+        )
+        self.assertEqual(r2.status_code, status.HTTP_201_CREATED)
+
+    def test_rejects_14_digit_with_bad_check(self):
+        # 14 digits but wrong check digit
+        bad = "12345678901234"  # likely wrong
+        r = self._create_item(gtin=bad)
+        self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("gtin", r.data)
+
+    def test_accepts_valid_14_digit(self):
+        # Compute valid 14 via simple local computation
+        base = "1234567890123"
+        total = 0
+        for i, ch in enumerate(reversed(base), start=1):
+            d = ord(ch) - 48
+            total += d * (3 if (i % 2 == 1) else 1)
+        mod = total % 10
+        cd = 0 if mod == 0 else 10 - mod
+        full = base + str(cd)
+
+        r = self._create_item(gtin=full)
+        self.assertEqual(r.status_code, status.HTTP_201_CREATED)
+        item_id = r.data["id"]
+        # Fetch and confirm value persisted as provided
+        get_r = self.client.get(f"/api/warehouse-items/{item_id}/")
+        self.assertEqual(get_r.status_code, 200)
+        self.assertEqual(get_r.data["gtin"], full)

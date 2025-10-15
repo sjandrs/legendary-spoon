@@ -1,0 +1,96 @@
+{
+  "coverageAreas": [
+    {
+      "id": 1,
+      "name": "Downtown District",
+      "description": "Main downtown commercial area",
+      "priority": "high",
+      "polygon": [
+        {"lat": 40.7589, "lng": -73.9851},
+        {"lat": 40.7614, "lng": -73.9776},
+        {"lat": 40.7505, "lng": -73.9733},
+        {"lat": 40.7480, "lng": -73.9808}
+      ],
+      "assignedTechnicians": [
+        {
+          "id": 1,
+          "name": "John Doe",
+          "role": "primary",
+          "responseTime": 15
+        },
+        {
+          "id": 4,
+          "name": "Lisa Chen",
+          "role": "backup",
+          "responseTime": 25
+        }
+      ],
+      "workloadMetrics": {
+        "activeWorkOrders": 12,
+        "averageResponseTime": 18,
+        "satisfactionScore": 4.2
+      }
+    },
+    {
+      "id": 2,
+      "name": "East Side",
+      "description": "Eastern residential neighborhoods",
+      "priority": "medium",
+      "polygon": [
+        {"lat": 40.7614, "lng": -73.9776},
+        {"lat": 40.7680, "lng": -73.9600},
+        {"lat": 40.7520, "lng": -73.9500},
+        {"lat": 40.7505, "lng": -73.9733}
+      ],
+      "assignedTechnicians": [
+        {
+          "id": 2,
+          "name": "Sarah Johnson",
+          "role": "primary",
+          "responseTime": 20
+        }
+      ],
+      "workloadMetrics": {
+        "activeWorkOrders": 8,
+        "averageResponseTime": 22,
+        "satisfactionScore": 4.5
+      }
+    },
+    {
+      "id": 3,
+      "name": "North Suburbs",
+      "description": "Northern suburban areas",
+      "priority": "low",
+      "polygon": [
+        {"lat": 40.7680, "lng": -73.9600},
+        {"lat": 40.7800, "lng": -73.9500},
+        {"lat": 40.7750, "lng": -73.9300},
+        {"lat": 40.7600, "lng": -73.9400}
+      ],
+      "assignedTechnicians": [
+        {
+          "id": 1,
+          "name": "John Doe",
+          "role": "secondary",
+          "responseTime": 35
+        },
+        {
+          "id": 6,
+          "name": "Tom Rodriguez",
+          "role": "primary",
+          "responseTime": 25
+        }
+      ],
+      "workloadMetrics": {
+        "activeWorkOrders": 5,
+        "averageResponseTime": 28,
+        "satisfactionScore": 4.0
+      }
+    }
+  ],
+  "mapCenter": {
+    "lat": 40.7589,
+    "lng": -73.9851
+  },
+  "mapZoom": 12
+}

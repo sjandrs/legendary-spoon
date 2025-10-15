@@ -1,0 +1,17 @@
+category,id,description
+Phase 1,REQ-101,"Implement financial reports: Balance Sheet, P&L, Cash Flow Statement"
+Phase 1,REQ-102,Enable automatic invoice generation from WorkOrders
+Phase 1,REQ-103,"Add payment terms, late fees, and reminders to invoices"
+Phase 1,REQ-104,Implement dedicated expense tracking with receipt upload and categorization
+Phase 1,REQ-105,Add budget planning and variance tracking
+Phase 1,REQ-106,"Provide tax reporting features (e.g., 1099, sales tax tracking)"
+Phase 1,SEC-101,All financial data must be access-controlled by RBAC
+Phase 1,CON-101,Reports must be exportable as PDF and CSV
+Phase 1,GUD-101,UI must provide clear navigation between accounting features
+Phase 2,REQ-201,Implement automatic WorkOrder creation upon Deal closure
+Phase 2,REQ-202,Enable project billing: time tracking → billable hours → invoicing
+Phase 2,REQ-203,Integrate inventory: WorkOrders adjust Warehouse stock
+Phase 2,REQ-204,"Add customer communication automation (invoice emails, reminders)"
+Phase 2,REQ-205,"Provide cross-module analytics (sales, project profitability, CLV)"
+Phase 2,PAT-201,Use event-driven architecture for workflow triggers
+Phase 2,SEC-201,All automation actions must be logged for audit

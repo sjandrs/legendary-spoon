@@ -45,6 +45,13 @@ router.register(r"line-items", api_views.LineItemViewSet, basename="lineitem")
 router.register(r"payments", api_views.PaymentViewSet, basename="payment")
 router.register(r"expenses", api_views.ExpenseViewSet, basename="expense")
 router.register(r"budgets", api_views.BudgetViewSet, basename="budget")
+router.register(r"cost-centers", api_views.CostCenterViewSet, basename="costcenter")
+router.register(r"budgets-v2", api_views.BudgetV2ViewSet, basename="budgetv2")
+router.register(
+    r"monthly-distributions",
+    api_views.MonthlyDistributionViewSet,
+    basename="monthlydistribution",
+)
 router.register(r"time-entries", api_views.TimeEntryViewSet, basename="timeentry")
 router.register(r"warehouses", api_views.WarehouseViewSet, basename="warehouse")
 router.register(
@@ -142,7 +149,9 @@ urlpatterns = [
     path("kb/", api_views.KnowledgeBaseView.as_view(), name="kb-list"),
     path("kb/<str:file_name>/", api_views.MarkdownFileView.as_view(), name="kb-file"),
     # Search
-    path("search/", search_views.SearchAPIView.as_view(), name="api_search"),
+    path("search/", api_views.GlobalSearchView.as_view(), name="api_search"),
+    # Advanced search (v2)
+    path("search/v2/", search_views.SearchAPIView.as_view(), name="api_search_v2"),
     path(
         "search/filters/",
         search_views.SearchFiltersAPIView.as_view(),
@@ -235,6 +244,12 @@ urlpatterns = [
         api_views.optimize_technician_routes,
         name="optimize-technician-routes",
     ),
+    # Legacy/alias path expected by some tests
+    path(
+        "optimize-technician-routes/",
+        api_views.optimize_technician_routes,
+        name="optimize-technician-routes-alias",
+    ),
     path(
         "scheduling/availability-check/",
         api_views.check_technician_availability,
@@ -249,5 +264,13 @@ urlpatterns = [
         "notifications/send-on-way/",
         api_views.send_on_way_notification,
         name="send-on-way-notification",
+    ),
+    # Dev-only utilities (DEBUG only)
+    path("dev/validate-json/", api_views.dev_validate_json, name="dev-validate-json"),
+    # Utilities — GTIN check digit helper
+    path(
+        "utils/gtin/check-digit/",
+        api_views.GTINCheckDigitView.as_view(),
+        name="gtin-check-digit",
     ),
 ]
