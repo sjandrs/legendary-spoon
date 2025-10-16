@@ -271,6 +271,14 @@ export const createCoverageArea = (data) => post('/api/coverage-areas/', data);
 export const updateCoverageArea = (id, data) => put(`/api/coverage-areas/${id}/`, data);
 export const deleteCoverageArea = (id) => del(`/api/coverage-areas/${id}/`);
 
+// Coverage Shapes (Phase 7)
+export const getCoverageShapes = (params) => get('/api/coverage-shapes/', { params });
+export const getCoverageShape = (id) => get(`/api/coverage-shapes/${id}/`);
+export const createCoverageShape = (data) => post('/api/coverage-shapes/', data);
+export const updateCoverageShape = (id, data) => put(`/api/coverage-shapes/${id}/`, data);
+export const deleteCoverageShape = (id) => del(`/api/coverage-shapes/${id}/`);
+export const getCoverageShapeSummary = (params) => get('/api/coverage-shapes/summary/', { params });
+
 // Technician Availability
 export const getTechnicianAvailability = (params) => get('/api/technician-availability/', { params });
 export const getTechnicianAvailabilityById = (id) => get(`/api/technician-availability/${id}/`);
