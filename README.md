@@ -1,5 +1,7 @@
 # Converge CRM
 
+[![Docs](https://img.shields.io/badge/docs-published-blue)](https://sjandrs.github.io/legendary-spoon/) [![Spec Validation](https://github.com/sjandrs/legendary-spoon/actions/workflows/spec-validate.yml/badge.svg)](https://github.com/sjandrs/legendary-spoon/actions/workflows/spec-validate.yml) [![Spec Pages](https://github.com/sjandrs/legendary-spoon/actions/workflows/spec-pages.yml/badge.svg)](https://github.com/sjandrs/legendary-spoon/actions/workflows/spec-pages.yml) [![Spec Compile](https://github.com/sjandrs/legendary-spoon/actions/workflows/spec-compile.yml/badge.svg)](https://github.com/sjandrs/legendary-spoon/actions/workflows/spec-compile.yml) [![Spec Release](https://github.com/sjandrs/legendary-spoon/actions/workflows/spec-release.yml/badge.svg)](https://github.com/sjandrs/legendary-spoon/actions/workflows/spec-release.yml)
+
 ## 🎯 **COMPREHENSIVE USER STORY VALIDATION COMPLETE**
 
 ### ✅ **PERFECT ACHIEVEMENT: 8/8 Comprehensive User Story Tests PASSING**
@@ -29,7 +31,52 @@ Built with a robust **Django** backend and a dynamic **React** frontend, Converg
 
 ## CI Status
 
-![Spec Validation](https://github.com/sjandrs/legendary-spoon/actions/workflows/spec-validate.yml/badge.svg)
+- [![Spec Validation](https://github.com/sjandrs/legendary-spoon/actions/workflows/spec-validate.yml/badge.svg)](https://github.com/sjandrs/legendary-spoon/actions/workflows/spec-validate.yml)
+- [![Spec Pages](https://github.com/sjandrs/legendary-spoon/actions/workflows/spec-pages.yml/badge.svg)](https://github.com/sjandrs/legendary-spoon/actions/workflows/spec-pages.yml)
+- [![Spec Compile](https://github.com/sjandrs/legendary-spoon/actions/workflows/spec-compile.yml/badge.svg)](https://github.com/sjandrs/legendary-spoon/actions/workflows/spec-compile.yml)
+- [![Spec Release](https://github.com/sjandrs/legendary-spoon/actions/workflows/spec-release.yml/badge.svg)](https://github.com/sjandrs/legendary-spoon/actions/workflows/spec-release.yml)
+
+### Spec compilation (compiled spec)
+
+You can generate a single compiled specification from all Markdown files in `spec/`.
+
+- Local usage (Windows PowerShell):
+    ```powershell
+    .\venv\Scripts\Activate.ps1
+    python tools/spec_compile.py --src spec --out spec/COMPILED_SPEC.md
+    # Optional: include subfolders
+    python tools/spec_compile.py --src spec --out spec/COMPILED_SPEC.md --recursive
+    ```
+    Notes:
+    - The compiler demotes H1 headings so the compiled document has a single top-level title.
+    - File ordering prioritizes `requirements.md`, `design.md`, `tasks.md`, then any `order: N` front matter, then filename.
+    - The compiled file (`spec/COMPILED_SPEC.md`) is gitignored by default.
+
+- In CI: the workflow `.github/workflows/spec-compile.yml` runs on every push/PR and uploads the compiled doc as an artifact named `compiled-spec`. To download it:
+    1) Open the run in GitHub Actions → Spec Compile job
+    2) Scroll to Artifacts → download `compiled-spec`
+
+
+### Spec compilation (compiled spec)
+
+You can generate a single compiled specification from all Markdown files in `spec/`.
+
+- Local usage (Windows PowerShell):
+    ```powershell
+    .\venv\Scripts\Activate.ps1
+    python tools/spec_compile.py --src spec --out spec/COMPILED_SPEC.md
+    # Optional: include subfolders
+    python tools/spec_compile.py --src spec --out spec/COMPILED_SPEC.md --recursive
+    ```
+    Notes:
+    - The compiler demotes H1 headings so the compiled document has a single top-level title.
+    - File ordering prioritizes `requirements.md`, `design.md`, `tasks.md`, then any `order: N` front matter, then filename.
+    - The compiled file (`spec/COMPILED_SPEC.md`) is gitignored by default.
+
+- In CI: the workflow `.github/workflows/spec-compile.yml` runs on every push/PR and uploads the compiled doc as an artifact named `compiled-spec`. To download it:
+    1) Open the run in GitHub Actions → Spec Compile job
+    2) Scroll to Artifacts → download `compiled-spec`
+
 
 ## 📚 Documentation
 

@@ -1,14 +1,14 @@
-name: Spec Compile
+name: Spec Release Asset
 
 on:
-  push:
-  pull_request:
+  release:
+    types: [published]
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
-  spec-compile:
+  attach-spec:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -19,13 +19,13 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Compile Specs
+      - name: Compile spec
         run: |
           python tools/spec_compile.py --src spec --out spec/COMPILED_SPEC.md
 
-      - name: Upload Compiled Spec
-        uses: actions/upload-artifact@v4
+      - name: Upload release asset
+        uses: softprops/action-gh-release@v2
         with:
-          name: compiled-spec
-          path: spec/COMPILED_SPEC.md
-          if-no-files-found: error
+          files: spec/COMPILED_SPEC.md
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
