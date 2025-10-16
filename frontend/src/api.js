@@ -295,3 +295,11 @@ export const assignTechnicianToWorkOrder = (workOrderId, data) => post(`/api/wor
 export const login = (credentials) => post('/api/login/', credentials);
 export const logout = () => post('/api/logout/');
 export const getCurrentUser = () => get('/api/user/');
+
+// Digital signatures (PDF download)
+export const getDigitalSignaturePdf = async (id) => {
+    const response = await apiClient.get(`/api/digital-signatures/${id}/pdf/`, {
+        responseType: 'blob',
+    });
+    return response;
+};

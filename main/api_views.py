@@ -3822,6 +3822,62 @@ class DigitalSignatureViewSet(viewsets.ModelViewSet):
             }
         )
 
+    @action(detail=True, methods=["get"], url_path="pdf")
+    def pdf(self, request, pk=None):
+        """Generate and stream a PDF representation of the signature/document."""
+        signature = self.get_object()
+        # Use pdf_service to generate a minimal PDF embedding signature image if present
+        from .pdf_service import get_pdf_service
+
+        service = get_pdf_service()
+        if not getattr(service, "weasyprint_available", False):
+            return Response(
+                {"error": "PDF generation unavailable (WeasyPrint not installed)"},
+                status=status.HTTP_503_SERVICE_UNAVAILABLE,
+            )
+
+        # Build simple HTML containing signature and metadata
+        img_html = ""
+        if signature.signature_data:
+            # Accept either raw base64 or data URL; ensure proper prefix
+            data = signature.signature_data
+            if not data.startswith("data:image/"):
+                data = f"data:image/png;base64,{data}"
+            img_html = (
+                '<img alt="Signature" src="' + data + '" '
+                'style="max-width:300px;max-height:150px;" />'
+            )
+
+        html = f"""
+        <html><head><meta charset='utf-8'><title>Signature #{signature.id}</title></head>
+        <body style='font-family: Arial, sans-serif; margin: 40px;'>
+            <h1>Digital Signature</h1>
+            <p><strong>Signer:</strong> {signature.signer_name or ''}
+            ({signature.signer_email or ''})</p>
+            <p><strong>Document:</strong> {signature.document_name or ''}</p>
+            <p><strong>Signed At:</strong> {signature.signed_at.strftime('%Y-%m-%d %H:%M')}</p>
+            <p><strong>Verified:</strong> {"Yes" if signature.is_valid else "No"}</p>
+            <p><strong>Hash:</strong> {signature.document_hash or ''}</p>
+            <div style='margin-top:20px;'>{img_html}</div>
+        </body></html>
+        """
+
+        pdf_bytes = service.generate_pdf_bytes(html)
+        if not pdf_bytes:
+            return Response(
+                {"error": "Failed to generate PDF"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+        # Stream as FileResponse
+        file_stream = io.BytesIO(pdf_bytes)
+        file_stream.seek(0)
+        resp = FileResponse(file_stream, content_type="application/pdf")
+        resp["Content-Disposition"] = f'attachment; filename="signature-{signature.id}.pdf"'
+        # Audit
+        log_activity(request.user, "export", signature, "Signature PDF downloaded")
+        return resp
+
 
 class InventoryReservationViewSet(viewsets.ModelViewSet):
     """

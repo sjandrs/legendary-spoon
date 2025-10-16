@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useState } from 'react';
-import SignatureCanvas from 'react-signature-canvas';
-import { post, get } from '../api';
+import SigCanvas from 'react-signature-canvas';
+import { post, getDigitalSignaturePdf } from '../api';
 import './DigitalSignaturePad.css';
 
 const DigitalSignaturePad = ({ workOrderId, onSignatureComplete, onCancel }) => {
@@ -88,10 +88,7 @@ const DigitalSignaturePad = ({ workOrderId, onSignatureComplete, onCancel }) => 
     if (!signatureData) return;
 
     try {
-      const response = await get(`/api/digital-signatures/${signatureData.id}/pdf/`, {
-        responseType: 'blob'
-      });
-
+      const response = await getDigitalSignaturePdf(signatureData.id);
       const blob = new Blob([response.data], { type: 'application/pdf' });
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
@@ -154,7 +151,7 @@ const DigitalSignaturePad = ({ workOrderId, onSignatureComplete, onCancel }) => 
               </button>
             </div>
             <div className="canvas-wrapper">
-              <SignatureCanvas
+              <SigCanvas
                 ref={sigCanvas}
                 canvasProps={{
                   className: 'signature-canvas',
