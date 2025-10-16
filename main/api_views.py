@@ -33,6 +33,7 @@ from .models import (
     Contact,
     CostCenter,
     CoverageArea,
+    CoverageShape,
     CustomerLifetimeValue,
     CustomField,
     CustomFieldValue,
@@ -102,6 +103,7 @@ from .serializers import (
     ContactWithCustomFieldsSerializer,
     CostCenterSerializer,
     CoverageAreaSerializer,
+    CoverageShapeSerializer,
     CustomFieldSerializer,
     CustomFieldValueSerializer,
     DealPredictionParameterSerializer,
@@ -2483,6 +2485,130 @@ class CoverageAreaViewSet(viewsets.ModelViewSet):
                 "optimized_assignments": [],
                 "coverage_improvements": [],
                 "recommendations": [],
+            }
+        )
+
+
+class CoverageShapeViewSet(viewsets.ModelViewSet):
+    """
+    ViewSet for managing JSON-backed coverage shapes (polygon/circle).
+    """
+
+    queryset = CoverageShape.objects.all()
+    serializer_class = CoverageShapeSerializer
+    permission_classes = [IsAuthenticated]
+    filter_backends = [
+        DjangoFilterBackend,
+        filters.SearchFilter,
+        filters.OrderingFilter,
+    ]
+    filterset_fields = ["technician", "is_active", "area_type", "priority_level"]
+    search_fields = ["name", "description"]
+    ordering_fields = ["id", "name", "created_at", "priority_level", "area_type"]
+    ordering = ["id"]
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        service_type = self.request.query_params.get("service_type")
+        if service_type:
+            try:
+                # Filter shapes that have the service type in properties.service_types
+                qs = qs.filter(properties__service_types__contains=[service_type])
+            except Exception:
+                # Fallback: substring match on JSON serialization (SQLite limitations)
+                qs = qs.filter(models.Q(properties__icontains=service_type))
+        technician_id = self.request.query_params.get("technician")
+        if technician_id:
+            qs = qs.filter(technician_id=technician_id)
+        return qs
+
+    @action(detail=False, methods=["get"], url_path="summary")
+    def summary(self, request):
+        """Return lightweight aggregates for CoverageShape to avoid client-side scans.
+
+        Optional filters respected via get_queryset():
+          - technician=<id>
+          - service_type=<type>
+          - area_type, is_active, priority_level via DRF filterset_fields
+
+        Response schema:
+          {
+            "total": int,
+            "by_area_type": {"polygon": n, "circle": m, ...},
+            "by_priority_level": {"1": n1, "2": n2, ...},
+            "by_active": {"true": x, "false": y},
+            "technicians_with_shapes": int,
+            "service_types": {"<type>": count, ...}  # top-k limited
+          }
+
+        Notes:
+          - service_types are aggregated from properties.service_types (list). On
+            SQLite we compute in Python for reliability; limit top-k via
+            ?service_types_limit=20
+        """
+        from collections import Counter
+
+        qs = self.filter_queryset(self.get_queryset())
+
+        total = qs.count()
+
+        # Area type counts
+        area_rows = qs.values("area_type").annotate(count=Count("id")).order_by()
+        by_area_type: dict[str, int] = {}
+        for r in area_rows:
+            key = str(r.get("area_type") or "unknown")
+            by_area_type[key] = int(r.get("count") or 0)
+
+        # Priority counts (stringify to keep JSON keys stable)
+        prio_rows = (
+            qs.values("priority_level").annotate(count=Count("id")).order_by()
+        )
+        by_priority_level: dict[str, int] = {}
+        for r in prio_rows:
+            key = str(r.get("priority_level") if r.get("priority_level") is not None else "null")
+            by_priority_level[key] = int(r.get("count") or 0)
+
+        # Active/inactive counts
+        active_rows = qs.values("is_active").annotate(count=Count("id")).order_by()
+        by_active: dict[str, int] = {}
+        for r in active_rows:
+            key = "true" if bool(r.get("is_active")) else "false"
+            by_active[key] = int(r.get("count") or 0)
+
+        # Distinct technicians with any shape
+        technicians_with_shapes = qs.values("technician").distinct().count()
+
+        # Aggregate service_types from JSON properties; safe on SQLite
+        params = getattr(request, "query_params", None) or getattr(request, "GET", {})
+        limit_param = params.get("service_types_limit")
+        try:
+            top_k = max(1, min(100, int(limit_param))) if limit_param else 20
+        except Exception:
+            top_k = 20
+        st_counter: Counter[str] = Counter()
+        for props in qs.values_list("properties", flat=True):
+            try:
+                if isinstance(props, dict):
+                    arr = props.get("service_types") or []
+                else:
+                    arr = []
+                for st in arr:
+                    if isinstance(st, str) and st:
+                        st_counter[st] += 1
+            except Exception:
+                # Be defensive: ignore malformed JSON
+                continue
+
+        service_types = {k: int(v) for k, v in st_counter.most_common(top_k)}
+
+        return Response(
+            {
+                "total": int(total),
+                "by_area_type": by_area_type,
+                "by_priority_level": by_priority_level,
+                "by_active": by_active,
+                "technicians_with_shapes": int(technicians_with_shapes),
+                "service_types": service_types,
             }
         )
 

@@ -85,6 +85,9 @@ router.register(
     r"coverage-areas", api_views.CoverageAreaViewSet, basename="coveragearea"
 )
 router.register(
+    r"coverage-shapes", api_views.CoverageShapeViewSet, basename="coverageshape"
+)
+router.register(
     r"technician-availability",
     api_views.TechnicianAvailabilityViewSet,
     basename="technicianavailability",

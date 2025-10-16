@@ -1907,6 +1907,43 @@ class CoverageArea(models.Model):
         return f"{self.technician} covers {self.zip_code}"
 
 
+class CoverageShape(models.Model):
+    """
+    JSON-backed geometric coverage shapes for technicians.
+    Supports polygon and circle shapes without requiring GeoDjango.
+
+    Implements Phase 7: coverage shapes persistence.
+    """
+
+    AREA_TYPE_CHOICES = [
+        ("polygon", "Polygon"),
+        ("circle", "Circle"),
+    ]
+
+    technician = models.ForeignKey(
+        Technician, on_delete=models.CASCADE, related_name="coverage_shapes"
+    )
+    name = models.CharField(max_length=200, blank=True)
+    description = models.TextField(blank=True)
+    area_type = models.CharField(max_length=20, choices=AREA_TYPE_CHOICES)
+    # geometry schema depends on area_type:
+    # - polygon: { "coordinates": [[lng, lat], ...] }
+    # - circle: { "center": [lng, lat], "radius_m": number }
+    geometry = models.JSONField(default=dict)
+    color = models.CharField(max_length=16, default="#3b82f6")
+    priority_level = models.PositiveSmallIntegerField(default=1)
+    # additional metadata (e.g., { service_types: ["electrical"] })
+    properties = models.JSONField(default=dict)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["id"]
+
+    def __str__(self):
+        return self.name or f"{self.area_type} for {self.technician_id}"
+
+
 class TechnicianAvailability(models.Model):
     """
     Weekly availability schedule for technicians.

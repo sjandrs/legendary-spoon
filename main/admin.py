@@ -43,6 +43,7 @@ from .models import (
     ScheduledEvent,
     SchedulingAnalytics,
     Tag,
+    CoverageShape,
     Warehouse,
     WarehouseItem,
     WorkOrder,
@@ -413,6 +414,20 @@ class LineItemAdmin(HistoryPaginationMixin, admin.ModelAdmin):
     list_display = ("work_order", "description", "quantity", "unit_price", "total")
     list_filter = ("work_order",)
     search_fields = ("description",)
+
+
+@admin.register(CoverageShape)
+class CoverageShapeAdmin(HistoryPaginationMixin, admin.ModelAdmin):
+    list_display = (
+        "id",
+        "technician",
+        "area_type",
+        "priority_level",
+        "is_active",
+        "created_at",
+    )
+    list_filter = ("area_type", "priority_level", "is_active")
+    search_fields = ("name", "description")
 
 
 @admin.register(Payment)

@@ -1330,6 +1330,70 @@ class CoverageAreaSerializer(serializers.ModelSerializer):
         ]
 
 
+class CoverageShapeSerializer(serializers.ModelSerializer):
+    """Serializer for JSON-backed geometric coverage shapes"""
+
+    technician_name = serializers.CharField(
+        source="technician.full_name", read_only=True
+    )
+
+    class Meta:
+        from .models import CoverageShape
+
+        model = CoverageShape
+        fields = [
+            "id",
+            "technician",
+            "technician_name",
+            "name",
+            "description",
+            "area_type",
+            "geometry",
+            "color",
+            "priority_level",
+            "properties",
+            "is_active",
+            "created_at",
+        ]
+
+    def validate(self, attrs):
+        area_type = attrs.get("area_type") or getattr(self.instance, "area_type", None)
+        geometry = attrs.get("geometry") or getattr(self.instance, "geometry", None)
+
+        if not area_type:
+            return attrs
+
+        errors = {}
+        if area_type == "polygon":
+            coords = (geometry or {}).get("coordinates") if isinstance(geometry, dict) else None
+            if not isinstance(coords, list) or len(coords) < 3:
+                errors["geometry"] = "Polygon requires coordinates with at least 3 points"
+            else:
+                for pt in coords:
+                    if not (
+                        isinstance(pt, (list, tuple))
+                        and len(pt) == 2
+                        and all(isinstance(n, (int, float)) for n in pt)
+                    ):
+                        errors["geometry"] = "Each coordinate must be [lng, lat]"
+                        break
+        elif area_type == "circle":
+            center = (geometry or {}).get("center") if isinstance(geometry, dict) else None
+            radius = (geometry or {}).get("radius_m") if isinstance(geometry, dict) else None
+            if not (
+                isinstance(center, (list, tuple))
+                and len(center) == 2
+                and all(isinstance(n, (int, float)) for n in center)
+            ):
+                errors["geometry"] = "Circle requires center [lng, lat]"
+            if not (isinstance(radius, (int, float)) and radius > 0):
+                errors["geometry"] = "Circle requires positive radius_m"
+
+        if errors:
+            raise serializers.ValidationError(errors)
+        return attrs
+
+
 class TechnicianAvailabilitySerializer(serializers.ModelSerializer):
     """Serializer for technician availability schedules"""
 
