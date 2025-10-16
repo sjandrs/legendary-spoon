@@ -19,7 +19,7 @@ async function fetchRequest(method, url, data, config = {}) {
         let parsed;
         try {
             parsed = text ? JSON.parse(text) : {};
-        } catch (_) {
+        } catch {
             parsed = { message: text };
         }
         return { data: parsed, status: res.status, headers: res.headers };
