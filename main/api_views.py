@@ -2226,6 +2226,66 @@ class TechnicianViewSet(viewsets.ModelViewSet):
     ordering_fields = ["id", "first_name", "last_name", "hire_date"]
     ordering = ["id"]
 
+    def filter_queryset(self, queryset):
+        qs = super().filter_queryset(queryset)
+        params = self.request.query_params
+
+        # certification exact match
+        cert_id = params.get("certification")
+        if cert_id:
+            qs = qs.filter(certifications__certification_id=cert_id, certifications__is_active=True)
+
+        # tech level min/max via related Certification
+        tl_min = params.get("tech_level_min")
+        if tl_min is not None:
+            try:
+                qs = qs.filter(certifications__certification__tech_level__gte=int(tl_min))
+            except ValueError:
+                pass
+        tl_max = params.get("tech_level_max")
+        if tl_max is not None:
+            try:
+                qs = qs.filter(certifications__certification__tech_level__lte=int(tl_max))
+            except ValueError:
+                pass
+
+        # certification_status: active or expired
+        status_filter = params.get("certification_status")
+        if status_filter in ("active", "expired"):
+            today = timezone.now().date()
+            if status_filter == "active":
+                qs = qs.filter(
+                    certifications__is_active=True,
+                    certifications__expiration_date__gt=today,
+                ) | qs.filter(
+                    certifications__is_active=True,
+                    certifications__expiration_date__isnull=True,
+                )
+            else:
+                qs = qs.filter(
+                    certifications__is_active=True,
+                    certifications__expiration_date__lte=today,
+                )
+
+        # coverage_presence: true/false across either zip-based CoverageArea or CoverageShape
+        cov = params.get("coverage_presence")
+        if cov in ("true", "false"):
+            has_cov = cov == "true"
+            qs = qs.annotate(
+                _has_cov=models.Case(
+                    models.When(
+                        models.Q(coverage_areas__is_active=True)
+                        | models.Q(coverage_shapes__is_active=True),
+                        then=models.Value(True),
+                    ),
+                    default=models.Value(False),
+                    output_field=models.BooleanField(),
+                )
+            )
+            qs = qs.filter(_has_cov=True) if has_cov else qs.filter(_has_cov=False)
+
+        return qs.distinct()
+
     def get_queryset(self):
         queryset = super().get_queryset()
         # Filter by user's access level

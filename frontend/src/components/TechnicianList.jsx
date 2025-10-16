@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
-// import { FixedSizeList } from 'react-window'; // Temporarily disabled due to import issues
-import { getTechnicians } from '../api';
+import FixedSizeList from 'react-window/dist/es/FixedSizeList';
+import { useSearchParams } from 'react-router-dom';
+import { getTechnicians, getCertifications } from '../api';
 import LoadingSkeleton from './LoadingSkeleton';
 
 const TechnicianList = ({ onTechnicianSelect, onTechnicianEdit, onTechnicianDelete }) => {
@@ -13,8 +14,15 @@ const TechnicianList = ({ onTechnicianSelect, onTechnicianEdit, onTechnicianDele
     hire_date_from: '',
     hire_date_to: '',
     min_hourly_rate: '',
-    max_hourly_rate: ''
+    max_hourly_rate: '',
+    certification: '',
+    tech_level_min: '',
+    tech_level_max: '',
+    certification_status: '', // active|expired
+    coverage_presence: '', // true|false
   });
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [certifications, setCertifications] = useState([]);
 
   // Fetch technicians with filters
   const fetchTechnicians = React.useCallback(async () => {
@@ -50,6 +58,29 @@ const TechnicianList = ({ onTechnicianSelect, onTechnicianEdit, onTechnicianDele
     fetchTechnicians();
   }, [fetchTechnicians]);
 
+  // Load certifications for filter dropdown
+  useEffect(() => {
+    (async () => {
+      try {
+        const resp = await getCertifications();
+        setCertifications(resp.data.results || resp.data || []);
+      } catch {
+        // Non-fatal
+      }
+    })();
+    // Initialize filters from URL
+    const urlFilters = {};
+    ['is_active','hire_date_from','hire_date_to','min_hourly_rate','max_hourly_rate','certification','tech_level_min','tech_level_max','certification_status','coverage_presence']
+      .forEach((k) => {
+        const v = searchParams.get(k);
+        if (v !== null) urlFilters[k] = v;
+      });
+    if (Object.keys(urlFilters).length) {
+      setFilters((prev) => ({ ...prev, ...urlFilters }));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // Debounced search
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm);
 
@@ -64,6 +95,15 @@ const TechnicianList = ({ onTechnicianSelect, onTechnicianEdit, onTechnicianDele
   useEffect(() => {
     fetchTechnicians();
   }, [debouncedSearchTerm, fetchTechnicians]);
+
+  // Sync filters to URL
+  useEffect(() => {
+    const next = new URLSearchParams(searchParams.toString());
+    Object.entries(filters).forEach(([k, v]) => {
+      if (v !== '') next.set(k, v); else next.delete(k);
+    });
+    setSearchParams(next, { replace: true });
+  }, [filters, searchParams, setSearchParams]);
 
   // Filter technicians for additional client-side filtering
   const filteredTechnicians = useMemo(() => {
@@ -100,7 +140,12 @@ const TechnicianList = ({ onTechnicianSelect, onTechnicianEdit, onTechnicianDele
       hire_date_from: '',
       hire_date_to: '',
       min_hourly_rate: '',
-      max_hourly_rate: ''
+      max_hourly_rate: '',
+      certification: '',
+      tech_level_min: '',
+      tech_level_max: '',
+      certification_status: '',
+      coverage_presence: '',
     });
   };
 
@@ -109,7 +154,7 @@ const TechnicianList = ({ onTechnicianSelect, onTechnicianEdit, onTechnicianDele
     const technician = filteredTechnicians[index];
 
     return (
-      <div style={style} className="flex items-center p-4 border-b border-gray-200 hover:bg-gray-50">
+      <div role="listitem" style={style} className="flex items-center p-4 border-b border-gray-200 hover:bg-gray-50">
         <div className="flex-shrink-0 h-12 w-12">
           <img
             className="h-12 w-12 rounded-full object-cover"
@@ -240,12 +285,30 @@ const TechnicianList = ({ onTechnicianSelect, onTechnicianEdit, onTechnicianDele
             </select>
           </div>
 
+          {/* Certification */}
+          <div>
+            <label htmlFor="certification" className="block text-sm font-medium text-gray-700 mb-1">
+              Certification
+            </label>
+            <select
+              id="certification"
+              value={filters.certification}
+              onChange={(e) => handleFilterChange('certification', e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="">All</option>
+              {certifications.map((c) => (
+                <option key={c.id} value={c.id}>{c.name} (Level {c.tech_level})</option>
+              ))}
+            </select>
+          </div>
+
           {/* Hourly Rate Range */}
           <div className="md:col-span-2 lg:col-span-1">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="rate-minmax" className="block text-sm font-medium text-gray-700 mb-1">
               Hourly Rate Range
             </label>
-            <div className="flex space-x-2">
+            <div id="rate-minmax" className="flex space-x-2">
               <input
                 type="number"
                 value={filters.min_hourly_rate}
@@ -263,12 +326,64 @@ const TechnicianList = ({ onTechnicianSelect, onTechnicianEdit, onTechnicianDele
             </div>
           </div>
 
+          {/* Tech Level Range */}
+          <div className="md:col-span-2 lg:col-span-1">
+            <label htmlFor="level-minmax" className="block text-sm font-medium text-gray-700 mb-1">
+              Tech Level Range
+            </label>
+            <div id="level-minmax" className="flex space-x-2">
+              <input
+                type="number"
+                value={filters.tech_level_min}
+                onChange={(e) => handleFilterChange('tech_level_min', e.target.value)}
+                placeholder="Min"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              <input
+                type="number"
+                value={filters.tech_level_max}
+                onChange={(e) => handleFilterChange('tech_level_max', e.target.value)}
+                placeholder="Max"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+          </div>
+
+          {/* Certification Status */}
+          <div>
+            <label htmlFor="cert_status" className="block text-sm font-medium text-gray-700 mb-1">
+              Certification Status
+            </label>
+            <select
+              id="cert_status"
+              value={filters.certification_status}
+              onChange={(e) => handleFilterChange('certification_status', e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="">All</option>
+              <option value="active">Active</option>
+              <option value="expired">Expired</option>
+            </select>
+          </div>
+
+          {/* Coverage Presence */}
+          <div className="flex items-end">
+            <label className="inline-flex items-center gap-2">
+              <input
+                type="checkbox"
+                checked={filters.coverage_presence === 'true'}
+                onChange={(e) => handleFilterChange('coverage_presence', e.target.checked ? 'true' : '')}
+              />
+              Has Coverage
+            </label>
+          </div>
+
           {/* Hire Date Range */}
           <div className="md:col-span-2 lg:col-span-2">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="hire-dates" className="block text-sm font-medium text-gray-700 mb-1">
               Hire Date Range
             </label>
-            <div className="flex space-x-2">
+            <div id="hire-dates" className="flex space-x-2">
               <input
                 type="date"
                 value={filters.hire_date_from}
@@ -307,13 +422,17 @@ const TechnicianList = ({ onTechnicianSelect, onTechnicianEdit, onTechnicianDele
       {/* Virtualized List */}
       <div className="bg-white rounded-lg shadow border border-gray-200">
         {filteredTechnicians.length > 0 ? (
-          <div
-            style={{ height: '600px', overflow: 'auto' }}
-            className="technician-list"
-          >
-            {filteredTechnicians.map((technician, index) =>
-              <TechnicianRow key={technician.id} index={index} style={{}} />
-            )}
+          <div style={{ height: '600px' }} className="technician-list" role="list" aria-label="Technicians">
+            <List
+              height={600}
+              itemCount={filteredTechnicians.length}
+              itemSize={96}
+              width={'100%'}
+            >
+              {({ index, style }) => (
+                <TechnicianRow index={index} style={style} />
+              )}
+            </List>
           </div>
         ) : (
           <div className="p-8 text-center text-gray-500">
