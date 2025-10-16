@@ -1,5 +1,6 @@
 import React from 'react';
-import { render } from '@testing-library/react';
+import { render, screen, waitForElementToBeRemoved } from '@testing-library/react';
+import { axe } from 'jest-axe';
 import { BrowserRouter } from 'react-router-dom';
 import { AuthProvider } from '../../contexts/AuthContext';
 
@@ -159,8 +160,7 @@ export const waitForLoading = async () => {
 export * from '@testing-library/react';
 export { default as userEvent } from '@testing-library/user-event';
 
-// Additional imports for the fillForm and submitForm functions
-import { screen, waitForElementToBeRemoved } from '@testing-library/react';
+// Additional testing utilities for comprehensive coverage
 
 // Enhanced testing utilities for comprehensive coverage
 
@@ -249,6 +249,28 @@ export const testComponentAccessibility = async (component, options = {}) => {
   });
 
   return container;
+};
+
+// jest-axe helpers
+/**
+ * Run axe-core against a container and assert zero violations
+ * Usage: const { container } = renderWithProviders(...); await expectNoAxeViolations(container)
+ */
+export const expectNoAxeViolations = async (container, axeOptions = {}) => {
+  if (!container) throw new Error('expectNoAxeViolations requires a valid container');
+  const results = await axe(container, axeOptions);
+  expect(results).toHaveNoViolations();
+  return results;
+};
+
+/**
+ * Convenience: render a component with providers and assert it has no axe violations
+ */
+export const renderAndExpectAccessible = async (ui, options = {}, axeOptions = {}) => {
+  const result = renderWithProviders(ui, options);
+  const results = await axe(result.container, axeOptions);
+  expect(results).toHaveNoViolations();
+  return result;
 };
 
 // Performance testing utilities
@@ -470,3 +492,49 @@ export const mockAvailability = (overrides = {}) => ({
   notes: 'Regular business hours',
   ...overrides,
 });
+
+// Mock data validation integration
+import { validateMockResponse } from '../helpers/mockDataValidation';
+
+/**
+ * Create validated mock data for testing
+ * @param {string} endpoint - API endpoint path
+ * @param {Object} mockData - Mock data to validate
+ * @returns {Object} Validated mock data
+ */
+export const createValidatedMockData = (endpoint, mockData) => {
+  const validation = validateMockResponse(mockData, endpoint);
+
+  if (!validation.success) {
+    console.warn(`Mock data validation warnings for ${endpoint}:`, validation.errors);
+    // Don't throw in tests to avoid breaking existing functionality
+    // but log warnings for developers to fix
+  }
+
+  if (validation.warnings.length > 0) {
+    console.info(`Mock data suggestions for ${endpoint}:`, validation.warnings);
+  }
+
+  return mockData;
+};
+
+/**
+ * Test helper that validates mock responses
+ * @param {string} testName - Name of test for error reporting
+ * @param {Function} testFunction - Test function to wrap
+ * @returns {Function} Wrapped test function with validation
+ */
+export const withMockValidation = (testName, testFunction) => {
+  return async () => {
+    try {
+      await testFunction();
+    } catch (error) {
+      if (error.message.includes('Mock data validation')) {
+        console.error(`❌ Mock validation failed in test: ${testName}`);
+        console.error(`   ${error.message}`);
+        console.error('   Please update mock data to match API schema');
+      }
+      throw error;
+    }
+  };
+};

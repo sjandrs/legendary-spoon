@@ -175,6 +175,8 @@ const TaskModal = ({ task, isEditing, onSave, onClose }) => {
   };
 
   const [formData, setFormData] = useState({ ...defaultTask, ...task });
+  const modalRef = React.useRef(null);
+  const previouslyFocusedRef = React.useRef(null);
   const [taskTypes, setTaskTypes] = useState([]);
 
   useEffect(() => {
@@ -200,6 +202,46 @@ const TaskModal = ({ task, isEditing, onSave, onClose }) => {
     fetchTaskTypes();
   }, []);
 
+  // Focus trap and restoration
+  useEffect(() => {
+    previouslyFocusedRef.current = document.activeElement;
+    const modalEl = modalRef.current;
+    if (!modalEl) return;
+    const focusableSelectors = [
+      'a[href]','button:not([disabled])','textarea','input','select','[tabindex]:not([tabindex="-1"])'
+    ];
+    const focusables = modalEl.querySelectorAll(focusableSelectors.join(','));
+    const first = focusables[0];
+    const last = focusables[focusables.length - 1];
+    if (!modalEl.hasAttribute('tabindex')) modalEl.setAttribute('tabindex', '-1');
+    if (first) first.focus(); else modalEl.focus();
+
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        e.stopPropagation();
+        onClose();
+        return;
+      }
+      if (e.key === 'Tab' && focusables.length > 0) {
+        if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault();
+          first.focus();
+        }
+      }
+    };
+
+    modalEl.addEventListener('keydown', handleKeyDown);
+    return () => {
+      modalEl.removeEventListener('keydown', handleKeyDown);
+      if (previouslyFocusedRef.current && typeof previouslyFocusedRef.current.focus === 'function') {
+        previouslyFocusedRef.current.focus();
+      }
+    };
+  }, [onClose]);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({
@@ -214,10 +256,11 @@ const TaskModal = ({ task, isEditing, onSave, onClose }) => {
   };
 
   return (
-    <div className="modal-overlay">
-      <div className="modal-content" role="dialog" aria-modal="true">
+    <div className="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="task-modal-title">
+      <div className="modal-content" ref={modalRef} aria-describedby="task-modal-desc">
         <div className="modal-header">
-          <h3>{isEditing ? 'Edit Task' : 'Create New Task'}</h3>
+          <h3 id="task-modal-title">{isEditing ? 'Edit Task' : 'Create New Task'}</h3>
+          <p id="task-modal-desc" className="sr-only">Create or edit a scheduled task. Press Escape to close.</p>
           <button onClick={onClose} className="close-btn">&times;</button>
         </div>
 

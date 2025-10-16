@@ -1,0 +1,8 @@
+{
+  "contacts": {
+    "caption": "Listado de contactos con nombre, correo electrónico, teléfono, cuenta y propietario"
+  },
+  "work_orders": {
+    "caption": "__STRING_NOT_TRANSLATED__"
+  }
+}

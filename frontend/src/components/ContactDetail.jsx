@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useParams, Link } from 'react-router-dom';
 import api from '../api';
 import InteractionHistory from './InteractionHistory';
@@ -6,6 +7,7 @@ import TagManager from './TagManager';
 import './ContactDetail.css';
 
 const ContactDetail = () => {
+    const { t } = useTranslation();
     const { id } = useParams();
     const [contact, setContact] = useState(null);
     const [interactions, setInteractions] = useState([]);
@@ -22,7 +24,7 @@ const ContactDetail = () => {
                 setError(null);
             } catch (_err) {
                 console.error('There was an error fetching the contact details!', _err);
-                setError('Failed to load contact details. You may not have permission to view this contact.');
+                setError(t('errors:api.not_found', 'Failed to load contact details. You may not have permission to view this contact.'));
             } finally {
                 setLoading(false);
             }
@@ -46,14 +48,14 @@ const ContactDetail = () => {
 
         fetchContactDetails();
         fetchInteractions();
-    }, [id]);
+    }, [id, t]);
 
     const handleTagsUpdate = (updatedTags) => {
         setContact(prevContact => ({ ...prevContact, tags: updatedTags }));
     };
 
     if (loading) {
-        return <div>Loading...</div>;
+        return <div>{t('common:status.loading', 'Loading...')}</div>;
     }
 
     if (error) {
@@ -61,7 +63,7 @@ const ContactDetail = () => {
     }
 
     if (!contact) {
-        return <div>No contact found.</div>;
+        return <div>{t('crm:contacts.not_found', 'No contact found.')}</div>;
     }
 
     return (
@@ -69,28 +71,28 @@ const ContactDetail = () => {
             <div className="contact-header">
                 <h2>{contact.first_name} {contact.last_name}</h2>
                 <div className="contact-actions">
-                    <Link to={`/contacts/${id}/edit`} className="btn btn-secondary">Edit</Link>
+                    <Link to={`/contacts/${id}/edit`} className="btn btn-secondary">{t('common:actions.edit', 'Edit')}</Link>
                     <Link
                         to="/tasks/new"
                         state={{ contact: contact }} // Pass the full contact object, or adjust as needed for TaskForm
                         className="btn btn-primary"
                     >
-                        Create Task
+                        {t('crm:contacts.create_task', 'Create Task')}
                     </Link>
                 </div>
             </div>
 
             <div className="contact-body">
                 <div className="contact-info">
-                    <p><strong>Email:</strong> {contact.email || 'N/A'}</p>
-                    <p><strong>Phone:</strong> {contact.phone_number || 'N/A'}</p>
-                    <p><strong>Title:</strong> {contact.title || 'N/A'}</p>
-                    {contact.account && <p><strong>Account:</strong> <Link to={`/accounts/${contact.account.id}`}>{contact.account.name}</Link></p>}
-                    {contact.owner && <p><strong>Owner:</strong> {contact.owner.username}</p>}
+                    <p><strong>{t('common:common.email', 'Email')}:</strong> {contact.email || t('common:common.not_available', 'N/A')}</p>
+                    <p><strong>{t('common:common.phone', 'Phone')}:</strong> {contact.phone_number || t('common:common.not_available', 'N/A')}</p>
+                    <p><strong>{t('forms:labels.job_title', 'Title')}:</strong> {contact.title || t('common:common.not_available', 'N/A')}</p>
+                    {contact.account && <p><strong>{t('crm:accounts.title', 'Account')}:</strong> <Link to={`/accounts/${contact.account.id}`}>{contact.account.name}</Link></p>}
+                    {contact.owner && <p><strong>{t('forms:labels.owner', 'Owner')}:</strong> {contact.owner.username}</p>}
 
                     {contact.custom_fields && contact.custom_fields.length > 0 && (
                         <div className="custom-fields-section">
-                            <h4>Custom Fields</h4>
+                            <h4>{t('crm:contacts.custom_fields', 'Custom Fields')}</h4>
                             {contact.custom_fields.map(field => (
                                 <p key={field.id}><strong>{field.field_name}:</strong> {String(field.value)}</p>
                             ))}

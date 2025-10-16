@@ -1,0 +1,53 @@
+{
+  "errors": { "fetch_failed": "__STRING_NOT_TRANSLATED__" },
+  "status": { "loading": "__STRING_NOT_TRANSLATED__", "no_data": "__STRING_NOT_TRANSLATED__" },
+  "titles": { "business_dashboard": "__STRING_NOT_TRANSLATED__" },
+  "metrics": {
+    "sales_performance": "__STRING_NOT_TRANSLATED__",
+    "total_revenue": "__STRING_NOT_TRANSLATED__",
+    "project_completion": "__STRING_NOT_TRANSLATED__",
+    "time_tracking": "__STRING_NOT_TRANSLATED__"
+  },
+  "labels": {
+    "win_rate": "__STRING_NOT_TRANSLATED__",
+    "last_30_days": "__STRING_NOT_TRANSLATED__",
+    "margin": "__STRING_NOT_TRANSLATED__",
+    "completion_rate": "__STRING_NOT_TRANSLATED__",
+    "total_deals": "__STRING_NOT_TRANSLATED__",
+    "won_deals": "__STRING_NOT_TRANSLATED__",
+    "total_value": "__STRING_NOT_TRANSLATED__",
+    "active_projects": "__STRING_NOT_TRANSLATED__",
+    "completed": "__STRING_NOT_TRANSLATED__",
+    "overdue": "__STRING_NOT_TRANSLATED__",
+    "qty_min": "__STRING_NOT_TRANSLATED__"
+  },
+  "text": {
+    "won_of": "__STRING_NOT_TRANSLATED__",
+    "deals": "__STRING_NOT_TRANSLATED__",
+    "billable": "__STRING_NOT_TRANSLATED__",
+    "overdue": "__STRING_NOT_TRANSLATED__"
+  },
+  "sections": {
+    "deal_pipeline": "__STRING_NOT_TRANSLATED__",
+    "project_overview": "__STRING_NOT_TRANSLATED__",
+    "top_customers": "__STRING_NOT_TRANSLATED__",
+    "project_profitability": "__STRING_NOT_TRANSLATED__",
+    "low_stock_alerts": "__STRING_NOT_TRANSLATED__"
+  },
+  "table": {
+    "customer": "__STRING_NOT_TRANSLATED__",
+    "total_value": "__STRING_NOT_TRANSLATED__",
+    "deal_count": "__STRING_NOT_TRANSLATED__",
+    "project": "__STRING_NOT_TRANSLATED__",
+    "revenue": "__STRING_NOT_TRANSLATED__",
+    "costs": "__STRING_NOT_TRANSLATED__",
+    "profit": "__STRING_NOT_TRANSLATED__",
+    "margin": "__STRING_NOT_TRANSLATED__"
+  },
+  "a11y": {
+    "top_customers_table": "__STRING_NOT_TRANSLATED__",
+    "top_customers_caption": "__STRING_NOT_TRANSLATED__",
+    "project_profitability_table": "__STRING_NOT_TRANSLATED__",
+    "project_profitability_caption": "__STRING_NOT_TRANSLATED__"
+  }
+}

@@ -1,70 +1,106 @@
 import axios from 'axios';
 
-// Create axios client, but tolerate unit tests that mock axios without .create or interceptors
-let apiClient = {};
-try {
-    apiClient = axios && typeof axios.create === 'function'
-        ? axios.create({ baseURL: 'http://localhost:8000' })
-        : (axios || {});
-} catch {
-    // noop: fall back to mocked instance when axios.create is unavailable in tests
-    apiClient = axios || {};
-}
+const BASE_URL = 'http://localhost:8000';
 
-// If apiClient is not a usable client, create a minimal shim with axios-like API
-if (!(apiClient && apiClient.get && apiClient.post && apiClient.put && apiClient.delete)) {
-    const base = 'http://localhost:8000';
-    apiClient = {
-        get: (url, config) => axios.get ? axios.get(url, config) : Promise.resolve({ data: {} }),
-        post: (url, data, config) => axios.post ? axios.post(url, data, config) : Promise.resolve({ data: {} }),
-        put: (url, data, config) => axios.put ? axios.put(url, data, config) : Promise.resolve({ data: {} }),
-        delete: (url, config) => axios.delete ? axios.delete(url, config) : Promise.resolve({ data: {} }),
-        interceptors: { request: { use: () => {} }, response: { use: () => {} } },
-        defaults: { baseURL: base },
-    };
-}
+// When running under Jest, use fetch-based client so MSW intercepts reliably in jsdom
+const isJest = typeof process !== 'undefined' && !!process.env.JEST_WORKER_ID;
 
-// Ensure interceptors objects exist to avoid crashes when axios is mocked
-if (!apiClient.interceptors) {
-    apiClient.interceptors = { request: { use: () => {} }, response: { use: () => {} } };
-}
-
-// Request interceptor (no-op in mocked environments)
-if (apiClient.interceptors && apiClient.interceptors.request && typeof apiClient.interceptors.request.use === 'function') {
-    apiClient.interceptors.request.use(config => {
+// Create a small fetch adapter that mimics axios response shape
+async function fetchRequest(method, url, data, config = {}) {
+    const fullUrl = url.startsWith('http') ? url : `${BASE_URL}${url}`;
+    const headers = { 'Content-Type': 'application/json', ...(config.headers || {}) };
+    try {
+        const res = await fetch(fullUrl, {
+            method,
+            headers,
+            body: data !== undefined ? JSON.stringify(data) : undefined,
+        });
+        const text = await res.text();
+        let parsed;
         try {
-            const token = typeof localStorage !== 'undefined' ? localStorage.getItem('authToken') : null;
-            if (token) {
-                config.headers = config.headers || {};
-                config.headers.Authorization = `Token ${token}`;
-            }
-        } catch {
-            // noop: localStorage/window may be unavailable in tests
+            parsed = text ? JSON.parse(text) : {};
+        } catch (_) {
+            parsed = { message: text };
         }
-        return config;
-    }, error => Promise.reject(error));
+        return { data: parsed, status: res.status, headers: res.headers };
+    } catch (error) {
+        // Simulate axios error shape minimally
+        throw { response: { status: 0, data: { error: String(error && error.message || 'Network error') } } };
+    }
 }
 
-// Response interceptor to handle 401 errors (guarded for tests)
-if (apiClient.interceptors && apiClient.interceptors.response && typeof apiClient.interceptors.response.use === 'function') {
-    apiClient.interceptors.response.use(
-        response => response,
-        error => {
-            if (error && error.response && error.response.status === 401) {
-                try {
-                    if (typeof localStorage !== 'undefined') localStorage.removeItem('authToken');
-                    if (typeof window !== 'undefined' && window.location) window.location.href = '/login';
-                } catch {
-                    // noop: localStorage/window may be unavailable in tests
+let apiClient = {};
+
+if (isJest) {
+    // Fetch-based client for tests
+    apiClient = {
+        get: (url, config) => fetchRequest('GET', url, undefined, config),
+        post: (url, data, config) => fetchRequest('POST', url, data, config),
+        put: (url, data, config) => fetchRequest('PUT', url, data, config),
+        patch: (url, data, config) => fetchRequest('PATCH', url, data, config),
+        delete: (url, config) => fetchRequest('DELETE', url, undefined, config),
+        defaults: { baseURL: BASE_URL },
+    };
+} else {
+    // Axios client for browser/dev runtime
+    try {
+        apiClient = axios && typeof axios.create === 'function'
+            ? axios.create({ baseURL: BASE_URL })
+            : (axios || {});
+    } catch {
+        apiClient = axios || {};
+    }
+
+    if (!(apiClient && apiClient.get && apiClient.post && apiClient.put && apiClient.delete)) {
+        apiClient = {
+            get: (url, config) => axios.get ? axios.get(url, config) : Promise.resolve({ data: {} }),
+            post: (url, data, config) => axios.post ? axios.post(url, data, config) : Promise.resolve({ data: {} }),
+            put: (url, data, config) => axios.put ? axios.put(url, data, config) : Promise.resolve({ data: {} }),
+            patch: (url, data, config) => axios.patch ? axios.patch(url, data, config) : Promise.resolve({ data: {} }),
+            delete: (url, config) => axios.delete ? axios.delete(url, config) : Promise.resolve({ data: {} }),
+            interceptors: { request: { use: () => {} }, response: { use: () => {} } },
+            defaults: { baseURL: BASE_URL },
+        };
+    }
+
+    if (!apiClient.interceptors) {
+        apiClient.interceptors = { request: { use: () => {} }, response: { use: () => {} } };
+    }
+
+    if (apiClient.interceptors && apiClient.interceptors.request && typeof apiClient.interceptors.request.use === 'function') {
+        apiClient.interceptors.request.use(config => {
+            try {
+                const token = typeof localStorage !== 'undefined' ? localStorage.getItem('authToken') : null;
+                if (token) {
+                    config.headers = config.headers || {};
+                    config.headers.Authorization = `Token ${token}`;
                 }
+            } catch {
+                // noop
             }
-            return Promise.reject(error);
-        }
-    );
+            return config;
+        }, error => Promise.reject(error));
+    }
+
+    if (apiClient.interceptors && apiClient.interceptors.response && typeof apiClient.interceptors.response.use === 'function') {
+        apiClient.interceptors.response.use(
+            response => response,
+            error => {
+                if (error && error.response && error.response.status === 401) {
+                    try {
+                        if (typeof localStorage !== 'undefined') localStorage.removeItem('authToken');
+                        if (typeof window !== 'undefined' && window.location) window.location.href = '/login';
+                    } catch {
+                        // noop
+                    }
+                }
+                return Promise.reject(error);
+            }
+        );
+    }
 }
 
-const call = (method, ...args) =>
-    apiClient && apiClient[method] ? apiClient[method](...args) : Promise.resolve({ data: {} });
+const call = (method, ...args) => apiClient && apiClient[method] ? apiClient[method](...args) : Promise.resolve({ data: {} });
 
 export const get = (...args) => call('get', ...args);
 export const post = (...args) => call('post', ...args);

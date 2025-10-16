@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import { useLocaleFormatting } from '../hooks/useLocaleFormatting';
 import api from '../api';
 import './AppointmentRequestQueue.css';
 
 const AppointmentRequestQueue = () => {
+  const { formatDateTime } = useLocaleFormatting();
   const [requests, setRequests] = useState([]);
   const [filteredRequests, setFilteredRequests] = useState([]);
   const [selectedRequest, setSelectedRequest] = useState(null);
@@ -174,10 +176,9 @@ const AppointmentRequestQueue = () => {
     return colors[status] || '#6b7280';
   };
 
-  const formatDateTime = (dateString) => {
+  const formatSubmittedAt = (dateString) => {
     if (!dateString) return 'Not specified';
-    const date = new Date(dateString);
-    return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    return formatDateTime(dateString);
   };
 
   return (
@@ -267,7 +268,7 @@ const AppointmentRequestQueue = () => {
                   <p><strong>Service:</strong> {request.service_type?.replace(/_/g, ' ').toUpperCase()}</p>
                   <p><strong>Address:</strong> {request.customer_address}</p>
                   <p><strong>Preferred Time:</strong> {request.preferred_date} {request.preferred_time ? `at ${request.preferred_time}` : ''}</p>
-                  <p><strong>Submitted:</strong> {formatDateTime(request.submitted_at)}</p>
+                  <p><strong>Submitted:</strong> {formatSubmittedAt(request.submitted_at)}</p>
                 </div>
 
                 <div className="request-description">

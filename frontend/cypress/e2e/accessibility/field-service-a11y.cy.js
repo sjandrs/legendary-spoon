@@ -22,8 +22,8 @@ describe('Field Service Accessibility Compliance', () => {
     });
 
     it('should pass axe accessibility audit', () => {
-      // Run comprehensive accessibility scan
-      cy.checkA11y();
+      // Run comprehensive accessibility scan with strict failure and all impacts
+      cy.checkA11yFail(['critical','serious','moderate','minor']);
     });
 
     it('should have proper ARIA labels for calendar', () => {
@@ -140,7 +140,7 @@ describe('Field Service Accessibility Compliance', () => {
     });
 
     it('should pass axe accessibility audit', () => {
-      cy.checkA11y();
+      cy.checkA11yFail(['critical','serious','moderate','minor']);
     });
 
     it('should provide alternative signature methods', () => {
@@ -200,7 +200,7 @@ describe('Field Service Accessibility Compliance', () => {
     });
 
     it('should pass axe accessibility audit', () => {
-      cy.checkA11y();
+      cy.checkA11yFail(['critical','serious','moderate','minor']);
     });
 
     it('should have proper form labeling and validation', () => {

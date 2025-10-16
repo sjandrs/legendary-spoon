@@ -1,0 +1,147 @@
+{
+  "navigation": {
+    "dashboard": "Dashboard",
+    "analytics": "Analytics",
+    "advanced": "Advanced",
+    "crm": "CRM",
+    "contacts": "Contacts",
+    "deals": "Deals",
+    "accounts": "Accounts",
+    "quotes": "Quotes",
+    "interactions": "Interactions",
+    "sales_marketing": "Sales & Marketing",
+    "projects_tasks": "Projects & Tasks",
+    "time_tracking": "Time Tracking",
+    "orders": "Orders",
+    "invoicing": "Invoicing",
+    "work_orders": "Work Orders",
+    "warehouse": "Warehouse",
+    "operations": "Operations",
+    "staff_resources": "Staff & Resources",
+    "field_service": "Field Service",
+    "accounting": "Accounting",
+    "reports": "Reports",
+    "payments": "Payments",
+    "expenses": "Expenses",
+    "budgets": "Budgets",
+    "tax_report": "Tax Report",
+    "resources": "Resources",
+    "knowledge_base": "Knowledge Base",
+    "settings": "Settings",
+    "logout": "Logout"
+  },
+  "actions": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create",
+    "update": "Update",
+    "view": "View",
+    "search": "Search",
+    "filter": "Filter",
+    "export": "Export",
+    "import": "Import",
+    "back": "Back"
+  },
+  "status": {
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "success": "Operation completed successfully",
+    "no_results": "No results found",
+    "not_found": "Not found"
+  },
+  "common": {
+    "name": "Name",
+    "email": "Email",
+    "phone": "Phone",
+    "address": "Address",
+    "date": "Date",
+    "time": "Time",
+    "description": "Description",
+    "notes": "Notes",
+    "status": "Status",
+    "type": "Type",
+    "category": "Category",
+    "priority": "Priority",
+    "amount": "Amount",
+    "quantity": "Quantity",
+    "total": "Total",
+    "subtotal": "Subtotal",
+    "tax": "Tax",
+    "discount": "Discount",
+    "not_available": "N/A"
+  },
+  "auth": {
+    "login": "Login",
+    "username": "Username",
+    "password": "Password",
+    "logout": "Logout",
+    "login_success": "Login successful",
+    "logout_success": "Logout successful"
+  },
+  "validation": {
+    "required": "This field is required",
+    "email_invalid": "Please enter a valid email address",
+    "phone_invalid": "Please enter a valid phone number",
+    "number_invalid": "Please enter a valid number",
+    "date_invalid": "Please enter a valid date",
+    "invalid_credentials": "Invalid credentials. Please try again."
+  },
+  "messages": {
+    "welcome": "Welcome",
+    "goodbye": "Goodbye",
+    "confirm_delete": "Are you sure you want to delete this item?",
+    "changes_saved": "Changes saved successfully",
+    "item_deleted": "Item deleted successfully",
+    "item_created": "Item created successfully",
+    "item_updated": "Item updated successfully"
+  },
+  "language_selector": {
+    "select_language": "Select language",
+    "tooltip": "Change display language",
+    "current_language": "Current: {{language}}"
+  },
+  "preferences": {
+    "timezone": {
+      "label": "Time zone",
+      "aria": "Select time zone",
+      "tooltip": "Display times in this time zone"
+    },
+    "currency": {
+      "label": "Currency",
+      "aria": "Select currency",
+      "tooltip": "Display amounts in this currency"
+    }
+  },
+  "nav": {
+    "utility": "Utility navigation"
+  },
+  "search": {
+    "global_label": "Global search",
+    "placeholder": "Search...",
+    "aria": "Global search input",
+    "submit": "Submit search"
+  },
+  "notifications": {
+    "label": "Notifications",
+    "title": "Notifications",
+    "view_all": "View All",
+    "examples": {
+      "new_deal": "New Deal Created",
+      "task_assigned": "Task Assigned",
+      "follow_up": "Follow up with client",
+      "work_order_completed": "Work Order Completed",
+      "work_order_completed_desc": "WO-1234 completed by John"
+    }
+  },
+  "time": {
+    "minutes_ago": "minutes ago",
+    "hour_ago": "hour ago",
+    "hours_ago": "hours ago"
+  },
+  "chat": "Chat",
+  "profile": {
+    "settings": "User profile and settings"
+  }
+}

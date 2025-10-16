@@ -1,9 +1,13 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { get } from '../api';
 import './Deals.css';
+import { useLocaleFormatting } from '../hooks/useLocaleFormatting';
 
 const Deals = () => {
+    const { t } = useTranslation();
+    const { formatCurrency, formatDate } = useLocaleFormatting();
     const [deals, setDeals] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -38,7 +42,7 @@ const Deals = () => {
 
             } catch (_err) {
                 console.error("Failed to fetch deals:", _err);
-                setError("Could not load deals. Please try again later.");
+                setError(t('crm:deals.errors.load_failed', 'Could not load deals. Please try again later.'));
             } finally {
                 setLoading(false);
             }
@@ -55,12 +59,7 @@ const Deals = () => {
         navigate('/deals');
     };
 
-    const formatCurrency = (value) => {
-        return new Intl.NumberFormat('en-US', {
-            style: 'currency',
-            currency: 'USD',
-        }).format(value);
-    };
+    // Currency and date formatting via locale-aware hook
 
     const getStageColor = (stage) => {
         // Simple hash function to get a color based on the stage name
@@ -73,7 +72,7 @@ const Deals = () => {
     };
 
     if (loading) {
-        return <div className="deals-container loading">Loading deals...</div>;
+        return <div className="deals-container loading">{t('crm:deals.status.loading', 'Loading deals...')}</div>;
     }
 
     if (error) {
@@ -83,34 +82,35 @@ const Deals = () => {
     return (
         <div className="deals-container">
             <div className="deals-header">
-                <h1>Deals</h1>
+                <h1>{t('crm:deals.title', 'Deals')}</h1>
                 {stageId && stageName && (
                     <div className="filter-info">
-                        <span>Filtered by Stage: <span className="stage-name">{stageName}</span></span>
-                        <button onClick={clearFilter} className="clear-filter-btn">Clear Filter</button>
+                        <span>{t('crm:deals.filtered_by_stage', 'Filtered by Stage:')} <span className="stage-name">{stageName}</span></span>
+                        <button onClick={clearFilter} className="clear-filter-btn">{t('crm:deals.clear_filter', 'Clear Filter')}</button>
                     </div>
                 )}
             </div>
 
             {deals.length === 0 ? (
-                <p>No deals found.</p>
+                <p>{t('crm:deals.no_results', 'No deals found.')}</p>
             ) : (
-                <table className="deals-table striped-table">
+                <table className="deals-table striped-table" role="table" aria-label={t('crm:deals.a11y.table_label', 'Deals')}>
+                    <caption className="sr-only">{t('crm:deals.a11y.table_caption', 'Deals list including account, stage, value, and expected close date')}</caption>
                     <thead>
                         <tr>
-                            <th>Deal Name</th>
-                            <th>Account</th>
-                            <th>Stage</th>
-                            <th>Value</th>
-                            <th>Close Date</th>
+                            <th scope="col" id="deals-name">{t('crm:deals.table.name', 'Deal Name')}</th>
+                            <th scope="col" id="deals-account">{t('crm:deals.table.account', 'Account')}</th>
+                            <th scope="col" id="deals-stage">{t('crm:deals.table.stage', 'Stage')}</th>
+                            <th scope="col" id="deals-value">{t('crm:deals.table.value', 'Value')}</th>
+                            <th scope="col" id="deals-close">{t('crm:deals.table.close_date', 'Close Date')}</th>
                         </tr>
                     </thead>
                     <tbody>
                         {deals.map(deal => (
                             <tr key={deal.id} onClick={() => handleRowClick(deal.id)} className="deal-row">
-                                <td>{deal.name}</td>
-                                <td>{deal.account_name || 'N/A'}</td>
-                                <td>
+                                <th scope="row" headers="deals-name">{deal.name}</th>
+                                <td headers="deals-account">{deal.account_name || t('common:not_available', 'N/A')}</td>
+                                <td headers="deals-stage">
                                     <span
                                         className="deal-stage"
                                         style={{ backgroundColor: getStageColor(deal.stage_name) }}
@@ -118,8 +118,8 @@ const Deals = () => {
                                         {deal.stage_name}
                                     </span>
                                 </td>
-                                <td className="deal-value">{formatCurrency(deal.value)}</td>
-                                <td>{new Date(deal.expected_close_date).toLocaleDateString()}</td>
+                                <td headers="deals-value" className="deal-value">{formatCurrency(deal.value)}</td>
+                                <td headers="deals-close">{formatDate(deal.expected_close_date)}</td>
                             </tr>
                         ))}
                     </tbody>

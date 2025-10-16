@@ -1,0 +1,60 @@
+{
+  "errors": {
+    "fetch_failed": "Failed to fetch dashboard analytics."
+  },
+  "status": {
+    "loading": "Loading dashboard...",
+    "no_data": "No analytics data available."
+  },
+  "titles": {
+    "business_dashboard": "Business Dashboard"
+  },
+  "metrics": {
+    "sales_performance": "Sales Performance",
+    "total_revenue": "Total Revenue",
+    "project_completion": "Project Completion",
+    "time_tracking": "Time Tracking"
+  },
+  "labels": {
+    "win_rate": "Win Rate",
+    "last_30_days": "Last 30 Days",
+    "margin": "Margin:",
+    "completion_rate": "Completion Rate",
+    "total_deals": "Total Deals:",
+    "won_deals": "Won Deals:",
+    "total_value": "Total Value:",
+    "active_projects": "Active Projects:",
+    "completed": "Completed:",
+    "overdue": "Overdue:",
+    "qty_min": "Qty: {{qty}} (Min: {{min}})"
+  },
+  "text": {
+    "won_of": "won of",
+    "deals": "deals",
+    "billable": "billable",
+    "overdue": "overdue"
+  },
+  "sections": {
+    "deal_pipeline": "Deal Pipeline",
+    "project_overview": "Project Overview",
+    "top_customers": "Top Customers by Lifetime Value",
+    "project_profitability": "Project Profitability",
+    "low_stock_alerts": "Low Stock Alerts"
+  },
+  "table": {
+    "customer": "Customer",
+    "total_value": "Total Value",
+    "deal_count": "Deal Count",
+    "project": "Project",
+    "revenue": "Revenue",
+    "costs": "Costs",
+    "profit": "Profit",
+    "margin": "Margin"
+  },
+  "a11y": {
+    "top_customers_table": "Top Customers by Lifetime Value",
+    "top_customers_caption": "Top customers and their lifetime value metrics",
+    "project_profitability_table": "Project Profitability",
+    "project_profitability_caption": "Project profitability breakdown including revenue, costs, and margins"
+  }
+}

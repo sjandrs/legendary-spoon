@@ -2,11 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import api from '../api';
 import './QuoteForm.css';
+import { useLocaleFormatting } from '../hooks/useLocaleFormatting';
 
 function QuoteForm() {
   const { id } = useParams();
   const navigate = useNavigate();
   const isEditMode = Boolean(id);
+  const { formatCurrency } = useLocaleFormatting();
 
   const [formData, setFormData] = useState({
     name: '',
@@ -233,12 +235,7 @@ function QuoteForm() {
     }
   };
 
-  const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-    }).format(amount || 0);
-  };
+  // Currency formatting now provided by useLocaleFormatting (locale-aware)
 
   if (loading && isEditMode && !formData.name) {
     return (

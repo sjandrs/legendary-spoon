@@ -1,0 +1,41 @@
+{
+  "staff": {
+    "title": "Staff Management",
+    "description": "This page will be used for managing staff and payroll."
+  },
+  "work_orders": {
+    "title": "Work Orders",
+    "description": "This page will be used for generating and managing work orders.",
+    "columns": {
+      "id": "ID",
+      "project": "Project",
+      "description": "Description",
+      "technician": "Technician",
+      "customer": "Customer",
+      "status": "Status",
+      "created": "Created",
+      "actions": "Actions"
+    },
+    "buttons": {
+      "on_my_way": "🚗 On My Way",
+      "sending": "📱 Sending..."
+    },
+    "messages": {
+      "sent": "\"On My Way\" notification sent successfully to customer!",
+      "error": "Error sending notification. Please try again."
+    },
+    "statuses": {
+      "pending": "Pending",
+      "assigned": "Assigned",
+      "in_progress": "In Progress",
+      "en_route": "En Route",
+      "completed": "Completed",
+      "cancelled": "Cancelled",
+      "unassigned": "Unassigned",
+      "unknown": "Unknown"
+    },
+    "aria": {
+      "send_on_my_way": "Send On My Way notification for work order {{id}}"
+    }
+  }
+}

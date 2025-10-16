@@ -335,19 +335,29 @@ class DealSerializer(serializers.ModelSerializer):
         return None
 
     def validate(self, attrs):
-        # Map legacy 'title'/'name' interplay: if provided name and not title, set title
+        # Map legacy 'title'/'name' interplay: handle both directions properly
         data = super().validate(attrs)
-        try:
-            title = data.get("title")
-        except Exception:
-            title = None
-        legacy_name = None
-        try:
-            legacy_name = getattr(self, "initial_data", {}).get("name")
-        except Exception:
-            legacy_name = None
-        if (title is None or title == "") and legacy_name:
-            data["title"] = legacy_name
+
+        # Get the actual input values (before field mapping)
+        initial_data = getattr(self, "initial_data", {})
+        initial_title = initial_data.get("title")
+        initial_name = initial_data.get("name")
+
+        # Current validated title (may have been overwritten by name field mapping)
+        current_title = data.get("title")
+
+        # Priority logic: title from initial_data takes precedence over name->title mapping
+        if initial_title and initial_title.strip():
+            # Use the explicitly provided title
+            data["title"] = initial_title
+        elif (
+            (not current_title or current_title == "")
+            and initial_name
+            and initial_name.strip()
+        ):
+            # Use name if title is empty but name has value
+            data["title"] = initial_name
+
         return data
 
 
@@ -966,10 +976,10 @@ class WarehouseItemSerializer(serializers.ModelSerializer):
             value = str(value)
         value = value.strip()
         if not value.isdigit():
-            raise serializers.ValidationError("GTIN must be digits-only")
+            raise serializers.ValidationError(_("GTIN must be digits-only"))
         length = len(value)
         if length < 7 or length > 14:
-            raise serializers.ValidationError("GTIN must be 7 to 14 digits long")
+            raise serializers.ValidationError(_("GTIN must be 7 to 14 digits long"))
 
         if length == 14:
             base = value[:-1]
@@ -981,7 +991,7 @@ class WarehouseItemSerializer(serializers.ModelSerializer):
             mod = total % 10
             check_digit = 0 if mod == 0 else 10 - mod
             if (ord(value[-1]) - 48) != check_digit:
-                raise serializers.ValidationError("Invalid GTIN check digit")
+                raise serializers.ValidationError(_("Invalid GTIN check digit"))
 
         return value
 
@@ -1079,10 +1089,15 @@ class BudgetV2Serializer(serializers.ModelSerializer):
         from rest_framework.exceptions import ValidationError
 
         if not isinstance(rows, list):
-            raise ValidationError({"detail": "distributions must be a list of 12 rows"})
+            raise ValidationError(
+                {"detail": _("distributions must be a list of 12 rows")}
+            )
         if len(rows) != 12:
             raise ValidationError(
-                {"detail": f"Exactly 12 months required (got {len(rows)})"}
+                {
+                    "detail": _("Exactly 12 months required (got %(count)s)")
+                    % {"count": len(rows)}
+                }
             )
 
         seen = set()
@@ -1095,24 +1110,39 @@ class BudgetV2Serializer(serializers.ModelSerializer):
                 p = Decimal(str(r.get("percent")))
             except Exception:
                 raise ValidationError(
-                    {"detail": f"Row {idx} must include numeric month and percent"}
+                    {
+                        "detail": _(
+                            "Row %(idx)s must include numeric month and percent"
+                        )
+                        % {"idx": idx}
+                    }
                 )
             if m < 1 or m > 12:
-                errors.append(f"Row {idx}: month {m} out of range (1..12)")
+                errors.append(
+                    _("Row %(idx)s: month %(m)s out of range (1..12)")
+                    % {"idx": idx, "m": m}
+                )
             if m in seen:
-                errors.append(f"Duplicate month {m}")
+                errors.append(_("Duplicate month %(m)s") % {"m": m})
             seen.add(m)
             if p < Decimal("0.00") or p > Decimal("100.00"):
-                errors.append(f"Row {idx}: percent {p} out of bounds (0..100)")
+                errors.append(
+                    _("Row %(idx)s: percent %(p)s out of bounds (0..100)")
+                    % {"idx": idx, "p": p}
+                )
             total += p
             cleaned.append((m, p))
 
         total = total.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
         if total != Decimal("100.00"):
-            errors.append(f"Total percent must be 100.00 (got {total})")
+            errors.append(
+                _("Total percent must be 100.00 (got %(total)s)") % {"total": total}
+            )
 
         if errors:
-            raise ValidationError({"detail": "Invalid distributions", "errors": errors})
+            raise ValidationError(
+                {"detail": _("Invalid distributions"), "errors": errors}
+            )
 
         # Persist atomically: replace all rows
         from .models import MonthlyDistribution
@@ -1700,18 +1730,22 @@ class SchedulingAnalyticsSerializer(serializers.ModelSerializer):
 
 class CLVParameterSerializer(serializers.Serializer):
     """Parameter validation for CLV calculations."""
-    
+
     include_predictions = serializers.BooleanField(default=True, required=False)
     refresh_data = serializers.BooleanField(default=False, required=False)
     confidence_threshold = serializers.DecimalField(
-        max_digits=3, decimal_places=2, min_value=0.0, max_value=1.0,
-        default=0.5, required=False
+        max_digits=3,
+        decimal_places=2,
+        min_value=0.0,
+        max_value=1.0,
+        default=0.5,
+        required=False,
     )
 
 
 class DealPredictionParameterSerializer(serializers.Serializer):
     """Parameter validation for deal predictions."""
-    
+
     include_factors = serializers.BooleanField(default=True, required=False)
     model_version = serializers.CharField(
         max_length=50, required=False, default="latest"
@@ -1721,19 +1755,19 @@ class DealPredictionParameterSerializer(serializers.Serializer):
 
 class RevenueForecastParameterSerializer(serializers.Serializer):
     """Parameter validation for revenue forecasts."""
-    
+
     PERIOD_CHOICES = [
         ("monthly", "Monthly"),
         ("quarterly", "Quarterly"),
         ("annual", "Annual"),
     ]
-    
+
     METHOD_CHOICES = [
         ("linear_regression", "Linear Regression"),
         ("moving_average", "Moving Average"),
         ("seasonal_arima", "Seasonal ARIMA"),
     ]
-    
+
     period = serializers.ChoiceField(
         choices=PERIOD_CHOICES, default="monthly", required=False
     )
@@ -1743,39 +1777,39 @@ class RevenueForecastParameterSerializer(serializers.Serializer):
     start_date = serializers.DateField(required=False)
     end_date = serializers.DateField(required=False)
     include_confidence = serializers.BooleanField(default=True, required=False)
-    
+
     def validate(self, attrs):
         """Validate date range parameters."""
         start_date = attrs.get("start_date")
         end_date = attrs.get("end_date")
-        
+
         if start_date and end_date:
             if start_date >= end_date:
                 raise serializers.ValidationError(
-                    "start_date must be before end_date"
+                    _("start_date must be before end_date")
                 )
-        
+
         return attrs
 
 
 class AnalyticsSnapshotFilterSerializer(serializers.Serializer):
     """Parameter validation for analytics snapshot filtering."""
-    
+
     start_date = serializers.DateField(required=False)
     end_date = serializers.DateField(required=False)
     page_size = serializers.IntegerField(
         min_value=1, max_value=100, default=20, required=False
     )
-    
+
     def validate(self, attrs):
         """Validate date range and pagination parameters."""
         start_date = attrs.get("start_date")
         end_date = attrs.get("end_date")
-        
+
         if start_date and end_date:
             if start_date >= end_date:
                 raise serializers.ValidationError(
-                    "start_date must be before end_date"
+                    _("start_date must be before end_date")
                 )
-        
+
         return attrs

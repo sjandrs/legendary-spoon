@@ -6,10 +6,18 @@ REM Install Python testing dependencies
 echo Installing Python testing tools...
 .\venv\Scripts\pip.exe install -r requirements.txt
 
-REM Install frontend testing dependencies
+REM Install frontend testing dependencies (include devDependencies like MSW)
 echo Installing frontend testing tools...
 cd frontend
-npm install
+REM Prefer clean install; ensure dev deps are included
+set NODE_ENV=development
+if exist package-lock.json (
+	call npm ci --include=dev || call npm ci
+) else (
+	call npm install
+)
+REM Fallback: explicitly install MSW if missing
+call npm ls msw >nul 2>nul || call npm install --save-dev msw@^2.11.3
 cd ..
 
 REM Install pre-commit hooks

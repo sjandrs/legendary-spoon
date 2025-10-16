@@ -1,0 +1,60 @@
+{
+  "general": {
+    "something_went_wrong": "Something went wrong",
+    "unexpected_error": "An unexpected error occurred",
+    "please_try_again": "Please try again",
+    "contact_support": "If the problem persists, please contact support",
+    "error_occurred": "An error occurred"
+  },
+  "network": {
+    "connection_failed": "Connection failed",
+    "network_error": "Network error",
+    "timeout": "Request timed out",
+    "no_internet": "No internet connection",
+    "server_unreachable": "Server is unreachable"
+  },
+  "authentication": {
+    "login_failed": "Login failed",
+    "invalid_credentials": "Invalid username or password",
+    "session_expired": "Your session has expired",
+    "unauthorized": "You are not authorized to perform this action",
+    "access_denied": "Access denied",
+    "account_locked": "Account has been locked"
+  },
+  "validation": {
+    "invalid_input": "Invalid input",
+    "missing_required_fields": "Please fill in all required fields",
+    "invalid_format": "Invalid format",
+    "value_too_long": "Value is too long",
+    "value_too_short": "Value is too short",
+    "invalid_email_format": "Invalid email format",
+    "invalid_phone_format": "Invalid phone number format"
+  },
+  "api": {
+    "not_found": "Resource not found",
+    "server_error": "Internal server error",
+    "bad_request": "Bad request",
+    "forbidden": "Forbidden",
+    "conflict": "Conflict - resource already exists",
+    "rate_limit_exceeded": "Rate limit exceeded. Please try again later",
+    "contacts": {
+      "load_failed": "Failed to load contacts.",
+      "fetch_failed": "Failed to fetch contacts."
+    },
+    "deals": {
+      "fetch_failed": "Failed to fetch deal details. The deal may not exist or you may not have permission to view it."
+    }
+  },
+  "file": {
+    "upload_failed": "File upload failed",
+    "file_too_large": "File is too large",
+    "invalid_file_type": "Invalid file type",
+    "file_not_found": "File not found",
+    "download_failed": "Download failed"
+  },
+  "permissions": {
+    "insufficient_permissions": "You don't have permission to perform this action",
+    "admin_required": "Administrator access required",
+    "owner_required": "You must be the owner to perform this action"
+  }
+}

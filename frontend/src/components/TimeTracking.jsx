@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useLocaleFormatting } from '../hooks/useLocaleFormatting';
 import { getTimeEntries, createTimeEntry, updateTimeEntry, deleteTimeEntry, getProjects } from '../api';
 import './TimeTracking.css';
 
@@ -109,6 +110,7 @@ const TimeTracking = () => {
   if (loading) return <div>Loading time tracking...</div>;
   if (error) return <div className="error">{error}</div>;
 
+  const { formatDate } = useLocaleFormatting();
   return (
     <div className="time-tracking">
       <div className="time-tracking-header">
@@ -240,7 +242,7 @@ const TimeTracking = () => {
               <tbody>
                 {timeEntries.map(entry => (
                   <tr key={entry.id}>
-                    <td>{new Date(entry.date).toLocaleDateString()}</td>
+                    <td>{formatDate(entry.date)}</td>
                     <td>{entry.project_title || 'Unknown Project'}</td>
                     <td>{entry.description}</td>
                     <td>{entry.hours}</td>

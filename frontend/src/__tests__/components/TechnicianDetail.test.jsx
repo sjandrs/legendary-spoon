@@ -3,8 +3,8 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import TechnicianDetail from '../../components/TechnicianDetail';
 import {
   getTechnician,
-  getTechnicianCertifications,
-  getTechnicianAvailability,
+  getTechnicianCertificationsById,
+  getCoverageAreas,
   updateTechnician,
   deleteTechnician
 } from '../../api';
@@ -13,8 +13,8 @@ import { renderWithProviders } from '../helpers/test-utils';
 // Mock the API calls
 jest.mock('../../api', () => ({
   getTechnician: jest.fn(),
-  getTechnicianCertifications: jest.fn(),
-  getTechnicianAvailability: jest.fn(),
+  getTechnicianCertificationsById: jest.fn(),
+  getCoverageAreas: jest.fn(),
   updateTechnician: jest.fn(),
   deleteTechnician: jest.fn(),
 }));
@@ -101,12 +101,13 @@ describe('TechnicianDetail', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     getTechnician.mockResolvedValue({ data: mockTechnician });
-    getTechnicianCertifications.mockResolvedValue({ data: mockCertifications });
-    getTechnicianAvailability.mockResolvedValue({ data: mockAvailability });
+    getTechnicianCertificationsById.mockResolvedValue({ data: mockCertifications });
+    getCoverageAreas.mockResolvedValue({ data: [] }); // Mock empty coverage areas for simplicity
   });
 
   const renderTechnicianDetail = (props = {}) => {
-    return renderWithProviders(<TechnicianDetail {...props} />);
+    const defaultProps = { technicianId: 1, ...props };
+    return renderWithProviders(<TechnicianDetail {...defaultProps} />);
   };
 
   describe('Loading and Data Display', () => {

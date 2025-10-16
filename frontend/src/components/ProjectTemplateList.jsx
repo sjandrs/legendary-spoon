@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import api from '../api';
 import './ProjectTemplateList.css';
 
@@ -8,7 +8,7 @@ function ProjectTemplateList() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
-  const navigate = useNavigate();
+  // const navigate = useNavigate(); // Commented out unused navigation
 
   useEffect(() => {
     fetchTemplates();

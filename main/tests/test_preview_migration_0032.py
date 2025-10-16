@@ -41,7 +41,6 @@ class PreviewMigration0032Tests(TestCase):
 
         # deals: one with title and empty name
         d1 = Deal.objects.create(
-            name="",
             title="Old Deal",
             account=a1,
             value=100,

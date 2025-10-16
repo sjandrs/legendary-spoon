@@ -274,14 +274,8 @@ describe('InteractionList Component - TASK-029', () => {
       const user = userEvent.setup();
       const confirmSpy = jest.spyOn(window, 'confirm').mockReturnValue(true);
 
-      server.use(
-        rest.delete('/api/interactions/:id/', (req, res, ctx) => {
-          return res(ctx.status(204));
-        })
-      );
-
-  api.get.mockResolvedValue({ data: allInteractions });
-  renderWithRouter(<InteractionList />);
+      api.get.mockResolvedValue({ data: allInteractions });
+      renderWithRouter(<InteractionList />);
 
       await waitFor(() => {
         expect(screen.getByText('Follow-up call')).toBeInTheDocument();

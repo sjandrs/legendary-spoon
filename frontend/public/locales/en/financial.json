@@ -1,0 +1,170 @@
+{
+  "reports": {
+    "title": "Financial Reports",
+    "errors": {
+      "load_failed": "Failed to load reports. Please try again."
+    },
+    "as_of": "Balance Sheet As Of:",
+    "period_start": "Period Start:",
+    "period_end": "Period End:",
+    "refresh": "Refresh Reports",
+    "export_csv": "Export CSV",
+    "export_pdf": "Export PDF",
+    "tabs": {
+      "balance_sheet": "Balance Sheet",
+      "profit_loss": "Profit & Loss",
+      "cash_flow": "Cash Flow"
+    },
+    "balance_sheet_title": "Balance Sheet (As of {{date}})",
+    "assets": "Assets",
+    "total_assets": "Total Assets",
+    "liabilities": "Liabilities",
+    "total_liabilities": "Total Liabilities",
+    "equity": "Equity",
+    "total_equity": "Total Equity",
+    "profit_loss_title": "Profit & Loss ({{start}} to {{end}})",
+    "revenue": "Revenue",
+    "total_revenue": "Total Revenue",
+    "expenses": "Expenses",
+    "total_expenses": "Total Expenses",
+    "net_profit": "Net Profit",
+    "cash_flow_title": "Cash Flow Statement ({{start}} to {{end}})",
+    "operating_activities": "Operating Activities",
+    "investing_activities": "Investing Activities",
+    "financing_activities": "Financing Activities",
+    "net_cash_flow": "Net Cash Flow",
+    "note": "Note"
+  },
+  "accounting": {
+    "title": "Accounting",
+    "description": "This page will be used for managing accounting, including income and expenses."
+  },
+  "invoicing": {
+    "title": "Invoicing",
+    "description": "This page will be used for creating and managing invoices."
+  },
+  "budget": {
+    "title": "Budget Planning",
+    "status": { "loading": "Loading budgets..." },
+    "actions": { "create": "Create Budget", "edit": "Edit" },
+    "table": {
+      "category": "Category",
+      "period": "Period",
+      "budgeted_amount": "Budgeted Amount",
+      "spent_amount": "Spent Amount",
+      "variance": "Variance",
+      "percent_used": "% Used",
+      "actions": "Actions"
+    },
+    "a11y": {
+      "table_label": "Budgets",
+      "table_caption": "Budgets including category, period, budgeted, spent, variance, percent used, and actions"
+    },
+    "errors": { "load_failed": "Failed to load budgets" },
+    "empty": "No budgets created yet.",
+    "empty_cta": "Create your first budget",
+    "empty_suffix": "to start planning."
+  },
+  "expense": {
+    "title_add": "Add Expense",
+    "title_edit": "Edit Expense",
+    "fields": {
+      "date": "Date",
+      "category": "Category",
+      "description": "Description",
+      "vendor": "Vendor",
+      "amount": "Amount",
+      "receipt": "Receipt"
+    },
+    "categories": {
+      "office_supplies": "Office Supplies",
+      "travel": "Travel",
+      "meals": "Meals & Entertainment",
+      "utilities": "Utilities",
+      "rent": "Rent",
+      "marketing": "Marketing",
+      "software": "Software & Subscriptions",
+      "equipment": "Equipment",
+      "professional_services": "Professional Services",
+      "other": "Other"
+    },
+    "actions": { "add": "Add Expense", "update": "Update Expense", "cancel": "Cancel" },
+    "status": { "saving": "Saving..." },
+    "hints": { "receipt_existing": "If you don't select a new file, the existing receipt will be kept." },
+    "errors": { "load_failed": "Failed to load expense", "save_failed": "Failed to save expense" }
+  },
+  "expense_list": {
+    "title": "Expenses",
+    "actions": { "add": "Add Expense", "approve": "Approve", "edit": "Edit" },
+    "table": {
+      "date": "Date",
+      "category": "Category",
+      "description": "Description",
+      "vendor": "Vendor",
+      "amount": "Amount",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "status": { "loading": "Loading expenses...", "approved": "Approved", "pending": "Pending" },
+    "a11y": {
+      "table_label": "Expenses",
+      "table_caption": "Expenses list including date, category, description, vendor, amount, status, and actions"
+    },
+    "errors": { "load_failed": "Failed to load expenses" }
+  },
+  "ledger": {
+    "status": { "loading": "Loading...", "creating": "Creating..." },
+    "actions": { "create": "Create" },
+    "table": { "id": "ID", "name": "Name", "code": "Code", "type": "Type" },
+    "form": { "name": "Name", "name_aria": "Account Name", "code": "Code", "code_aria": "Account Code", "type": "Account Type" },
+    "types": { "asset": "Asset", "liability": "Liability", "equity": "Equity", "revenue": "Revenue", "expense": "Expense" },
+    "errors": { "create_failed": "Failed to create account" },
+    "a11y": { "table_label": "Ledger Accounts", "table_caption": "Ledger accounts including code and type" }
+  },
+  "journal": {
+    "status": { "loading": "Loading...", "creating": "Creating..." },
+    "actions": { "create": "Create" },
+    "table": { "id": "ID", "date": "Date", "description": "Description", "debit": "Debit Account", "credit": "Credit Account", "amount": "Amount" },
+    "form": {
+      "date": "Date",
+      "description": "Description",
+      "description_aria": "Description",
+      "debit_account": "Debit Account ID",
+      "debit_account_aria": "Debit Account",
+      "credit_account": "Credit Account ID",
+      "credit_account_aria": "Credit Account",
+      "amount": "Amount",
+      "amount_aria": "Amount"
+    },
+    "errors": { "create_failed": "Failed to create journal entry" },
+    "a11y": { "table_label": "Journal Entries", "table_caption": "Journal entries including date, description, debit/credit accounts, and amount" }
+  },
+  "payments": {
+    "status": { "loading": "Loading...", "creating": "Creating..." },
+    "actions": { "create": "Create" },
+    "table": { "id": "ID", "invoice": "Invoice", "amount": "Amount", "payment_date": "Payment Date", "method": "Method", "received_by": "Received By" },
+    "form": { "content_type": "Content Type (e.g. invoice)", "object_id": "Object ID", "amount": "Amount", "method": "Method", "received_by": "Received By (User ID)" },
+    "errors": { "create_failed": "Failed to create payment" },
+    "a11y": { "table_label": "Payments", "table_caption": "Payments including invoice reference, amount, date, method, and receiver" }
+  },
+  "tax": {
+    "title": "Tax Reporting",
+    "status": { "loading": "Loading tax reports..." },
+    "fields": { "year": "Tax Year" },
+    "errors": { "load_failed": "Failed to load tax data" },
+    "contractor_payments": {
+      "title": "1099 Contractor Payments",
+      "contractor": "Contractor",
+      "tax_id": "SSN/EIN",
+      "total_payments": "Total Payments",
+      "actions": "Actions",
+      "not_provided": "Not provided",
+      "generate_1099": "Generate 1099",
+      "note": "Note: 1099 forms are required for payments of $600 or more to contractors."
+    },
+    "sales_tax": { "title": "Sales Tax Collected", "total_sales": "Total Sales", "tax_collected": "Tax Collected", "tax_rate": "Tax Rate" },
+    "business_expenses": { "title": "Business Expenses", "category": "Category", "total_amount": "Total Amount", "percentage": "Percentage of Total", "total_expenses": "Total Expenses" },
+    "summary": { "title": "Tax Year Summary", "revenue": "Revenue", "expenses": "Expenses", "net_income": "Net Income", "tax_liability": "Tax Liability (est.)", "effective_rate_note": "Based on 25% effective rate" },
+    "export": { "title": "Export Tax Data", "print": "Print Report", "csv": "Export to CSV", "pdf": "Export to PDF", "csv_alert": "CSV export functionality to be implemented", "pdf_alert": "PDF export functionality to be implemented" }
+  }
+}

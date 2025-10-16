@@ -1,0 +1,8 @@
+{
+  "contacts": {
+    "caption": "Contacts listing with name, email, phone, account, and owner"
+  },
+  "work_orders": {
+    "caption": "List of work orders with status and actions"
+  }
+}

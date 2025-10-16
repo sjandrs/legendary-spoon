@@ -1,13 +1,17 @@
 import React, { useState, useEffect, useContext } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { getProjects } from '../api';
 import TaskCalendar from './TaskCalendar';
 import ActivityTimeline from './ActivityTimeline';
 import AuthContext from '../contexts/AuthContext';
 import './TaskDashboard.css';
+import { useLocaleFormatting } from '../hooks/useLocaleFormatting';
 
 const TaskDashboard = () => {
   const { user } = useContext(AuthContext);
+  const { t } = useTranslation();
+  const { formatDate } = useLocaleFormatting();
   const [activeTab, setActiveTab] = useState('calendar');
   const [taskStats, setTaskStats] = useState({
     total: 0,
@@ -104,22 +108,22 @@ const TaskDashboard = () => {
   );
 
   if (loading) {
-    return <div className="task-dashboard loading">Loading dashboard...</div>;
+    return <div className="task-dashboard loading">{t('crm:tasks.loading_dashboard', 'Loading dashboard...')}</div>;
   }
 
   return (
     <div className="task-dashboard">
       <div className="dashboard-header">
-        <h1>Task & Activity Management</h1>
+        <h1>{t('crm:tasks.title', 'Task & Activity Management')}</h1>
         <div className="header-actions">
           <button
             onClick={() => window.location.reload()}
             className="refresh-btn"
           >
-            🔄 Refresh
+            🔄 {t('crm:tasks.refresh', 'Refresh')}
           </button>
           {user && user.is_superuser && (
-            <Link to="/tasks/admin" className="settings-btn" title="Task Settings">
+            <Link to="/tasks/admin" className="settings-btn" title={t('crm:tasks.settings_title', 'Task Settings')}>
               ⚙️
             </Link>
           )}
@@ -129,37 +133,37 @@ const TaskDashboard = () => {
       {/* Statistics Cards */}
       <div className="stats-grid">
         <StatCard
-          title="Total Tasks"
+          title={t('crm:tasks.stats.total', 'Total Tasks')}
           value={taskStats.total}
           color="#007bff"
           icon="📋"
         />
         <StatCard
-          title="Pending"
+          title={t('crm:tasks.stats.pending', 'Pending')}
           value={taskStats.pending}
           color="#ffc107"
           icon="⏳"
         />
         <StatCard
-          title="In Progress"
+          title={t('crm:tasks.stats.in_progress', 'In Progress')}
           value={taskStats.inProgress}
           color="#17a2b8"
           icon="🔄"
         />
         <StatCard
-          title="Completed"
+          title={t('crm:tasks.stats.completed', 'Completed')}
           value={taskStats.completed}
           color="#28a745"
           icon="✅"
         />
         <StatCard
-          title="Overdue"
+          title={t('crm:tasks.stats.overdue', 'Overdue')}
           value={taskStats.overdue}
           color="#dc3545"
           icon="⚠️"
         />
         <StatCard
-          title="Due This Week"
+          title={t('crm:tasks.stats.due_week', 'Due This Week')}
           value={taskStats.upcomingWeek}
           color="#fd7e14"
           icon="📅"
@@ -172,19 +176,19 @@ const TaskDashboard = () => {
           className={`tab-btn ${activeTab === 'calendar' ? 'active' : ''}`}
           onClick={() => setActiveTab('calendar')}
         >
-          📅 Calendar View
+          📅 {t('crm:tasks.tabs.calendar', 'Calendar View')}
         </button>
         <button
           className={`tab-btn ${activeTab === 'list' ? 'active' : ''}`}
           onClick={() => setActiveTab('list')}
         >
-          📝 Task List
+          📝 {t('crm:tasks.tabs.list', 'Task List')}
         </button>
         <button
           className={`tab-btn ${activeTab === 'activity' ? 'active' : ''}`}
           onClick={() => setActiveTab('activity')}
         >
-          ⏱️ Activity Timeline
+          ⏱️ {t('crm:tasks.tabs.activity', 'Activity Timeline')}
         </button>
       </div>
 
@@ -200,13 +204,13 @@ const TaskDashboard = () => {
           <div className="tab-panel">
             <div className="task-list-container">
               <div className="task-list-header">
-                <h3>Recent Tasks</h3>
-                <a href="/tasks" className="view-all-link">View All Tasks →</a>
+                <h3>{t('crm:tasks.recent', 'Recent Tasks')}</h3>
+                <a href="/tasks" className="view-all-link">{t('crm:tasks.view_all', 'View All Tasks →')}</a>
               </div>
 
               {recentTasks.length === 0 ? (
                 <div className="no-tasks">
-                  <p>No tasks found. Create your first task to get started!</p>
+                  <p>{t('crm:tasks.no_tasks', 'No tasks found. Create your first task to get started!')}</p>
                 </div>
               ) : (
                 <div className="task-list">
@@ -225,7 +229,7 @@ const TaskDashboard = () => {
                             className="task-status"
                             style={{ color: getStatusColor(task.status) }}
                           >
-                            {task.status ? task.status.replace('_', ' ') : 'No Status'}
+                            {task.status ? task.status.replace('_', ' ') : t('crm:tasks.no_status', 'No Status')}
                           </span>
                         </div>
                       </div>
@@ -235,11 +239,11 @@ const TaskDashboard = () => {
                           <p className="task-description">{task.description}</p>
                         )}
                         <div className="task-info">
-                          <span className="task-type">📋 {task.task_type ? task.task_type.replace('_', ' ') : 'No Type'}</span>
+                          <span className="task-type">📋 {task.task_type ? task.task_type.replace('_', ' ') : t('crm:tasks.no_type', 'No Type')}</span>
                           {task.due_date && (
                             <span className={`task-due ${task.is_overdue ? 'overdue' : ''}`}>
-                              📅 Due: {new Date(task.due_date).toLocaleDateString()}
-                              {task.is_overdue && ' (Overdue!)'}
+                              📅 {t('crm:tasks.due', 'Due:')} {formatDate(task.due_date)}
+                              {task.is_overdue && ` (${t('crm:tasks.overdue_exclaim', 'Overdue!')})`}
                             </span>
                           )}
                           {task.assigned_to_name && (

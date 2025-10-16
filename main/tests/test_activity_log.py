@@ -5,6 +5,7 @@ from rest_framework.test import APIClient, APITestCase
 
 from main.models import (
     ActivityLog,
+    Contact,
     DigitalSignature,
     InventoryReservation,
     Project,
@@ -25,8 +26,16 @@ class ActivityLogEndpointsTests(APITestCase):
         self.client.force_authenticate(user=self.user)
 
     def test_send_invoice_email_logs_activity(self):
-        # Minimal WorkOrder/Invoice
-        project = Project.objects.create(title="P1", created_by=self.user)
+        # Minimal WorkOrder/Invoice with proper setup including contact
+        contact = Contact.objects.create(
+            first_name="Test",
+            last_name="User",
+            email="test@example.com",
+            owner=self.user,
+        )
+        project = Project.objects.create(
+            title="P1", created_by=self.user, assigned_to=self.user, contact=contact
+        )
         wo = WorkOrder.objects.create(project=project)
         inv = WorkOrderInvoice.objects.create(
             work_order=wo,
@@ -35,7 +44,7 @@ class ActivityLogEndpointsTests(APITestCase):
             due_date=timezone.now().date(),
         )
         inv_id = getattr(inv, "id", None)
-        url = reverse("send_invoice_email", kwargs={"invoice_id": inv_id})
+        url = reverse("send-invoice-email", kwargs={"invoice_id": inv_id})
         resp = self.client.post(url)
         self.assertEqual(resp.status_code, 200)
         self.assertTrue(
@@ -65,7 +74,10 @@ class ActivityLogEndpointsTests(APITestCase):
             name="Widget", sku="W1", quantity=10, minimum_stock=1, unit_cost=1
         )
         res = InventoryReservation.objects.create(
-            scheduled_event=event, warehouse_item=item, quantity_reserved=5
+            scheduled_event=event,
+            warehouse_item=item,
+            quantity_reserved=5,
+            reserved_by=self.user,
         )
         res_id = getattr(res, "id", None)
         url = reverse("inventoryreservation-consume", kwargs={"pk": res_id})

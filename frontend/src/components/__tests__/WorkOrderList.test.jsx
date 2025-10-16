@@ -1,5 +1,6 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { expectNoAxeViolations } from '../../__tests__/helpers/test-utils';
 import { jest } from '@jest/globals';
 import WorkOrderList from '../WorkOrderList';
 import * as api from '../../api';
@@ -496,6 +497,15 @@ describe('WorkOrderList', () => {
           expect(badge).toHaveStyle({ color: 'white' });
         });
       });
+    });
+
+    it('has no obvious accessibility violations (axe)', async () => {
+      api.getWorkOrders.mockResolvedValue({ data: { results: mockWorkOrders } });
+      const { container } = render(<WorkOrderList />);
+      await waitFor(() => {
+        expect(screen.getByRole('table')).toBeInTheDocument();
+      });
+      await expectNoAxeViolations(container);
     });
   });
 

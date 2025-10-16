@@ -1,0 +1,117 @@
+{
+	"reports": {
+		"title": "__STRING_NOT_TRANSLATED__",
+		"errors": { "load_failed": "__STRING_NOT_TRANSLATED__" },
+		"as_of": "__STRING_NOT_TRANSLATED__",
+		"period_start": "__STRING_NOT_TRANSLATED__",
+		"period_end": "__STRING_NOT_TRANSLATED__",
+		"refresh": "__STRING_NOT_TRANSLATED__",
+		"export_csv": "__STRING_NOT_TRANSLATED__",
+		"export_pdf": "__STRING_NOT_TRANSLATED__",
+		"tabs": {
+			"balance_sheet": "__STRING_NOT_TRANSLATED__",
+			"profit_loss": "__STRING_NOT_TRANSLATED__",
+			"cash_flow": "__STRING_NOT_TRANSLATED__"
+		},
+		"balance_sheet_title": "__STRING_NOT_TRANSLATED__",
+		"assets": "__STRING_NOT_TRANSLATED__",
+		"total_assets": "__STRING_NOT_TRANSLATED__",
+		"liabilities": "__STRING_NOT_TRANSLATED__",
+		"total_liabilities": "__STRING_NOT_TRANSLATED__",
+		"equity": "__STRING_NOT_TRANSLATED__",
+		"total_equity": "__STRING_NOT_TRANSLATED__",
+		"profit_loss_title": "__STRING_NOT_TRANSLATED__",
+		"revenue": "__STRING_NOT_TRANSLATED__",
+		"total_revenue": "__STRING_NOT_TRANSLATED__",
+		"expenses": "__STRING_NOT_TRANSLATED__",
+		"total_expenses": "__STRING_NOT_TRANSLATED__",
+		"net_profit": "__STRING_NOT_TRANSLATED__",
+		"cash_flow_title": "__STRING_NOT_TRANSLATED__",
+		"operating_activities": "__STRING_NOT_TRANSLATED__",
+		"investing_activities": "__STRING_NOT_TRANSLATED__",
+		"financing_activities": "__STRING_NOT_TRANSLATED__",
+		"net_cash_flow": "__STRING_NOT_TRANSLATED__",
+		"note": "__STRING_NOT_TRANSLATED__"
+	},
+	"accounting": {
+		"title": "__STRING_NOT_TRANSLATED__",
+		"description": "__STRING_NOT_TRANSLATED__"
+	},
+	"invoicing": {
+		"title": "__STRING_NOT_TRANSLATED__",
+		"description": "__STRING_NOT_TRANSLATED__"
+		},
+		"budget": {
+			"title": "__STRING_NOT_TRANSLATED__",
+			"status": { "loading": "__STRING_NOT_TRANSLATED__" },
+			"actions": { "create": "__STRING_NOT_TRANSLATED__", "edit": "__STRING_NOT_TRANSLATED__" },
+			"table": {
+				"category": "__STRING_NOT_TRANSLATED__",
+				"period": "__STRING_NOT_TRANSLATED__",
+				"budgeted_amount": "__STRING_NOT_TRANSLATED__",
+				"spent_amount": "__STRING_NOT_TRANSLATED__",
+				"variance": "__STRING_NOT_TRANSLATED__",
+				"percent_used": "__STRING_NOT_TRANSLATED__",
+				"actions": "__STRING_NOT_TRANSLATED__"
+			},
+			"a11y": { "table_label": "__STRING_NOT_TRANSLATED__", "table_caption": "__STRING_NOT_TRANSLATED__" },
+			"errors": { "load_failed": "__STRING_NOT_TRANSLATED__" },
+			"empty": "__STRING_NOT_TRANSLATED__",
+			"empty_cta": "__STRING_NOT_TRANSLATED__",
+			"empty_suffix": "__STRING_NOT_TRANSLATED__"
+		},
+		"expense": {
+			"title_add": "__STRING_NOT_TRANSLATED__",
+			"title_edit": "__STRING_NOT_TRANSLATED__",
+			"fields": { "date": "__STRING_NOT_TRANSLATED__", "category": "__STRING_NOT_TRANSLATED__", "description": "__STRING_NOT_TRANSLATED__", "vendor": "__STRING_NOT_TRANSLATED__", "amount": "__STRING_NOT_TRANSLATED__", "receipt": "__STRING_NOT_TRANSLATED__" },
+			"categories": { "office_supplies": "__STRING_NOT_TRANSLATED__", "travel": "__STRING_NOT_TRANSLATED__", "meals": "__STRING_NOT_TRANSLATED__", "utilities": "__STRING_NOT_TRANSLATED__", "rent": "__STRING_NOT_TRANSLATED__", "marketing": "__STRING_NOT_TRANSLATED__", "software": "__STRING_NOT_TRANSLATED__", "equipment": "__STRING_NOT_TRANSLATED__", "professional_services": "__STRING_NOT_TRANSLATED__", "other": "__STRING_NOT_TRANSLATED__" },
+			"actions": { "add": "__STRING_NOT_TRANSLATED__", "update": "__STRING_NOT_TRANSLATED__", "cancel": "__STRING_NOT_TRANSLATED__" },
+			"status": { "saving": "__STRING_NOT_TRANSLATED__" },
+			"hints": { "receipt_existing": "__STRING_NOT_TRANSLATED__" },
+			"errors": { "load_failed": "__STRING_NOT_TRANSLATED__", "save_failed": "__STRING_NOT_TRANSLATED__" }
+		},
+		"expense_list": {
+			"title": "__STRING_NOT_TRANSLATED__",
+			"actions": { "add": "__STRING_NOT_TRANSLATED__", "approve": "__STRING_NOT_TRANSLATED__", "edit": "__STRING_NOT_TRANSLATED__" },
+			"table": { "date": "__STRING_NOT_TRANSLATED__", "category": "__STRING_NOT_TRANSLATED__", "description": "__STRING_NOT_TRANSLATED__", "vendor": "__STRING_NOT_TRANSLATED__", "amount": "__STRING_NOT_TRANSLATED__", "status": "__STRING_NOT_TRANSLATED__", "actions": "__STRING_NOT_TRANSLATED__" },
+			"status": { "loading": "__STRING_NOT_TRANSLATED__", "approved": "__STRING_NOT_TRANSLATED__", "pending": "__STRING_NOT_TRANSLATED__" },
+			"a11y": { "table_label": "__STRING_NOT_TRANSLATED__", "table_caption": "__STRING_NOT_TRANSLATED__" },
+			"errors": { "load_failed": "__STRING_NOT_TRANSLATED__" }
+		},
+		"ledger": {
+			"status": { "loading": "__STRING_NOT_TRANSLATED__", "creating": "__STRING_NOT_TRANSLATED__" },
+			"actions": { "create": "__STRING_NOT_TRANSLATED__" },
+			"table": { "id": "__STRING_NOT_TRANSLATED__", "name": "__STRING_NOT_TRANSLATED__", "code": "__STRING_NOT_TRANSLATED__", "type": "__STRING_NOT_TRANSLATED__" },
+			"form": { "name": "__STRING_NOT_TRANSLATED__", "name_aria": "__STRING_NOT_TRANSLATED__", "code": "__STRING_NOT_TRANSLATED__", "code_aria": "__STRING_NOT_TRANSLATED__", "type": "__STRING_NOT_TRANSLATED__" },
+			"types": { "asset": "__STRING_NOT_TRANSLATED__", "liability": "__STRING_NOT_TRANSLATED__", "equity": "__STRING_NOT_TRANSLATED__", "revenue": "__STRING_NOT_TRANSLATED__", "expense": "__STRING_NOT_TRANSLATED__" },
+			"errors": { "create_failed": "__STRING_NOT_TRANSLATED__" },
+			"a11y": { "table_label": "__STRING_NOT_TRANSLATED__", "table_caption": "__STRING_NOT_TRANSLATED__" }
+		},
+		"journal": {
+			"status": { "loading": "__STRING_NOT_TRANSLATED__", "creating": "__STRING_NOT_TRANSLATED__" },
+			"actions": { "create": "__STRING_NOT_TRANSLATED__" },
+			"table": { "id": "__STRING_NOT_TRANSLATED__", "date": "__STRING_NOT_TRANSLATED__", "description": "__STRING_NOT_TRANSLATED__", "debit": "__STRING_NOT_TRANSLATED__", "credit": "__STRING_NOT_TRANSLATED__", "amount": "__STRING_NOT_TRANSLATED__" },
+			"form": { "date": "__STRING_NOT_TRANSLATED__", "description": "__STRING_NOT_TRANSLATED__", "description_aria": "__STRING_NOT_TRANSLATED__", "debit_account": "__STRING_NOT_TRANSLATED__", "debit_account_aria": "__STRING_NOT_TRANSLATED__", "credit_account": "__STRING_NOT_TRANSLATED__", "credit_account_aria": "__STRING_NOT_TRANSLATED__", "amount": "__STRING_NOT_TRANSLATED__", "amount_aria": "__STRING_NOT_TRANSLATED__" },
+			"errors": { "create_failed": "__STRING_NOT_TRANSLATED__" },
+			"a11y": { "table_label": "__STRING_NOT_TRANSLATED__", "table_caption": "__STRING_NOT_TRANSLATED__" }
+		},
+		"payments": {
+			"status": { "loading": "__STRING_NOT_TRANSLATED__", "creating": "__STRING_NOT_TRANSLATED__" },
+			"actions": { "create": "__STRING_NOT_TRANSLATED__" },
+			"table": { "id": "__STRING_NOT_TRANSLATED__", "invoice": "__STRING_NOT_TRANSLATED__", "amount": "__STRING_NOT_TRANSLATED__", "payment_date": "__STRING_NOT_TRANSLATED__", "method": "__STRING_NOT_TRANSLATED__", "received_by": "__STRING_NOT_TRANSLATED__" },
+			"form": { "content_type": "__STRING_NOT_TRANSLATED__", "object_id": "__STRING_NOT_TRANSLATED__", "amount": "__STRING_NOT_TRANSLATED__", "method": "__STRING_NOT_TRANSLATED__", "received_by": "__STRING_NOT_TRANSLATED__" },
+			"errors": { "create_failed": "__STRING_NOT_TRANSLATED__" },
+			"a11y": { "table_label": "__STRING_NOT_TRANSLATED__", "table_caption": "__STRING_NOT_TRANSLATED__" }
+		},
+		"tax": {
+			"title": "__STRING_NOT_TRANSLATED__",
+			"status": { "loading": "__STRING_NOT_TRANSLATED__" },
+			"fields": { "year": "__STRING_NOT_TRANSLATED__" },
+			"errors": { "load_failed": "__STRING_NOT_TRANSLATED__" },
+			"contractor_payments": { "title": "__STRING_NOT_TRANSLATED__", "contractor": "__STRING_NOT_TRANSLATED__", "tax_id": "__STRING_NOT_TRANSLATED__", "total_payments": "__STRING_NOT_TRANSLATED__", "actions": "__STRING_NOT_TRANSLATED__", "not_provided": "__STRING_NOT_TRANSLATED__", "generate_1099": "__STRING_NOT_TRANSLATED__", "note": "__STRING_NOT_TRANSLATED__" },
+			"sales_tax": { "title": "__STRING_NOT_TRANSLATED__", "total_sales": "__STRING_NOT_TRANSLATED__", "tax_collected": "__STRING_NOT_TRANSLATED__", "tax_rate": "__STRING_NOT_TRANSLATED__" },
+			"business_expenses": { "title": "__STRING_NOT_TRANSLATED__", "category": "__STRING_NOT_TRANSLATED__", "total_amount": "__STRING_NOT_TRANSLATED__", "percentage": "__STRING_NOT_TRANSLATED__", "total_expenses": "__STRING_NOT_TRANSLATED__" },
+			"summary": { "title": "__STRING_NOT_TRANSLATED__", "revenue": "__STRING_NOT_TRANSLATED__", "expenses": "__STRING_NOT_TRANSLATED__", "net_income": "__STRING_NOT_TRANSLATED__", "tax_liability": "__STRING_NOT_TRANSLATED__", "effective_rate_note": "__STRING_NOT_TRANSLATED__" },
+			"export": { "title": "__STRING_NOT_TRANSLATED__", "print": "__STRING_NOT_TRANSLATED__", "csv": "__STRING_NOT_TRANSLATED__", "pdf": "__STRING_NOT_TRANSLATED__", "csv_alert": "__STRING_NOT_TRANSLATED__", "pdf_alert": "__STRING_NOT_TRANSLATED__" }
+		}
+}

@@ -1,0 +1,55 @@
+{
+  "contacts": {
+    "my_contacts": "__STRING_NOT_TRANSLATED__",
+    "no_contacts": "__STRING_NOT_TRANSLATED__",
+    "add_contact": "__STRING_NOT_TRANSLATED__",
+    "title": "__STRING_NOT_TRANSLATED__",
+    "description": "__STRING_NOT_TRANSLATED__",
+    "create_new": "__STRING_NOT_TRANSLATED__",
+    "owner": "__STRING_NOT_TRANSLATED__",
+    "no_contacts_get_started": "__STRING_NOT_TRANSLATED__",
+    "edit_contact": "__STRING_NOT_TRANSLATED__",
+    "save_contact": "__STRING_NOT_TRANSLATED__",
+    "not_found": "__STRING_NOT_TRANSLATED__",
+    "create_task": "__STRING_NOT_TRANSLATED__",
+    "custom_fields": "__STRING_NOT_TRANSLATED__"
+  },
+  "accounts": {
+    "title": "__STRING_NOT_TRANSLATED__"
+  },
+  "deals": {
+    "not_found": "__STRING_NOT_TRANSLATED__",
+    "deal_information": "__STRING_NOT_TRANSLATED__",
+    "owner": "__STRING_NOT_TRANSLATED__",
+    "value": "__STRING_NOT_TRANSLATED__",
+    "stage": "__STRING_NOT_TRANSLATED__",
+    "expected_close_date": "__STRING_NOT_TRANSLATED__",
+    "associated_parties": "__STRING_NOT_TRANSLATED__"
+  },
+  "tasks": {
+    "loading_dashboard": "__STRING_NOT_TRANSLATED__",
+    "title": "__STRING_NOT_TRANSLATED__",
+    "refresh": "__STRING_NOT_TRANSLATED__",
+    "settings_title": "__STRING_NOT_TRANSLATED__",
+    "stats": {
+      "total": "__STRING_NOT_TRANSLATED__",
+      "pending": "__STRING_NOT_TRANSLATED__",
+      "in_progress": "__STRING_NOT_TRANSLATED__",
+      "completed": "__STRING_NOT_TRANSLATED__",
+      "overdue": "__STRING_NOT_TRANSLATED__",
+      "due_week": "__STRING_NOT_TRANSLATED__"
+    },
+    "tabs": {
+      "calendar": "__STRING_NOT_TRANSLATED__",
+      "list": "__STRING_NOT_TRANSLATED__",
+      "activity": "__STRING_NOT_TRANSLATED__"
+    },
+    "recent": "__STRING_NOT_TRANSLATED__",
+    "view_all": "__STRING_NOT_TRANSLATED__",
+    "no_tasks": "__STRING_NOT_TRANSLATED__",
+    "no_status": "__STRING_NOT_TRANSLATED__",
+    "no_type": "__STRING_NOT_TRANSLATED__",
+    "due": "__STRING_NOT_TRANSLATED__",
+    "overdue_exclaim": "__STRING_NOT_TRANSLATED__"
+  }
+}

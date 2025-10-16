@@ -1,6 +1,7 @@
 import { http, HttpResponse } from 'msw';
 
-const API_BASE_URL = 'http://127.0.0.1:8000/api';
+// Use a host-agnostic prefix so requests to localhost or 127.0.0.1 are intercepted equally
+const API_BASE_URL = '*/api';
 
 // Mock data
 const mockContacts = [
@@ -217,6 +218,72 @@ const mockPayments = [
     status: 'pending',
     created_at: '2025-01-01T00:00:00Z',
     updated_at: '2025-01-01T00:00:00Z',
+  },
+];
+
+// Certifications
+const mockCertifications = [
+  {
+    id: 1,
+    name: 'HVAC Certification',
+    description: 'Heating, Ventilation, and Air Conditioning certification',
+    issuing_authority: 'HVAC Institute',
+    validity_period_months: 24,
+    required_for_roles: ['HVAC Technician', 'Senior Technician'],
+    is_active: true,
+    created_at: '2023-01-01T00:00:00Z',
+    updated_at: '2023-01-01T00:00:00Z',
+  },
+  {
+    id: 2,
+    name: 'Electrical Certification',
+    description: 'Electrical systems certification',
+    issuing_authority: 'Electrical Board',
+    validity_period_months: 36,
+    required_for_roles: ['Electrician'],
+    is_active: true,
+    created_at: '2023-02:01T00:00:00Z',
+    updated_at: '2023-02:01T00:00:00Z',
+  },
+];
+
+// Technician Certifications (join records)
+const mockTechnicianCertifications = [
+  {
+    id: 1,
+    technician: 1,
+    technician_name: 'John Doe',
+    certification: {
+      id: 1,
+      name: 'HVAC Certification',
+      category: 'HVAC',
+      tech_level: 'Intermediate',
+    },
+    certification_name: 'HVAC Certification',
+    obtained_date: '2023-01-15',
+    expiration_date: '2026-01-15',
+    certificate_number: 'HVAC-2023-001',
+    is_current: true,
+    days_until_expiration: 365,
+    status: 'valid',
+  },
+  {
+    id: 2,
+    technician: 2,
+    technician_name: 'Jane Smith',
+    certification: {
+      id: 2,
+      name: 'Electrical Certification',
+      category: 'Electrical',
+      tech_level: 'Senior',
+    },
+    certification_name: 'Electrical Certification',
+    obtained_date: '2023-05-01',
+    expiration_date: '2024-12-15',
+    certificate_number: 'ELE-2023-010',
+    is_current: true,
+    days_until_expiration: 15,
+    status: 'expiring_soon',
   },
 ];
 
@@ -509,6 +576,94 @@ const handlers = [
     return HttpResponse.json(payment, { status: 201 });
   }),
 
+  // Certifications endpoints
+  http.get(`${API_BASE_URL}/certifications/`, ({ request }) => {
+    const url = new URL(request.url);
+    const search = url.searchParams.get('search')?.toLowerCase();
+    const authority = url.searchParams.get('issuing_authority');
+    let items = [...mockCertifications];
+    if (search) {
+      items = items.filter((c) => c.name.toLowerCase().includes(search));
+    }
+    if (authority) {
+      items = items.filter((c) => c.issuing_authority === authority);
+    }
+    return HttpResponse.json({ count: items.length, results: items });
+  }),
+
+  http.get(`${API_BASE_URL}/certifications/:id/`, ({ params }) => {
+    const item = mockCertifications.find((c) => c.id === parseInt(params.id));
+    if (!item) return HttpResponse.json({ detail: 'Not found' }, { status: 404 });
+    return HttpResponse.json(item);
+  }),
+
+  http.post(`${API_BASE_URL}/certifications/`, async ({ request }) => {
+    const data = await request.json();
+    const item = {
+      id: mockCertifications.length + 1,
+      description: '',
+      required_for_roles: [],
+      is_active: true,
+      ...data,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    };
+    mockCertifications.push(item);
+    return HttpResponse.json(item, { status: 201 });
+  }),
+
+  http.put(`${API_BASE_URL}/certifications/:id/`, async ({ params, request }) => {
+    const idx = mockCertifications.findIndex((c) => c.id === parseInt(params.id));
+    if (idx === -1) return HttpResponse.json({ detail: 'Not found' }, { status: 404 });
+    const data = await request.json();
+    mockCertifications[idx] = { ...mockCertifications[idx], ...data, updated_at: new Date().toISOString() };
+    return HttpResponse.json(mockCertifications[idx]);
+  }),
+
+  http.delete(`${API_BASE_URL}/certifications/:id/`, ({ params }) => {
+    const idx = mockCertifications.findIndex((c) => c.id === parseInt(params.id));
+    if (idx === -1) return HttpResponse.json({ detail: 'Not found' }, { status: 404 });
+    mockCertifications.splice(idx, 1);
+    return new HttpResponse(null, { status: 204 });
+  }),
+
+  // Technician Certifications endpoints
+  http.get(`${API_BASE_URL}/technician-certifications/`, ({ request }) => {
+    const url = new URL(request.url);
+    const status = url.searchParams.get('status');
+    const technician = url.searchParams.get('technician');
+    const sort = url.searchParams.get('sort');
+    let items = [...mockTechnicianCertifications];
+    if (status) items = items.filter((tc) => tc.status === status);
+    if (technician) items = items.filter((tc) => `${tc.technician}` === `${technician}`);
+    if (sort === 'expiration_date') {
+      items.sort((a, b) => new Date(a.expiration_date) - new Date(b.expiration_date));
+    }
+    return HttpResponse.json({ count: items.length, results: items });
+  }),
+
+  http.post(`${API_BASE_URL}/technician-certifications/`, async ({ request }) => {
+    const data = await request.json();
+    const item = { id: mockTechnicianCertifications.length + 1, ...data };
+    mockTechnicianCertifications.push(item);
+    return HttpResponse.json(item, { status: 201 });
+  }),
+
+  http.put(`${API_BASE_URL}/technician-certifications/:id/`, async ({ params, request }) => {
+    const idx = mockTechnicianCertifications.findIndex((c) => c.id === parseInt(params.id));
+    if (idx === -1) return HttpResponse.json({ detail: 'Not found' }, { status: 404 });
+    const data = await request.json();
+    mockTechnicianCertifications[idx] = { ...mockTechnicianCertifications[idx], ...data };
+    return HttpResponse.json(mockTechnicianCertifications[idx]);
+  }),
+
+  http.delete(`${API_BASE_URL}/technician-certifications/:id/`, ({ params }) => {
+    const idx = mockTechnicianCertifications.findIndex((c) => c.id === parseInt(params.id));
+    if (idx === -1) return HttpResponse.json({ detail: 'Not found' }, { status: 404 });
+    mockTechnicianCertifications.splice(idx, 1);
+    return new HttpResponse(null, { status: 204 });
+  }),
+
   // Dashboard analytics
   http.get(`${API_BASE_URL}/analytics/dashboard/`, () => {
     return HttpResponse.json({
@@ -523,6 +678,184 @@ const handlers = [
       low_stock_items: mockWarehouseItems.filter(item => item.status === 'low_stock').length,
       pending_expenses: mockExpenses.filter(exp => exp.status === 'pending').length,
     });
+  }),
+
+  // Blog Posts endpoints
+  http.get(`${API_BASE_URL}/blog-posts/`, () => {
+    return HttpResponse.json({
+        count: 3,
+        next: null,
+        previous: null,
+        results: [
+          {
+            id: 1,
+            title: 'Test Blog Post 1',
+            slug: 'test-blog-post-1',
+            content: 'This is test content for blog post 1',
+            status: 'published',
+            author: { id: 1, username: 'admin' },
+            tags: ['test', 'blog'],
+            created_at: '2025-01-15T10:00:00Z',
+            updated_at: '2025-01-15T10:00:00Z',
+            published_at: '2025-01-15T10:00:00Z',
+          },
+          {
+            id: 2,
+            title: 'Test Blog Post 2',
+            slug: 'test-blog-post-2',
+            content: 'This is test content for blog post 2',
+            status: 'draft',
+            author: { id: 1, username: 'admin' },
+            tags: ['test'],
+            created_at: '2025-01-14T10:00:00Z',
+            updated_at: '2025-01-14T10:00:00Z',
+            published_at: null,
+          },
+          {
+            id: 3,
+            title: 'Test Blog Post 3',
+            slug: 'test-blog-post-3',
+            content: 'This is test content for blog post 3',
+            status: 'published',
+            author: { id: 2, username: 'editor' },
+            tags: [],
+            created_at: '2025-01-13T10:00:00Z',
+            updated_at: '2025-01-13T10:00:00Z',
+            published_at: '2025-01-13T10:00:00Z',
+          },
+        ],
+      });
+  }),
+
+  http.get(`${API_BASE_URL}/blog-posts/:id/`, ({ params }) => {
+    const blogPosts = [
+      {
+        id: 1,
+        title: 'Test Blog Post 1',
+        slug: 'test-blog-post-1',
+        content: 'This is test content for blog post 1',
+        status: 'published',
+        author: { id: 1, username: 'admin' },
+        tags: ['test', 'blog'],
+        created_at: '2025-01-15T10:00:00Z',
+        updated_at: '2025-01-15T10:00:00Z',
+        published_at: '2025-01-15T10:00:00Z',
+      },
+      {
+        id: 2,
+        title: 'Test Blog Post 2',
+        slug: 'test-blog-post-2',
+        content: 'This is test content for blog post 2',
+        status: 'draft',
+        author: { id: 1, username: 'admin' },
+        tags: ['test'],
+        created_at: '2025-01-14T10:00:00Z',
+        updated_at: '2025-01-14T10:00:00Z',
+        published_at: null,
+      },
+      {
+        id: 3,
+        title: 'Test Blog Post 3',
+        slug: 'test-blog-post-3',
+        content: 'This is test content for blog post 3',
+        status: 'published',
+        author: { id: 2, username: 'editor' },
+        tags: [],
+        created_at: '2025-01-13T10:00:00Z',
+        updated_at: '2025-01-13T10:00:00Z',
+        published_at: '2025-01-13T10:00:00Z',
+      },
+    ];
+
+    const post = blogPosts.find(p => p.id === parseInt(params.id));
+    if (!post) {
+      return HttpResponse.json({ error: 'Blog post not found' }, { status: 404 });
+    }
+    return HttpResponse.json(post);
+  }),
+
+  http.post(`${API_BASE_URL}/blog-posts/`, async ({ request }) => {
+    const newPost = await request.json();
+    const post = {
+      id: Date.now(),
+      ...newPost,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    };
+    return HttpResponse.json(post, { status: 201 });
+  }),
+
+  // Pages endpoints
+  http.get(`${API_BASE_URL}/pages/`, () => {
+    return HttpResponse.json({
+        count: 2,
+        results: [
+          {
+            id: 1,
+            title: 'About Us',
+            slug: 'about-us',
+            content: '<p>About us content</p>',
+            meta_title: 'About Us | Company',
+            meta_description: 'Learn about our company',
+            is_published: true,
+            created_at: '2025-01-15T10:00:00Z',
+            updated_at: '2025-01-15T10:00:00Z',
+          },
+          {
+            id: 2,
+            title: 'Contact',
+            slug: 'contact',
+            content: '<p>Contact us</p>',
+            meta_title: 'Contact Us',
+            meta_description: 'Get in touch',
+            is_published: false,
+            created_at: '2025-01-14T10:00:00Z',
+            updated_at: '2025-01-14T10:00:00Z',
+          },
+        ],
+      });
+  }),
+
+  // Notifications endpoints
+  http.get(`${API_BASE_URL}/notifications/`, () => {
+    return HttpResponse.json({
+        count: 3,
+        results: [
+          {
+            id: 1,
+            type: 'info',
+            title: 'New Message',
+            message: 'You have a new message from John Doe',
+            is_read: false,
+            created_at: '2025-01-16T10:00:00Z',
+          },
+          {
+            id: 2,
+            type: 'warning',
+            title: 'Deadline Approaching',
+            message: 'Project deadline is in 2 days',
+            is_read: false,
+            created_at: '2025-01-15T10:00:00Z',
+          },
+          {
+            id: 3,
+            type: 'success',
+            title: 'Task Completed',
+            message: 'Task #123 has been completed',
+            is_read: true,
+            created_at: '2025-01-14T10:00:00Z',
+          },
+        ],
+      });
+  }),
+
+  http.patch(`${API_BASE_URL}/notifications/:id/`, async ({ request, params }) => {
+    const body = await request.json();
+    return HttpResponse.json({ ...body, id: parseInt(params.id) }, { status: 200 });
+  }),
+
+  http.delete(`${API_BASE_URL}/notifications/:id/`, () => {
+    return new HttpResponse(null, { status: 204 });
   }),
 
   // Error simulation endpoints

@@ -1,8 +1,13 @@
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { getWorkOrders } from '../api';
 import api from '../api';
+import { useLocaleFormatting } from '../hooks/useLocaleFormatting';
 
 const WorkOrderList = () => {
+  const { t } = useTranslation(['operational', 'common', 'a11y']);
+  const { formatDate } = useLocaleFormatting();
+
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [sendingNotification, setSendingNotification] = useState(null);
@@ -24,12 +29,12 @@ const WorkOrderList = () => {
         work_order_id: workOrder.id,
         customer_phone: workOrder.customer_phone,
         customer_email: workOrder.customer_email,
-        technician_name: workOrder.technician_name || 'Technician',
+        technician_name: workOrder.technician_name || t('common:common.technician', 'Technician'),
         estimated_arrival: calculateETA()
       });
 
       if (response.status === 200) {
-        setMessage(`"On My Way" notification sent successfully to customer!`);
+        setMessage(t('operational:work_orders.messages.sent', '"On My Way" notification sent successfully to customer!'));
         // Update the work order status locally
         setOrders(orders.map(order =>
           order.id === workOrder.id
@@ -39,7 +44,7 @@ const WorkOrderList = () => {
       }
     } catch (_err) {
       console.error('Error sending notification:', _err);
-      setMessage('Error sending notification. Please try again.');
+      setMessage(t('operational:work_orders.messages.error', 'Error sending notification. Please try again.'));
     } finally {
       setSendingNotification(null);
       // Clear message after 5 seconds
@@ -71,37 +76,38 @@ const WorkOrderList = () => {
     return colors[status] || '#6b7280';
   };
 
-  if (loading) return <div>Loading...</div>;
+  if (loading) return <div>{t('common:status.loading', 'Loading...')}</div>;
 
   return (
     <div className="work-order-list">
       {message && (
-        <div className={`notification-message ${message.includes('Error') ? 'error' : 'success'}`}>
+        <div className={`notification-message ${message.includes('Error') ? 'error' : 'success'}`} role="alert" aria-live="assertive">
           {message}
         </div>
       )}
 
-      <table className="striped-table">
+      <table className="striped-table" role="table" aria-label={t('operational:work_orders.title', 'Work Orders')}>
+        <caption className="sr-only">{t('a11y:work_orders.caption', 'List of work orders with status and actions')}</caption>
         <thead>
           <tr>
-            <th>ID</th>
-            <th>Project</th>
-            <th>Description</th>
-            <th>Technician</th>
-            <th>Customer</th>
-            <th>Status</th>
-            <th>Created</th>
-            <th>Actions</th>
+            <th scope="col" id="wo-id" role="columnheader">{t('operational:work_orders.columns.id', 'ID')}</th>
+            <th scope="col" id="wo-project" role="columnheader">{t('operational:work_orders.columns.project', 'Project')}</th>
+            <th scope="col" id="wo-description" role="columnheader">{t('operational:work_orders.columns.description', 'Description')}</th>
+            <th scope="col" id="wo-tech" role="columnheader">{t('operational:work_orders.columns.technician', 'Technician')}</th>
+            <th scope="col" id="wo-customer" role="columnheader">{t('operational:work_orders.columns.customer', 'Customer')}</th>
+            <th scope="col" id="wo-status" role="columnheader">{t('operational:work_orders.columns.status', 'Status')}</th>
+            <th scope="col" id="wo-created" role="columnheader">{t('operational:work_orders.columns.created', 'Created')}</th>
+            <th scope="col" id="wo-actions" role="columnheader">{t('operational:work_orders.columns.actions', 'Actions')}</th>
           </tr>
         </thead>
         <tbody>
           {orders.map(order => (
             <tr key={order.id}>
-              <td>#{order.id}</td>
-              <td>{order.project_name || order.project}</td>
-              <td>{order.description}</td>
-              <td>{order.technician_name || 'Unassigned'}</td>
-              <td>
+              <td headers="wo-id">#{order.id}</td>
+              <td headers="wo-project">{order.project_name || order.project}</td>
+              <td headers="wo-description">{order.description}</td>
+              <td headers="wo-tech">{order.technician_name || t('operational:work_orders.statuses.unassigned', 'Unassigned')}</td>
+              <td headers="wo-customer">
                 {order.customer_name && (
                   <div>
                     <div>{order.customer_name}</div>
@@ -109,7 +115,7 @@ const WorkOrderList = () => {
                   </div>
                 )}
               </td>
-              <td>
+              <td headers="wo-status">
                 <span
                   className="status-badge"
                   style={{
@@ -121,11 +127,22 @@ const WorkOrderList = () => {
                     fontWeight: '500'
                   }}
                 >
-                  {order.status?.replace('_', ' ').toUpperCase()}
+                  {(() => {
+                    const keyMap = {
+                      pending: 'pending',
+                      assigned: 'assigned',
+                      in_progress: 'in_progress',
+                      en_route: 'en_route',
+                      completed: 'completed',
+                      cancelled: 'cancelled',
+                    };
+                    const k = keyMap[order.status] || 'unknown';
+                    return t(`operational:work_orders.statuses.${k}`, order.status?.replace('_', ' ').toUpperCase());
+                  })()}
                 </span>
               </td>
-              <td>{new Date(order.created_at).toLocaleDateString()}</td>
-              <td>
+              <td headers="wo-created">{formatDate(order.created_at)}</td>
+              <td headers="wo-actions">
                 {canSendOnMyWay(order) && (
                   <button
                     className="on-my-way-btn"
@@ -143,8 +160,11 @@ const WorkOrderList = () => {
                       opacity: sendingNotification === order.id ? 0.5 : 1,
                       transition: 'all 0.2s'
                     }}
+                    aria-label={t('operational:work_orders.aria.send_on_my_way', 'Send On My Way notification for work order {{id}}', { id: order.id })}
                   >
-                    {sendingNotification === order.id ? '📱 Sending...' : '🚗 On My Way'}
+                    {sendingNotification === order.id
+                      ? t('operational:work_orders.buttons.sending', '📱 Sending...')
+                      : t('operational:work_orders.buttons.on_my_way', '🚗 On My Way')}
                   </button>
                 )}
               </td>

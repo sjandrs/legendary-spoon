@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import api from '../api';
 import LoadingSkeleton from './LoadingSkeleton'; // TASK-083
 import './QuoteList.css';
+import { useLocaleFormatting } from '../hooks/useLocaleFormatting';
 
 function QuoteList() {
   const [quotes, setQuotes] = useState([]);
@@ -12,6 +13,9 @@ function QuoteList() {
   const [statusFilter, setStatusFilter] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+
+  // Locale-aware formatting utilities
+  const { formatCurrency, formatDate } = useLocaleFormatting();
 
   useEffect(() => {
     fetchQuotes();
@@ -65,20 +69,13 @@ function QuoteList() {
     return <span className={statusInfo.className}>{statusInfo.label}</span>;
   };
 
-  const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-    }).format(amount || 0);
+  const formatCurrencyDisplay = (amount) => {
+    return formatCurrency(amount || 0, 'USD');
   };
 
-  const formatDate = (dateString) => {
+  const formatDateDisplay = (dateString) => {
     if (!dateString) return 'N/A';
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-    });
+    return formatDate(dateString);
   };
 
   // TASK-083: Loading skeleton for better perceived performance
@@ -172,9 +169,9 @@ function QuoteList() {
                     </td>
                     <td>{quote.account_name || 'N/A'}</td>
                     <td>{quote.contact_name || 'N/A'}</td>
-                    <td className="amount-cell">{formatCurrency(quote.total_amount)}</td>
+                    <td className="amount-cell">{formatCurrencyDisplay(quote.total_amount)}</td>
                     <td>{getStatusBadge(quote.status)}</td>
-                    <td>{formatDate(quote.valid_until)}</td>
+                    <td>{formatDateDisplay(quote.valid_until)}</td>
                     <td>
                       <div className="action-buttons">
                         <Link to={`/quotes/${quote.id}`} className="btn-view">

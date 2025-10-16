@@ -421,19 +421,84 @@ const SaveSearchModal = ({ onSave, onClose }) => {
   const [description, setDescription] = useState('');
   const [isPublic, setIsPublic] = useState(false);
 
+  const modalRef = React.useRef(null);
+  const closeBtnRef = React.useRef(null);
+  const previouslyFocusedRef = React.useRef(null);
+
+  useEffect(() => {
+    // Save the element that had focus before opening the dialog
+    previouslyFocusedRef.current = document.activeElement;
+
+    const modalEl = modalRef.current;
+    if (!modalEl) return;
+
+    // Focus the first focusable element inside the modal
+    const focusableSelectors = [
+      'a[href]','button:not([disabled])','textarea','input','select','[tabindex]:not([tabindex="-1"])'
+    ];
+    const focusables = modalEl.querySelectorAll(focusableSelectors.join(','));
+    const first = focusables[0];
+    const last = focusables[focusables.length - 1];
+
+    const focusFirst = () => {
+      if (first) first.focus();
+      else modalEl.focus();
+    };
+
+    // Ensure dialog itself can receive focus
+    if (!modalEl.hasAttribute('tabindex')) modalEl.setAttribute('tabindex', '-1');
+    // Move focus into dialog
+    focusFirst();
+
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        e.stopPropagation();
+        onClose();
+        return;
+      }
+      if (e.key === 'Tab' && focusables.length > 0) {
+        // Trap focus within modal
+        if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault();
+          first.focus();
+        }
+      }
+    };
+
+    modalEl.addEventListener('keydown', handleKeyDown);
+    return () => {
+      modalEl.removeEventListener('keydown', handleKeyDown);
+      // Restore focus to the previously focused trigger element
+      if (previouslyFocusedRef.current && typeof previouslyFocusedRef.current.focus === 'function') {
+        previouslyFocusedRef.current.focus();
+      } else if (closeBtnRef.current) {
+        closeBtnRef.current.focus();
+      }
+    };
+  }, [onClose]);
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (name.trim()) {
-      onSave(name, description, isPublic);
+    // Read latest values from DOM to avoid any interim state lag in tests
+    const form = e.currentTarget?.closest('form') || e.currentTarget?.form;
+    const currentName = form?.querySelector('#search-name')?.value ?? name;
+    const currentDesc = form?.querySelector('#search-description')?.value ?? description;
+    const currentPublic = form?.querySelector('input[type="checkbox"]')?.checked ?? isPublic;
+    if (currentName.trim()) {
+      onSave(currentName, currentDesc, currentPublic);
     }
   };
 
   return (
     <div className="modal-overlay" role="dialog" aria-labelledby="save-search-title" aria-modal="true">
-      <div className="modal-content">
+      <div className="modal-content" ref={modalRef} aria-describedby="save-search-desc">
         <div className="modal-header">
           <h3 id="save-search-title">Save Search</h3>
-          <button onClick={onClose} className="close-btn" aria-label="Close modal">&times;</button>
+          <p id="save-search-desc" className="sr-only">Save current search criteria for quick access later.</p>
+          <button ref={closeBtnRef} onClick={onClose} className="close-btn" aria-label="Close modal">&times;</button>
         </div>
 
         <form onSubmit={handleSubmit} className="save-search-form">

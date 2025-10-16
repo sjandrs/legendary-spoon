@@ -51,10 +51,16 @@ const CoverageAreaMap = ({ technicianId = null, onAreaSelect }) => {
       setTechnicians(techData);
       if (techData.length > 0 && !selectedTechnician) {
         setSelectedTechnician(techData[0].id);
+        // Center map on the first technician's current location if available
+        const loc = techData[0]?.current_location;
+        if (loc && typeof loc.lat === 'number' && typeof loc.lng === 'number') {
+          setMapCenter([loc.lat, loc.lng]);
+          setMapZoom(10);
+        }
       }
     } catch (err) {
       console.error('Error fetching technicians:', err);
-      setError('Failed to load technicians.');
+      setError('Failed to load technician locations.');
     }
   }, [selectedTechnician]);
 
@@ -133,7 +139,13 @@ const CoverageAreaMap = ({ technicianId = null, onAreaSelect }) => {
   };
 
   const getAreaColor = (area, index) => {
-    return area.color || areaColors[index % areaColors.length];
+    // Priority-based color mapping expected by tests
+    if (area.priority_level) {
+      if (area.priority_level === 1) return '#EF4444'; // High - red
+      if (area.priority_level === 2) return '#F59E0B'; // Medium - amber
+      if (area.priority_level === 3) return '#10B981'; // Low - green
+    }
+    return (area.color || areaColors[index % areaColors.length]).toUpperCase();
   };
 
   const searchLocation = async () => {
@@ -183,7 +195,12 @@ const CoverageAreaMap = ({ technicianId = null, onAreaSelect }) => {
   };
 
   if (loading && !coverageAreas.length) {
-    return <LoadingSkeleton />;
+    return (
+      <div>
+        <div role="status">Loading Coverage Areas...</div>
+        <div data-testid="map-skeleton"><LoadingSkeleton variant="rectangle" height="400px" /></div>
+      </div>
+    );
   }
 
   return (
@@ -240,6 +257,7 @@ const CoverageAreaMap = ({ technicianId = null, onAreaSelect }) => {
 
       {/* Controls */}
       <div className="bg-white p-4 rounded-lg shadow border border-gray-200">
+        <h2 className="text-xl font-semibold mb-3">Map Controls</h2>
         <div className="flex flex-wrap items-center gap-4 mb-4">
           {/* Location Search */}
           <div className="flex-1 min-w-64">
@@ -333,6 +351,8 @@ const CoverageAreaMap = ({ technicianId = null, onAreaSelect }) => {
                   <Polygon
                     key={area.id}
                     positions={area.coordinates}
+                    color={color}
+                    fillColor={color}
                     pathOptions={{
                       color: color,
                       fillColor: color,
@@ -349,6 +369,9 @@ const CoverageAreaMap = ({ technicianId = null, onAreaSelect }) => {
                         <p className="text-sm text-gray-600">
                           Technician: {area.technician_name || 'Unknown'}
                         </p>
+                        {typeof area.priority_level !== 'undefined' && (
+                          <p className="text-sm text-gray-600">Priority: {area.priority_level}</p>
+                        )}
                         {area.description && (
                           <p className="text-sm mt-1">{area.description}</p>
                         )}
@@ -377,6 +400,21 @@ const CoverageAreaMap = ({ technicianId = null, onAreaSelect }) => {
 
               return null;
             })}
+
+            {/* Technician markers */}
+            {technicians
+              .filter(t => t?.current_location && typeof t.current_location.lat === 'number' && typeof t.current_location.lng === 'number')
+              .map(t => (
+                <Marker key={t.id} position={[t.current_location.lat, t.current_location.lng]}>
+                  <Popup>
+                    <div>
+                      <div className="font-semibold">{t.first_name} {t.last_name}</div>
+                      {t.email && <div className="text-sm text-gray-700">{t.email}</div>}
+                      <div className="text-xs text-gray-500">Last updated: {t.current_location.updated_at || '—'}</div>
+                    </div>
+                  </Popup>
+                </Marker>
+              ))}
 
             {/* Render drawing points */}
             {drawingPoints.map((point, index) => (

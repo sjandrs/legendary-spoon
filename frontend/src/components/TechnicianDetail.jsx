@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { getTechnician, getTechnicianCertificationsById, getCoverageAreas } from '../api';
 import LoadingSkeleton from './LoadingSkeleton';
+import { useLocaleFormatting } from '../hooks/useLocaleFormatting';
 
 const TechnicianDetail = ({ technicianId, onEdit, onClose }) => {
+  const { formatDate: formatDateLocale, formatCurrency: formatCurrencyLocale } = useLocaleFormatting();
   const [technician, setTechnician] = useState(null);
   const [certifications, setCertifications] = useState([]);
   const [coverageAreas, setCoverageAreas] = useState([]);
@@ -61,19 +63,12 @@ const TechnicianDetail = ({ technicianId, onEdit, onClose }) => {
 
   const formatDate = (dateString) => {
     if (!dateString) return 'N/A';
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    });
+    return formatDateLocale(dateString, { year: 'numeric', month: 'long', day: 'numeric' });
   };
 
   const formatCurrency = (amount) => {
-    if (!amount) return 'N/A';
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD'
-    }).format(amount);
+    if (amount == null) return 'N/A';
+    return formatCurrencyLocale(amount);
   };
 
   const getCertificationStatus = (certification) => {
@@ -104,7 +99,7 @@ const TechnicianDetail = ({ technicianId, onEdit, onClose }) => {
   };
 
   if (loading) {
-    return <LoadingSkeleton />;
+    return <div data-testid="loading-skeleton"><LoadingSkeleton /></div>;
   }
 
   if (error) {

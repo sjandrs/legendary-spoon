@@ -57,6 +57,13 @@ router.register(r"warehouses", api_views.WarehouseViewSet, basename="warehouse")
 router.register(
     r"warehouse-items", api_views.WarehouseItemViewSet, basename="warehouseitem"
 )
+# Advanced Search: saved searches & bulk operations
+router.register(
+    r"saved-searches", search_views.SavedSearchViewSet, basename="savedsearch"
+)
+router.register(
+    r"bulk-operations", search_views.BulkOperationViewSet, basename="bulkoperation"
+)
 # Phase 3: Analytics APIs
 router.register(
     r"analytics-snapshots",
@@ -152,6 +159,16 @@ urlpatterns = [
     path("search/", api_views.GlobalSearchView.as_view(), name="api_search"),
     # Advanced search (v2)
     path("search/v2/", search_views.SearchAPIView.as_view(), name="api_search_v2"),
+    path(
+        "search/suggestions/",
+        search_views.SearchSuggestionsAPIView.as_view(),
+        name="api_search_suggestions",
+    ),
+    path(
+        "search/bulk-operations/",
+        search_views.BulkUpdateAPIView.as_view(),
+        name="api_search_bulk_operations",
+    ),
     path(
         "search/filters/",
         search_views.SearchFiltersAPIView.as_view(),

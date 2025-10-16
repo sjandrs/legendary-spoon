@@ -9,72 +9,72 @@ import userEvent from '@testing-library/user-event';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import BlogPostForm from '../../components/BlogPostForm';
-import { rest } from 'msw';
-import { setupServer } from 'msw/node';
 import api from '../../api';
 import '@testing-library/jest-dom';
 
-const server = setupServer(
-  rest.post('http://localhost:8000/api/blog-posts/', (req, res, ctx) => {
-    return res(
-      ctx.status(201),
-      ctx.json({
-        id: 1,
-        title: req.body.title,
-        slug: req.body.slug,
-        content: req.body.content,
-        status: req.body.status,
-        author: { id: 1, username: 'admin' },
-        tags: req.body.tags || [],
-        created_at: '2025-01-16T10:00:00Z',
-        updated_at: '2025-01-16T10:00:00Z',
-      })
-    );
-  }),
-  rest.put('http://localhost:8000/api/blog-posts/1/', (req, res, ctx) => {
-    return res(
-      ctx.status(200),
-      ctx.json({
-        id: 1,
-        title: req.body.title,
-        slug: req.body.slug,
-        content: req.body.content,
-        status: req.body.status,
-        author: { id: 1, username: 'admin' },
-        tags: req.body.tags || [],
-        updated_at: '2025-01-16T10:30:00Z',
-      })
-    );
-  }),
-  rest.get('http://localhost:8000/api/blog-posts/1/', (req, res, ctx) => {
-    return res(
-      ctx.json({
-        id: 1,
-        title: 'Existing Blog Post',
-        slug: 'existing-blog-post',
-        content: 'Existing content',
-        status: 'draft',
-        author: { id: 1, username: 'admin' },
-        tags: ['existing', 'test'],
-        created_at: '2025-01-15T10:00:00Z',
-        updated_at: '2025-01-15T10:00:00Z',
-      })
-    );
-  }),
-  rest.get('http://localhost:8000/api/tags/', (req, res, ctx) => {
-    return res(
-      ctx.json({
-        results: [
-          { id: 1, name: 'Technology' },
-          { id: 2, name: 'Business' },
-          { id: 3, name: 'Marketing' },
-        ],
-      })
-    );
-  })
-);
+// Use global MSW setup from setupTests.js
+const server = globalThis.server;
+const http = globalThis.http;
+const HttpResponse = globalThis.HttpResponse;
 
-beforeAll(() => server.listen());
+const mockHandlers = [
+  http.post('http://localhost:8000/api/blog-posts/', async ({ request }) => {
+    const body = await request.json();
+    return HttpResponse.json({
+      id: 1,
+      title: body.title,
+      slug: body.slug,
+      content: body.content,
+      status: body.status,
+      author: { id: 1, username: 'admin' },
+      tags: body.tags || [],
+      created_at: '2025-01-16T10:00:00Z',
+      updated_at: '2025-01-16T10:00:00Z',
+    }, { status: 201 }
+    );
+  }),
+  http.put('http://localhost:8000/api/blog-posts/1/', async ({ request }) => {
+    const body = await request.json();
+    return HttpResponse.json({
+      id: 1,
+      title: body.title,
+      slug: body.slug,
+      content: body.content,
+      status: body.status,
+      author: { id: 1, username: 'admin' },
+      tags: body.tags || [],
+      updated_at: '2025-01-16T10:30:00Z',
+    });
+  }),
+  http.get('http://localhost:8000/api/blog-posts/1/', () => {
+    return HttpResponse.json({
+      id: 1,
+      title: 'Existing Blog Post',
+      slug: 'existing-blog-post',
+      content: 'Existing content',
+      status: 'draft',
+      author: { id: 1, username: 'admin' },
+      tags: ['existing', 'test'],
+      created_at: '2025-01-15T10:00:00Z',
+      updated_at: '2025-01-15T10:00:00Z',
+    });
+  }),
+  http.get('http://localhost:8000/api/tags/', () => {
+    return HttpResponse.json({
+      results: [
+        { id: 1, name: 'Technology' },
+        { id: 2, name: 'Business' },
+        { id: 3, name: 'Marketing' },
+      ],
+    });
+  })
+];
+
+// Set up the handlers for this test
+beforeAll(() => {
+  server.listen();
+  server.use(...mockHandlers);
+});
 afterEach(() => server.resetHandlers());
 afterAll(() => server.close());
 

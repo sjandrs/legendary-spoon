@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { get as apiGetNamed } from '../api';
 import { useLocaleFormatting } from '../hooks/useLocaleFormatting';
 
 const Reports = () => {
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState('balance-sheet');
   const [balanceSheet, setBalanceSheet] = useState(null);
   const [profitLoss, setProfitLoss] = useState(null);
@@ -37,7 +39,7 @@ const Reports = () => {
       setProfitLoss(pnlRes.data);
       setCashFlow(cashRes.data);
     } catch (_err) {
-      setError('Failed to load reports. Please try again.');
+      setError(t('financial:reports.errors.load_failed', 'Failed to load reports. Please try again.'));
       console.error('Error fetching reports:', _err);
     } finally {
       setLoading(false);
@@ -85,15 +87,15 @@ const Reports = () => {
   };
 
   const renderBalanceSheet = () => {
-    if (!balanceSheet) return <div>Loading...</div>;
+    if (!balanceSheet) return <div>{t('common:status.loading', 'Loading...')}</div>;
 
     return (
       <div className="report-section">
-        <h3>Balance Sheet (As of {balanceSheet.as_of_date})</h3>
+  <h3>{t('financial:reports.balance_sheet_title', `Balance Sheet (As of ${balanceSheet.as_of_date})`)}</h3>
 
         <div className="balance-sheet-grid">
           <div className="assets-section">
-            <h4>Assets</h4>
+            <h4>{t('financial:reports.assets', 'Assets')}</h4>
             <table className="striped-table">
               <tbody>
                 {Object.entries(balanceSheet.assets).map(([account, balance]) => (
@@ -103,7 +105,7 @@ const Reports = () => {
                   </tr>
                 ))}
                 <tr className="total-row">
-                  <td><strong>Total Assets</strong></td>
+                  <td><strong>{t('financial:reports.total_assets', 'Total Assets')}</strong></td>
                   <td className="text-right"><strong>{formatCurrency(balanceSheet.total_assets)}</strong></td>
                 </tr>
               </tbody>
@@ -112,7 +114,7 @@ const Reports = () => {
 
           <div className="liabilities-equity-section">
             <div className="liabilities-section">
-              <h4>Liabilities</h4>
+              <h4>{t('financial:reports.liabilities', 'Liabilities')}</h4>
               <table className="striped-table">
                 <tbody>
                   {Object.entries(balanceSheet.liabilities).map(([account, balance]) => (
@@ -122,7 +124,7 @@ const Reports = () => {
                     </tr>
                   ))}
                   <tr className="total-row">
-                    <td><strong>Total Liabilities</strong></td>
+                    <td><strong>{t('financial:reports.total_liabilities', 'Total Liabilities')}</strong></td>
                     <td className="text-right"><strong>{formatCurrency(balanceSheet.total_liabilities)}</strong></td>
                   </tr>
                 </tbody>
@@ -130,7 +132,7 @@ const Reports = () => {
             </div>
 
             <div className="equity-section">
-              <h4>Equity</h4>
+              <h4>{t('financial:reports.equity', 'Equity')}</h4>
               <table className="striped-table">
                 <tbody>
                   {Object.entries(balanceSheet.equity).map(([account, balance]) => (
@@ -140,7 +142,7 @@ const Reports = () => {
                     </tr>
                   ))}
                   <tr className="total-row">
-                    <td><strong>Total Equity</strong></td>
+                    <td><strong>{t('financial:reports.total_equity', 'Total Equity')}</strong></td>
                     <td className="text-right"><strong>{formatCurrency(balanceSheet.total_equity)}</strong></td>
                   </tr>
                 </tbody>
@@ -153,15 +155,15 @@ const Reports = () => {
   };
 
   const renderProfitLoss = () => {
-    if (!profitLoss) return <div>Loading...</div>;
+    if (!profitLoss) return <div>{t('common:status.loading', 'Loading...')}</div>;
 
     return (
       <div className="report-section">
-        <h3>Profit & Loss ({profitLoss.start_date} to {profitLoss.end_date})</h3>
+  <h3>{t('financial:reports.profit_loss_title', `Profit & Loss (${profitLoss.start_date} to ${profitLoss.end_date})`)}</h3>
 
         <div className="pnl-grid">
           <div className="revenue-section">
-            <h4>Revenue</h4>
+            <h4>{t('financial:reports.revenue', 'Revenue')}</h4>
             <table className="striped-table">
               <tbody>
                 {Object.entries(profitLoss.revenue).map(([account, amount]) => (
@@ -171,7 +173,7 @@ const Reports = () => {
                   </tr>
                 ))}
                 <tr className="total-row">
-                  <td><strong>Total Revenue</strong></td>
+                  <td><strong>{t('financial:reports.total_revenue', 'Total Revenue')}</strong></td>
                   <td className="text-right"><strong>{formatCurrency(profitLoss.total_revenue)}</strong></td>
                 </tr>
               </tbody>
@@ -179,7 +181,7 @@ const Reports = () => {
           </div>
 
           <div className="expenses-section">
-            <h4>Expenses</h4>
+            <h4>{t('financial:reports.expenses', 'Expenses')}</h4>
             <table className="striped-table">
               <tbody>
                 {Object.entries(profitLoss.expenses).map(([account, amount]) => (
@@ -189,7 +191,7 @@ const Reports = () => {
                   </tr>
                 ))}
                 <tr className="total-row">
-                  <td><strong>Total Expenses</strong></td>
+                  <td><strong>{t('financial:reports.total_expenses', 'Total Expenses')}</strong></td>
                   <td className="text-right"><strong>{formatCurrency(profitLoss.total_expenses)}</strong></td>
                 </tr>
               </tbody>
@@ -198,7 +200,7 @@ const Reports = () => {
         </div>
 
         <div className="net-profit-section">
-          <h4>Net Profit: <span className={profitLoss.net_profit >= 0 ? 'positive' : 'negative'}>
+          <h4>{t('financial:reports.net_profit', 'Net Profit')}: <span className={profitLoss.net_profit >= 0 ? 'positive' : 'negative'}>
             {formatCurrency(profitLoss.net_profit)}
           </span></h4>
         </div>
@@ -207,28 +209,28 @@ const Reports = () => {
   };
 
   const renderCashFlow = () => {
-    if (!cashFlow) return <div>Loading...</div>;
+    if (!cashFlow) return <div>{t('common:status.loading', 'Loading...')}</div>;
 
     return (
       <div className="report-section">
-        <h3>Cash Flow Statement ({cashFlow.start_date} to {cashFlow.end_date})</h3>
+  <h3>{t('financial:reports.cash_flow_title', `Cash Flow Statement (${cashFlow.start_date} to ${cashFlow.end_date})`)}</h3>
 
         <table className="striped-table">
           <tbody>
             <tr>
-              <td>Operating Activities</td>
+              <td>{t('financial:reports.operating_activities', 'Operating Activities')}</td>
               <td className="text-right">{formatCurrency(cashFlow.operating_activities)}</td>
             </tr>
             <tr>
-              <td>Investing Activities</td>
+              <td>{t('financial:reports.investing_activities', 'Investing Activities')}</td>
               <td className="text-right">{formatCurrency(cashFlow.investing_activities)}</td>
             </tr>
             <tr>
-              <td>Financing Activities</td>
+              <td>{t('financial:reports.financing_activities', 'Financing Activities')}</td>
               <td className="text-right">{formatCurrency(cashFlow.financing_activities)}</td>
             </tr>
             <tr className="total-row">
-              <td><strong>Net Cash Flow</strong></td>
+              <td><strong>{t('financial:reports.net_cash_flow', 'Net Cash Flow')}</strong></td>
               <td className="text-right"><strong>{formatCurrency(cashFlow.net_cash_flow)}</strong></td>
             </tr>
           </tbody>
@@ -236,7 +238,7 @@ const Reports = () => {
 
         {cashFlow.error && (
           <div className="error-message">
-            <p>Note: {cashFlow.error}</p>
+            <p>{t('financial:reports.note', 'Note')}: {cashFlow.error}</p>
           </div>
         )}
       </div>
@@ -245,12 +247,12 @@ const Reports = () => {
 
   return (
     <div className="reports-page">
-      <h2>Financial Reports</h2>
+      <h2>{t('financial:reports.title', 'Financial Reports')}</h2>
 
       <div className="date-filters">
         <div className="filter-group">
           <label>
-            Balance Sheet As Of:
+            {t('financial:reports.as_of', 'Balance Sheet As Of:')}
             <input
               type="date"
               value={dateFilters.asOfDate}
@@ -261,7 +263,7 @@ const Reports = () => {
 
         <div className="filter-group">
           <label>
-            Period Start:
+            {t('financial:reports.period_start', 'Period Start:')}
             <input
               type="date"
               value={dateFilters.startDate}
@@ -269,7 +271,7 @@ const Reports = () => {
             />
           </label>
           <label>
-            Period End:
+            {t('financial:reports.period_end', 'Period End:')}
             <input
               type="date"
               value={dateFilters.endDate}
@@ -279,7 +281,7 @@ const Reports = () => {
         </div>
 
         <button onClick={fetchReports} disabled={loading}>
-          {loading ? 'Loading...' : 'Refresh Reports'}
+          {loading ? t('common:status.loading', 'Loading...') : t('financial:reports.refresh', 'Refresh Reports')}
         </button>
       </div>
 
@@ -290,19 +292,19 @@ const Reports = () => {
           className={activeTab === 'balance-sheet' ? 'active' : ''}
           onClick={() => setActiveTab('balance-sheet')}
         >
-          Balance Sheet
+          {t('financial:reports.tabs.balance_sheet', 'Balance Sheet')}
         </button>
         <button
           className={activeTab === 'profit-loss' ? 'active' : ''}
           onClick={() => setActiveTab('profit-loss')}
         >
-          Profit & Loss
+          {t('financial:reports.tabs.profit_loss', 'Profit & Loss')}
         </button>
         <button
           className={activeTab === 'cash-flow' ? 'active' : ''}
           onClick={() => setActiveTab('cash-flow')}
         >
-          Cash Flow
+          {t('financial:reports.tabs.cash_flow', 'Cash Flow')}
         </button>
       </div>
 
@@ -311,13 +313,13 @@ const Reports = () => {
           className="btn btn-secondary"
           onClick={() => exportToCSV(generateCSVData(activeTab), `${activeTab}-report.csv`)}
         >
-          Export CSV
+          {t('financial:reports.export_csv', 'Export CSV')}
         </button>
         <button
           className="btn btn-secondary"
           onClick={exportToPDF}
         >
-          Export PDF
+          {t('financial:reports.export_pdf', 'Export PDF')}
         </button>
       </div>
 

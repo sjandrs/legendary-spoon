@@ -41,7 +41,7 @@ function BlogPostForm() {
         const res = await api.get('/api/tags/');
         const results = res.data?.results || [];
         setAvailableTags(results);
-      } catch (_err) {
+      } catch {
         // Non-blocking fallback for tests
         setAvailableTags([
           { id: 1, name: 'Technology' },
@@ -60,7 +60,7 @@ function BlogPostForm() {
   let response;
   try {
     response = await api.get(`/api/posts/${id}/`);
-  } catch (_err) {
+  } catch {
     response = await api.get(`/api/blog-posts/${id}/`);
   }
       const post = response.data;
@@ -81,7 +81,7 @@ function BlogPostForm() {
       if (Array.isArray(post.tags)) {
         setSelectedTags(post.tags.map(t => (typeof t === 'string' ? t : t.name)));
       }
-    } catch (_err) {
+    } catch {
       // Fallback for tests if MSW interception is inactive
       const fallback = {
         title: 'Existing Blog Post',

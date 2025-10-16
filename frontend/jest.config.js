@@ -1,16 +1,14 @@
 export default {
   testEnvironment: 'jsdom',
+  // Ensure polyfills exist before MSW imports
+  setupFiles: ['<rootDir>/src/jest.polyfills.js', 'cross-fetch/polyfill'],
   setupFilesAfterEnv: ['<rootDir>/src/setupTests.js'],
   moduleNameMapper: {
     '\\.(css|less|scss|sass)$': 'identity-obj-proxy',
     '^@/(.*)$': '<rootDir>/src/$1',
     '@fullcalendar/(.*)': '<rootDir>/node_modules/@fullcalendar/$1',
-    // MSW mappings for Jest CJS resolution
-  '^msw/node$': '<rootDir>/src/__tests__/__mocks__/msw-shim.js',
-  '^msw$': '<rootDir>/src/__tests__/__mocks__/msw-shim.js',
-    // MSW v2 Node interceptors sometimes fail to resolve on Windows; stub them in unit tests
-    '^@mswjs/interceptors/(.*)$': '<rootDir>/src/__tests__/__mocks__/msw-interceptors.js',
-    '^@mswjs/interceptors/fetch$': '<rootDir>/src/__tests__/__mocks__/msw-interceptors.js',
+    '^msw/node$': '<rootDir>/node_modules/msw/node',
+    '^@mswjs/interceptors/(.*)$': '<rootDir>/node_modules/@mswjs/interceptors/$1',
   },
   transform: {
     '^.+\\.(js|jsx|ts|tsx)$': 'babel-jest',
@@ -53,7 +51,17 @@ export default {
   },
   coverageReporters: ['text', 'lcov', 'html'],
   testTimeout: 10000,
-  maxWorkers: '50%',
+  maxWorkers: '75%', // Increased from 50% for better parallelization
   clearMocks: true,
   restoreMocks: true,
+  // Performance optimizations
+  cacheDirectory: '<rootDir>/node_modules/.cache/jest',
+  // Bail on first test failure in CI mode for faster feedback
+  bail: process.env.CI ? 1 : false,
+  // Optimize coverage collection
+  coverageProvider: 'v8', // Faster than babel
+  // Reduce test discovery overhead
+  haste: {
+    enableSymlinks: false,
+  },
 };

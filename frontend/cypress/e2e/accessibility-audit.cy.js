@@ -20,60 +20,42 @@ describe('Accessibility Audit - WCAG 2.1 AA Compliance', () => {
       cy.visit('/accounts');
       cy.waitForLoad();
       cy.injectAxe();
-      cy.checkA11y(null, {
-        includedImpacts: ['critical', 'serious'],
-        rules: {
-          'color-contrast': { enabled: true },
-          'label': { enabled: true },
-          'button-name': { enabled: true },
-          'link-name': { enabled: true },
-        },
-      });
+        cy.checkA11yFail(['critical', 'serious', 'moderate', 'minor']);
     });
 
     it('should have no accessibility violations on Account Detail page', () => {
       cy.visit('/accounts/1');
       cy.waitForLoad();
       cy.injectAxe();
-      cy.checkA11y(null, {
-        includedImpacts: ['critical', 'serious'],
-      });
+        cy.checkA11yFail(['critical', 'serious']);
     });
 
     it('should have no accessibility violations on Quotes List page', () => {
       cy.visit('/quotes');
       cy.waitForLoad();
       cy.injectAxe();
-      cy.checkA11y(null, {
-        includedImpacts: ['critical', 'serious'],
-      });
+        cy.checkA11yFail(['critical', 'serious']);
     });
 
     it('should have no accessibility violations on Quote Detail page', () => {
       cy.visit('/quotes/1');
       cy.waitForLoad();
       cy.injectAxe();
-      cy.checkA11y(null, {
-        includedImpacts: ['critical', 'serious'],
-      });
+        cy.checkA11yFail(['critical', 'serious']);
     });
 
     it('should have no accessibility violations on Interactions List page', () => {
       cy.visit('/interactions');
       cy.waitForLoad();
       cy.injectAxe();
-      cy.checkA11y(null, {
-        includedImpacts: ['critical', 'serious'],
-      });
+        cy.checkA11yFail(['critical', 'serious']);
     });
 
     it('should have no accessibility violations on Activity Timeline page', () => {
       cy.visit('/activity-timeline');
       cy.waitForLoad();
       cy.injectAxe();
-      cy.checkA11y(null, {
-        includedImpacts: ['critical', 'serious'],
-      });
+        cy.checkA11yFail(['critical', 'serious']);
     });
   });
 
@@ -82,49 +64,35 @@ describe('Accessibility Audit - WCAG 2.1 AA Compliance', () => {
       cy.visit('/analytics/deal-predictions');
       cy.waitForLoad();
       cy.injectAxe();
-      cy.checkA11y(null, {
-        includedImpacts: ['critical', 'serious'],
-        rules: {
-          'aria-required-children': { enabled: true },
-          'aria-valid-attr-value': { enabled: true },
-        },
-      });
+        cy.checkA11yFail(['critical', 'serious']);
     });
 
     it('should have no accessibility violations on Customer Lifetime Value page', () => {
       cy.visit('/analytics/customer-lifetime-value');
       cy.waitForLoad();
       cy.injectAxe();
-      cy.checkA11y(null, {
-        includedImpacts: ['critical', 'serious'],
-      });
+        cy.checkA11yFail(['critical', 'serious']);
     });
 
     it('should have no accessibility violations on Revenue Forecast page', () => {
       cy.visit('/analytics/revenue-forecast');
       cy.waitForLoad();
       cy.injectAxe();
-      cy.checkA11y(null, {
-        includedImpacts: ['critical', 'serious'],
-      });
+        cy.checkA11yFail(['critical', 'serious']);
     });
 
     it('should have no accessibility violations on Analytics Snapshots page', () => {
       cy.visit('/analytics/snapshots');
       cy.waitForLoad();
       cy.injectAxe();
-      cy.checkA11y(null, {
-        includedImpacts: ['critical', 'serious'],
-      });
+        cy.checkA11yFail(['critical', 'serious']);
     });
 
     it('should have no accessibility violations on Analytics Dashboard page', () => {
       cy.visit('/analytics/dashboard');
       cy.waitForLoad();
       cy.injectAxe();
-      cy.checkA11y(null, {
-        includedImpacts: ['critical', 'serious'],
-      });
+        cy.checkA11yFail(['critical', 'serious']);
     });
   });
 

@@ -118,8 +118,87 @@ function BlogPostList() {
         </select>
       </div>
 
+      {/* Always render the table for accessibility, even on error/empty states */}
+      <div className="posts-table">
+        <table role="table" aria-label="Blog posts">
+          <thead>
+            <tr>
+              <th>Title</th>
+              <th>Author</th>
+              <th>Status</th>
+              <th>Published Date</th>
+              <th>Tags</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredPosts.map((post) => (
+              <tr key={post.id}>
+                <td>
+                  <Link to={`/blog/${post.id}`} className="post-title-link">
+                    {post.title}
+                  </Link>
+                </td>
+                <td>{typeof post.author === 'object' ? (post.author?.username || 'Unknown') : (post.author || 'Unknown')}</td>
+                <td>
+                  <span className={`status-badge status-${post.status}`}>
+                    {post.status || 'draft'}
+                  </span>
+                </td>
+                <td>
+                  {post.published_at
+                    ? new Date(post.published_at).toLocaleDateString()
+                    : 'Not published'}
+                </td>
+                <td>
+                  <div className="tags-cell">
+                    {post.tags && post.tags.length > 0 ? (
+                      post.tags.slice(0, 3).map((tag, idx) => (
+                        <span key={idx} className="tag-badge">
+                          {tag.name || tag}
+                        </span>
+                      ))
+                    ) : (
+                      <span className="no-tags">No tags</span>
+                    )}
+                    {post.tags && post.tags.length > 3 && (
+                      <span className="tag-badge more-tags">
+                        +{post.tags.length - 3}
+                      </span>
+                    )}
+                  </div>
+                </td>
+                <td>
+                  <div className="actions-cell">
+                    <Link to={`/blog/${post.id}`} className="action-btn view-btn" title="View">
+                      👁️
+                    </Link>
+                    <Link
+                      to={`/blog/${post.id}/edit`}
+                      className="action-btn edit-btn"
+                      title="Edit"
+                      data-testid={`edit-blog-post-${post.id}`}
+                    >
+                      ✏️
+                    </Link>
+                    <button
+                      onClick={() => handleDelete(post.id)}
+                      className="action-btn delete-btn"
+                      title="Delete"
+                      data-testid={`delete-blog-post-${post.id}`}
+                    >
+                      🗑️
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
       {error && (
-        <div className="error-banner">
+        <div className="error-banner" role="alert" aria-live="polite">
           {error}
           <button type="button" onClick={fetchPosts} className="retry-button">
             Retry
@@ -127,7 +206,7 @@ function BlogPostList() {
         </div>
       )}
 
-      {filteredPosts.length === 0 ? (
+      {filteredPosts.length === 0 && !error && (
         <div className="empty-state">
           <div className="empty-icon">📝</div>
           <h3>No Blog Posts Found</h3>
@@ -135,84 +214,6 @@ function BlogPostList() {
           <Link to="/blog/new" className="create-button">
             Create your first blog post
           </Link>
-        </div>
-      ) : (
-        <div className="posts-table">
-          <table role="table">
-            <thead>
-              <tr>
-                <th>Title</th>
-                <th>Author</th>
-                <th>Status</th>
-                <th>Published Date</th>
-                <th>Tags</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredPosts.map((post) => (
-                <tr key={post.id}>
-                  <td>
-                    <Link to={`/blog/${post.id}`} className="post-title-link">
-                      {post.title}
-                    </Link>
-                  </td>
-                  <td>{typeof post.author === 'object' ? (post.author?.username || 'Unknown') : (post.author || 'Unknown')}</td>
-                  <td>
-                    <span className={`status-badge status-${post.status}`}>
-                      {post.status || 'draft'}
-                    </span>
-                  </td>
-                  <td>
-                    {post.published_at
-                      ? new Date(post.published_at).toLocaleDateString()
-                      : 'Not published'}
-                  </td>
-                  <td>
-                    <div className="tags-cell">
-                      {post.tags && post.tags.length > 0 ? (
-                        post.tags.slice(0, 3).map((tag, idx) => (
-                          <span key={idx} className="tag-badge">
-                            {tag.name || tag}
-                          </span>
-                        ))
-                      ) : (
-                        <span className="no-tags">No tags</span>
-                      )}
-                      {post.tags && post.tags.length > 3 && (
-                        <span className="tag-badge more-tags">
-                          +{post.tags.length - 3}
-                        </span>
-                      )}
-                    </div>
-                  </td>
-                  <td>
-                    <div className="actions-cell">
-                      <Link to={`/blog/${post.id}`} className="action-btn view-btn" title="View">
-                        👁️
-                      </Link>
-                      <Link
-                        to={`/blog/${post.id}/edit`}
-                        className="action-btn edit-btn"
-                        title="Edit"
-                        data-testid={`edit-blog-post-${post.id}`}
-                      >
-                        ✏️
-                      </Link>
-                      <button
-                        onClick={() => handleDelete(post.id)}
-                        className="action-btn delete-btn"
-                        title="Delete"
-                        data-testid={`delete-blog-post-${post.id}`}
-                      >
-                        🗑️
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
         </div>
       )}
 

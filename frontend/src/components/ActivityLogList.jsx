@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import { useLocaleFormatting } from '../hooks/useLocaleFormatting';
 import api from '../api';
 import './ActivityLogList.css';
 
 function ActivityLogList() {
+  const { formatDateTime } = useLocaleFormatting();
   const [logs, setLogs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all');
@@ -94,7 +96,7 @@ function ActivityLogList() {
             ) : (
               filteredLogs.map((log) => (
                 <tr key={log.id}>
-                  <td>{new Date(log.timestamp).toLocaleString()}</td>
+                  <td>{formatDateTime(log.timestamp)}</td>
                   <td>{log.user || 'System'}</td>
                   <td>
                     <span className={`action-badge action-${log.action}`}>

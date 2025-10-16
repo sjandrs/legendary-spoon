@@ -64,6 +64,10 @@ MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    # Enable locale handling prior to CommonMiddleware so request.LANGUAGE_CODE is available
+    "main.middleware.locale_middleware.APILanguageMiddleware",
+    # Activate timezone from X-Timezone header for API consumers
+    "main.middleware.timezone_middleware.APITimezoneMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -134,6 +138,19 @@ TIME_ZONE = "America/New_York"
 USE_I18N = True
 
 USE_TZ = True
+
+# Supported languages for API localization (Phase 7)
+LANGUAGES = [
+    ("en", "English"),
+    ("es", "Spanish"),
+    ("fr", "French"),
+    ("ar", "Arabic"),
+]
+
+# Location for backend translation files (django.po/mo) should we add them later
+LOCALE_PATHS = [
+    os.path.join(BASE_DIR, "locale"),
+]
 
 
 # Static files (CSS, JavaScript, Images)

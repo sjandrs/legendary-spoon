@@ -1,7 +1,7 @@
 import React from 'react';
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { renderWithProviders } from '../../__tests__/helpers/test-utils';
+import { renderWithProviders, expectNoAxeViolations } from '../../__tests__/helpers/test-utils';
 import DashboardPage from '../DashboardPage';
 import * as api from '../../api';
 
@@ -147,5 +147,13 @@ describe('DashboardPage Component', () => {
       expect(screen.getByText('Project Completion')).toBeInTheDocument();
       expect(screen.getByText('Time Tracking')).toBeInTheDocument();
     });
+  });
+
+  it('has no obvious accessibility violations (axe)', async () => {
+    const { container } = renderWithProviders(<DashboardPage />);
+    await waitFor(() => {
+      expect(screen.getByText('Business Dashboard')).toBeInTheDocument();
+    });
+    await expectNoAxeViolations(container);
   });
 });

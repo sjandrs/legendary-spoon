@@ -1,8 +1,38 @@
 {
+    // Existing settings
     "python.globalModuleInstallation": true,
     "github.copilot.chat.agent.thinkingTool": true,
     "github.copilot.advanced": {
         "github.copilot.chat.filecreation": true,
         "github.copilot.chat.history": true
-    }
+    },
+
+    // Python: point to the project venv interpreter
+    "python.defaultInterpreterPath": "${workspaceFolder}\\venv\\Scripts\\python.exe",
+
+    // Python Testing: use unittest (Django tests run under unittest via manage.py style)
+    "python.testing.pytestEnabled": false,
+    "python.testing.unittestEnabled": true,
+    "python.testing.autoTestDiscoverOnSaveEnabled": true,
+    "python.testing.cwd": "${workspaceFolder}",
+    "python.testing.unittestArgs": [
+        "-v",
+        "-s",
+        ".",
+        "-p",
+        "test_*.py"
+    ],
+
+    // Ensure Django env is present when discovering/running tests
+    "python.envFile": "${workspaceFolder}/.env",
+
+    // Helpful for import resolution in editor/intellisense
+    "python.analysis.extraPaths": [
+        "${workspaceFolder}",
+        "${workspaceFolder}/main"
+    ],
+
+    // Jest: discover tests in the frontend folder via the Jest extension
+    "jest.rootPath": "frontend",
+    "jest.jestCommandLine": "npm test --"
 }

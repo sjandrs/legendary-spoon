@@ -44,7 +44,7 @@ function LoginPage() {
           />
         </div>
         {error && <p style={{ color: 'red' }}>{error}</p>}
-        <button type="submit">Login</button>
+        <button type="submit" aria-label="Login">Sign In</button>
       </form>
     </div>
   );

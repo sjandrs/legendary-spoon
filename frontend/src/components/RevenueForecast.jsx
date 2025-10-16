@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useLocaleFormatting } from '../hooks/useLocaleFormatting';
 import api from '../api';
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, BarElement, Title, Tooltip, Legend, Filler } from 'chart.js';
 import { Line } from 'react-chartjs-2';
@@ -7,6 +8,7 @@ import './RevenueForecast.css';
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, BarElement, Title, Tooltip, Legend, Filler);
 
 function RevenueForecast() {
+  const { formatCurrency } = useLocaleFormatting();
   const [forecastData, setForecastData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -43,14 +45,7 @@ function RevenueForecast() {
     setIncludeSeasonality(e.target.checked);
   };
 
-  const formatCurrency = (value) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(value || 0);
-  };
+  const formatUSD0 = (value) => formatCurrency(value || 0, 'USD', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
 
   const renderForecastChart = () => {
     if (!forecastData?.forecast) return null;
@@ -137,7 +132,7 @@ function RevenueForecast() {
           callbacks: {
             label: function (context) {
               const label = context.dataset.label || '';
-              const value = formatCurrency(context.parsed.y);
+              const value = formatUSD0(context.parsed.y);
               return `${label}: ${value}`;
             },
           },
@@ -148,7 +143,8 @@ function RevenueForecast() {
           beginAtZero: true,
           ticks: {
             callback: function (value) {
-              return '$' + (value / 1000).toFixed(0) + 'K';
+              const v = Number(value) || 0;
+              return `${(v / 1000).toFixed(0)}K`;
             },
           },
         },
@@ -291,7 +287,7 @@ function RevenueForecast() {
               <div className="card-icon">💰</div>
               <div className="card-content">
                 <h3>Total Forecasted Revenue</h3>
-                <p className="summary-value">{formatCurrency(totals.total)}</p>
+                <p className="summary-value">{formatUSD0(totals.total)}</p>
                 <p className="summary-label">Next {months} months</p>
               </div>
             </div>
@@ -300,7 +296,7 @@ function RevenueForecast() {
               <div className="card-icon">📊</div>
               <div className="card-content">
                 <h3>Average Monthly Revenue</h3>
-                <p className="summary-value">{formatCurrency(totals.average)}</p>
+                <p className="summary-value">{formatUSD0(totals.average)}</p>
                 <p className="summary-label">Projected average</p>
               </div>
             </div>
@@ -365,13 +361,13 @@ function RevenueForecast() {
                     {forecastData.forecast.map((item, index) => (
                       <tr key={index}>
                         <td className="period-cell">{item.period}</td>
-                        <td className="revenue-cell">{formatCurrency(item.predicted_revenue)}</td>
+                        <td className="revenue-cell">{formatUSD0(item.predicted_revenue)}</td>
                         <td className="growth-cell" style={{ color: (item.growth_rate || 0) >= 0 ? '#10b981' : '#ef4444' }}>
                           {item.growth_rate !== undefined ? `${item.growth_rate >= 0 ? '+' : ''}${item.growth_rate.toFixed(1)}%` : 'N/A'}
                         </td>
                         <td className="confidence-cell">
                           {item.lower_bound !== undefined && item.upper_bound !== undefined
-                            ? `${formatCurrency(item.lower_bound)} - ${formatCurrency(item.upper_bound)}`
+                            ? `${formatUSD0(item.lower_bound)} - ${formatUSD0(item.upper_bound)}`
                             : 'N/A'}
                         </td>
                       </tr>

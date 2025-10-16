@@ -50,7 +50,13 @@ class WarehouseItemGTINTests(APITestCase):
         bad = "12345678901234"  # likely wrong
         r = self._create_item(gtin=bad)
         self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertIn("gtin", r.data)
+        # Check for new structured error format from custom exception handler
+        self.assertIn("errors", r.data)
+        self.assertEqual(r.data["detail"], "Validation error")
+        # Find error for gtin field
+        gtin_errors = [e for e in r.data["errors"] if "gtin" in e["path"]]
+        self.assertTrue(len(gtin_errors) > 0, "Expected GTIN validation error")
+        self.assertIn("check digit", gtin_errors[0]["message"])
 
     def test_accepts_valid_14_digit(self):
         # Compute valid 14 via the API util would be ideal; use a known good pair

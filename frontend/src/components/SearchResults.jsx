@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import './SearchResults.css';
+import { useLocaleFormatting } from '../hooks/useLocaleFormatting';
 
 const SearchResults = ({ results, onBulkAction, onLoadMore }) => {
+  const { formatNumber } = useLocaleFormatting();
   const [selectedItems, setSelectedItems] = useState([]);
   const [bulkAction, setBulkAction] = useState('');
   const [showBulkModal, setShowBulkModal] = useState(false);
@@ -101,10 +103,8 @@ const SearchResults = ({ results, onBulkAction, onLoadMore }) => {
 
   const formatCurrency = (value) => {
     if (value === null || value === undefined) return '';
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD'
-    }).format(value);
+    // Fallback currency formatting for search result snippets; keep it simple
+    return `$${formatNumber(value || 0, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   };
 
   const renderResultItem = (item, type, index) => (

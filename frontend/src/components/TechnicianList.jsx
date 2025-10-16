@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { FixedSizeList as List } from 'react-window';
+// import { FixedSizeList } from 'react-window'; // Temporarily disabled due to import issues
 import { getTechnicians } from '../api';
 import LoadingSkeleton from './LoadingSkeleton';
 
@@ -307,14 +307,14 @@ const TechnicianList = ({ onTechnicianSelect, onTechnicianEdit, onTechnicianDele
       {/* Virtualized List */}
       <div className="bg-white rounded-lg shadow border border-gray-200">
         {filteredTechnicians.length > 0 ? (
-          <List
-            height={600}
-            itemCount={filteredTechnicians.length}
-            itemSize={120}
+          <div
+            style={{ height: '600px', overflow: 'auto' }}
             className="technician-list"
           >
-            {TechnicianRow}
-          </List>
+            {filteredTechnicians.map((technician, index) =>
+              <TechnicianRow key={technician.id} index={index} style={{}} />
+            )}
+          </div>
         ) : (
           <div className="p-8 text-center text-gray-500">
             <p>No technicians found matching your criteria.</p>

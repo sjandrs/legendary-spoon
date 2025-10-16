@@ -8,55 +8,10 @@ import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import NotificationCenter from '../../components/NotificationCenter';
-import { rest } from 'msw';
-import { setupServer } from 'msw/node';
 import '@testing-library/jest-dom';
 
-const server = setupServer(
-  rest.get('http://localhost:8000/api/notifications/', (req, res, ctx) => {
-    return res(
-      ctx.json({
-        count: 3,
-        results: [
-          {
-            id: 1,
-            type: 'info',
-            title: 'New Message',
-            message: 'You have a new message from John Doe',
-            is_read: false,
-            created_at: '2025-01-16T10:00:00Z',
-          },
-          {
-            id: 2,
-            type: 'warning',
-            title: 'Deadline Approaching',
-            message: 'Project deadline is in 2 days',
-            is_read: false,
-            created_at: '2025-01-15T10:00:00Z',
-          },
-          {
-            id: 3,
-            type: 'success',
-            title: 'Task Completed',
-            message: 'Task #123 has been completed',
-            is_read: true,
-            created_at: '2025-01-14T10:00:00Z',
-          },
-        ],
-      })
-    );
-  }),
-  rest.patch('http://localhost:8000/api/notifications/:id/', (req, res, ctx) => {
-    return res(ctx.status(200), ctx.json({ ...req.body, id: parseInt(req.params.id) }));
-  }),
-  rest.delete('http://localhost:8000/api/notifications/:id/', (req, res, ctx) => {
-    return res(ctx.status(204));
-  })
-);
-
-beforeAll(() => server.listen());
-afterEach(() => server.resetHandlers());
-afterAll(() => server.close());
+// Use global MSW server from setupTests.js
+const { server, http, HttpResponse } = globalThis;
 
 const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
 
@@ -189,8 +144,8 @@ describe('NotificationCenter Component', () => {
   describe('Empty States', () => {
     it('should display empty state when no notifications exist', async () => {
       server.use(
-        rest.get('http://localhost:8000/api/notifications/', (req, res, ctx) => {
-          return res(ctx.json({ count: 0, results: [] }));
+        http.get('http://localhost:8000/api/notifications/', () => {
+          return HttpResponse.json({ count: 0, results: [] });
         })
       );
 

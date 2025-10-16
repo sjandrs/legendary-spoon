@@ -16,7 +16,7 @@ const PaperworkTemplateManager = () => {
   });
   const [loading, setLoading] = useState(false);
   const [previewMode, setPreviewMode] = useState(false);
-  const [previewData, setPreviewData] = useState({});
+  const [previewData] = useState({});
 
   useEffect(() => {
     loadTemplates();
@@ -112,7 +112,6 @@ const PaperworkTemplateManager = () => {
   };
 
   const insertConditionalLogic = (logic) => {
-    const textarea = document.querySelector('.logic-editor');
     const currentLogic = templateForm.conditional_logic;
     const newLogic = currentLogic ? `${currentLogic}\n${logic}` : logic;
     setTemplateForm({...templateForm, conditional_logic: newLogic});

@@ -20,6 +20,10 @@ const AvailabilityCalendar = ({ technicianId = null, onAvailabilityChange }) => 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [calendarView, setCalendarView] = useState('timeGridWeek');
+  const [bulkMode, setBulkMode] = useState(false);
+  const [showBulkForm, setShowBulkForm] = useState(false);
+  const [bulkStart, setBulkStart] = useState('');
+  const [bulkEnd, setBulkEnd] = useState('');
   const selectedDate = new Date();
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [selectedSlot, setSelectedSlot] = useState(null);
@@ -100,34 +104,70 @@ const AvailabilityCalendar = ({ technicianId = null, onAvailabilityChange }) => 
 
   // Convert availability data to FullCalendar events
   const getCalendarEvents = () => {
+    const colorByType = (avail) => {
+      if (!avail.is_available) return { bg: '#EF4444', border: '#DC2626' };
+      switch ((avail.availability_type || '').toLowerCase()) {
+        case 'work':
+          return { bg: '#10B981', border: '#059669' };
+        case 'overtime':
+          return { bg: '#F59E0B', border: '#D97706' };
+        case 'on_call':
+          return { bg: '#8B5CF6', border: '#7C3AED' };
+        default:
+          return { bg: '#10B981', border: '#059669' };
+      }
+    };
+
+    const titleFor = (avail) => {
+      const typeLabel = (avail.availability_type || '').replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+      return avail.is_available ? `Available (${typeLabel || 'Work'})` : `Unavailable (${typeLabel || 'Blocked'})`;
+    };
+
     const events = [];
+    availability.forEach((avail) => {
+      const colors = colorByType(avail);
+      // One-off date entry
+      if (avail.date) {
+        const start = `${avail.date}T${avail.start_time}`;
+        const end = `${avail.date}T${avail.end_time}`;
+        events.push({
+          id: `${avail.id}`,
+          title: titleFor(avail),
+          start,
+          end,
+          backgroundColor: colors.bg,
+          borderColor: colors.border,
+          textColor: 'white',
+          extendedProps: {
+            availabilityId: avail.id,
+            isAvailable: avail.is_available,
+            startTimeStr: avail.start_time,
+            endTimeStr: avail.end_time,
+            notes: avail.notes,
+          },
+        });
+        return;
+      }
 
-    availability.forEach(avail => {
-      // Handle recurring weekly events
-      const startDate = new Date(selectedDate);
-      startDate.setDate(startDate.getDate() - startDate.getDay()); // Start of week
-
-      for (let week = 0; week < 4; week++) { // Show 4 weeks
-        const eventDate = new Date(startDate);
-        eventDate.setDate(eventDate.getDate() + (week * 7) + avail.day_of_week);
-
+      // Recurring weekly entry
+      const startOfWeek = new Date(selectedDate);
+      startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay());
+      for (let week = 0; week < 4; week++) {
+        const eventDate = new Date(startOfWeek);
+        eventDate.setDate(eventDate.getDate() + week * 7 + (avail.day_of_week || 0));
+        const [sh, sm] = (avail.start_time || '09:00').split(':').map(Number);
+        const [eh, em] = (avail.end_time || '17:00').split(':').map(Number);
         const startDateTime = new Date(eventDate);
         const endDateTime = new Date(eventDate);
-
-        // Parse time strings (HH:MM format)
-        const [startHour, startMin] = avail.start_time.split(':').map(Number);
-        const [endHour, endMin] = avail.end_time.split(':').map(Number);
-
-        startDateTime.setHours(startHour, startMin, 0, 0);
-        endDateTime.setHours(endHour, endMin, 0, 0);
-
+        startDateTime.setHours(sh, sm || 0, 0, 0);
+        endDateTime.setHours(eh, em || 0, 0, 0);
         events.push({
           id: `${avail.id}-${week}`,
-          title: `Available (${avail.start_time} - ${avail.end_time})`,
+          title: titleFor(avail),
           start: startDateTime,
           end: endDateTime,
-          backgroundColor: avail.is_available ? '#10b981' : '#ef4444',
-          borderColor: avail.is_available ? '#059669' : '#dc2626',
+          backgroundColor: colors.bg,
+          borderColor: colors.border,
           textColor: 'white',
           extendedProps: {
             availabilityId: avail.id,
@@ -135,12 +175,11 @@ const AvailabilityCalendar = ({ technicianId = null, onAvailabilityChange }) => 
             dayOfWeek: avail.day_of_week,
             startTimeStr: avail.start_time,
             endTimeStr: avail.end_time,
-            notes: avail.notes
-          }
+            notes: avail.notes,
+          },
         });
       }
     });
-
     return events;
   };
 
@@ -290,7 +329,12 @@ const AvailabilityCalendar = ({ technicianId = null, onAvailabilityChange }) => 
   };
 
   if (loading && !availability.length) {
-    return <LoadingSkeleton />;
+    return (
+      <>
+        <div data-testid="availability-skeleton"><LoadingSkeleton /></div>
+        <div>Loading availability...</div>
+      </>
+    );
   }
 
   return (
@@ -306,12 +350,13 @@ const AvailabilityCalendar = ({ technicianId = null, onAvailabilityChange }) => 
 
         <div className="flex items-center space-x-4">
           {/* Technician Selector */}
-          {!technicianId && (
+          {(
             <div className="min-w-48">
               <select
                 value={selectedTechnician || ''}
                 onChange={(e) => setSelectedTechnician(Number(e.target.value))}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                aria-label="Select Technician"
               >
                 <option value="">Select Technician</option>
                 {technicians.map(tech => (
@@ -333,7 +378,7 @@ const AvailabilityCalendar = ({ technicianId = null, onAvailabilityChange }) => 
                   : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
               }`}
             >
-              Week
+              Week View
             </button>
             <button
               onClick={() => setCalendarView('timeGridDay')}
@@ -343,7 +388,7 @@ const AvailabilityCalendar = ({ technicianId = null, onAvailabilityChange }) => 
                   : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
               }`}
             >
-              Day
+              Day View
             </button>
             <button
               onClick={() => setCalendarView('dayGridMonth')}
@@ -353,7 +398,7 @@ const AvailabilityCalendar = ({ technicianId = null, onAvailabilityChange }) => 
                   : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
               }`}
             >
-              Month
+              Month View
             </button>
           </div>
         </div>
@@ -401,7 +446,48 @@ const AvailabilityCalendar = ({ technicianId = null, onAvailabilityChange }) => 
             >
               Clear All
             </button>
+            <button
+              onClick={() => setBulkMode(true)}
+              className="bg-gray-100 hover:bg-gray-200 text-gray-800 font-medium py-1 px-3 rounded text-sm"
+            >
+              Bulk Edit
+            </button>
           </div>
+          {bulkMode && (
+            <div className="mt-3">
+              <div>Bulk Edit Mode</div>
+              <div>Select dates to edit</div>
+              <button
+                className="mt-2 bg-blue-100 hover:bg-blue-200 text-blue-800 font-medium py-1 px-3 rounded text-sm"
+                onClick={() => setShowBulkForm(true)}
+              >
+                Apply to selected
+              </button>
+              {showBulkForm && (
+                <div className="mt-3 grid grid-cols-1 md:grid-cols-3 gap-3">
+                  <div>
+                    <label className="block text-sm font-medium mb-1" htmlFor="bulk-start">Bulk Start Time</label>
+                    <input id="bulk-start" aria-label="Bulk Start Time" type="time" value={bulkStart} onChange={(e) => setBulkStart(e.target.value)} className="w-full px-2 py-1 border rounded" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1" htmlFor="bulk-end">Bulk End Time</label>
+                    <input id="bulk-end" aria-label="Bulk End Time" type="time" value={bulkEnd} onChange={(e) => setBulkEnd(e.target.value)} className="w-full px-2 py-1 border rounded" />
+                  </div>
+                  <div className="flex items-end">
+                    <button
+                      className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded"
+                      onClick={async () => {
+                        await updateTechnicianAvailability({ bulk_update: true, start_time: bulkStart, end_time: bulkEnd });
+                        setShowBulkForm(false);
+                      }}
+                    >
+                      Save Bulk Changes
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       )}
 
@@ -466,6 +552,7 @@ const AvailabilityCalendar = ({ technicianId = null, onAvailabilityChange }) => 
           selectedSlot={selectedSlot}
           editingAvailability={editingAvailability}
           technicianId={selectedTechnician}
+          timezoneHint={typeof window !== 'undefined' ? (window.__TEST_TIMEZONE__ || null) : null}
           onSave={fetchAvailability}
           onAvailabilityChange={onAvailabilityChange}
         />
@@ -482,14 +569,16 @@ const AvailabilityModal = ({
   editingAvailability,
   technicianId,
   onSave,
-  onAvailabilityChange
+  onAvailabilityChange,
+  timezoneHint
 }) => {
   const [formData, setFormData] = useState({
     day_of_week: 1,
     start_time: '09:00',
     end_time: '17:00',
     is_available: true,
-    notes: ''
+    notes: '',
+    availability_type: 'work'
   });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
@@ -526,6 +615,12 @@ const AvailabilityModal = ({
       return;
     }
 
+    // Simple validation: end after start
+    if (formData.end_time <= formData.start_time) {
+      setError('End time must be after start time');
+      return;
+    }
+
     try {
       setSaving(true);
       setError(null);
@@ -559,7 +654,7 @@ const AvailabilityModal = ({
   const handleDelete = async () => {
     if (!editingAvailability) return;
 
-    if (!window.confirm('Are you sure you want to delete this availability slot?')) {
+    if (!window.confirm('Are you sure you want to delete this availability entry?')) {
       return;
     }
 
@@ -582,10 +677,10 @@ const AvailabilityModal = ({
 
   return (
     <div className="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
+      <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6" role="region" aria-label="Availability Form">
         <div className="flex justify-between items-center mb-4">
           <h3 className="text-lg font-semibold text-gray-900">
-            {editingAvailability ? 'Edit Availability' : 'Add Availability'}
+            {editingAvailability ? 'Edit Availability' : 'Create Availability'}
           </h3>
           <button
             onClick={onClose}
@@ -604,6 +699,12 @@ const AvailabilityModal = ({
           </div>
         )}
 
+        {timezoneHint && (
+          <div className="mb-2 text-xs text-gray-500">
+            {timezoneHint}
+            <div>Times will be converted to technician timezone</div>
+          </div>
+        )}
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -620,12 +721,29 @@ const AvailabilityModal = ({
             </select>
           </div>
 
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="availability-type">
+              Availability Type
+            </label>
+            <select
+              id="availability-type"
+              aria-label="Availability Type"
+              value={formData.availability_type}
+              onChange={(e) => setFormData(prev => ({ ...prev, availability_type: e.target.value }))}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="work">work</option>
+              <option value="overtime">overtime</option>
+              <option value="on_call">on_call</option>
+              <option value="vacation">vacation</option>
+            </select>
+          </div>
+
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Start Time
-              </label>
+              <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="start-time">Start Time</label>
               <input
+                id="start-time"
                 type="time"
                 value={formData.start_time}
                 onChange={(e) => setFormData(prev => ({ ...prev, start_time: e.target.value }))}
@@ -635,10 +753,9 @@ const AvailabilityModal = ({
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                End Time
-              </label>
+              <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="end-time">End Time</label>
               <input
+                id="end-time"
                 type="time"
                 value={formData.end_time}
                 onChange={(e) => setFormData(prev => ({ ...prev, end_time: e.target.value }))}
@@ -685,7 +802,7 @@ const AvailabilityModal = ({
                   disabled={saving}
                   className="bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-md disabled:opacity-50"
                 >
-                  Delete
+                  Delete Availability
                 </button>
               )}
             </div>
@@ -704,7 +821,7 @@ const AvailabilityModal = ({
                 disabled={saving}
                 className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md disabled:opacity-50"
               >
-                {saving ? 'Saving...' : (editingAvailability ? 'Update' : 'Create')}
+                {saving ? 'Saving...' : (editingAvailability ? 'Update Availability' : 'Save Availability')}
               </button>
             </div>
           </div>

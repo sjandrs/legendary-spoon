@@ -19,6 +19,9 @@ class BudgetV2ModelValidationTests(TestCase):
         budget = BudgetV2.objects.create(
             name="Ops Model", year=2040, cost_center=self.cc, created_by=self.user
         )
+        # Clear auto-created distributions from signal
+        budget.monthly_distributions.all().delete()
+
         # Create 11 rows at 8.0 each = 88.0 total
         for m in range(1, 12):
             MonthlyDistribution.objects.create(
@@ -35,6 +38,9 @@ class BudgetV2ModelValidationTests(TestCase):
         budget = BudgetV2.objects.create(
             name="Ops Model 2", year=2041, cost_center=self.cc, created_by=self.user
         )
+        # Clear auto-created distributions from signal
+        budget.monthly_distributions.all().delete()
+
         # Create 11 rows at 8.33 each = 91.63 total
         for m in range(1, 12):
             MonthlyDistribution.objects.create(

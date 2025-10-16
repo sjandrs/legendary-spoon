@@ -1,0 +1,306 @@
+name: Test Validation Pipeline
+on:
+  push:
+    branches: [ main, develop, master ]
+  pull_request:
+    branches: [ main, develop, master ]
+  workflow_dispatch:
+    inputs:
+      test_scope:
+        description: 'Test scope to run'
+        required: false
+        default: 'all'
+        type: choice
+        options:
+        - all
+        - backend
+        - frontend
+        - integration
+
+jobs:
+  # Backend Tests
+  backend-tests:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.inputs.test_scope == 'all' || github.event.inputs.test_scope == 'backend' || github.event.inputs.test_scope == '' }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Cache Python dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Setup test database
+        run: |
+          python manage.py migrate
+          python manage.py seed_data
+
+      - name: Run backend tests with coverage
+        run: |
+          python -m coverage run manage.py test main.tests --verbosity=2
+          python -m coverage report --show-missing
+          python -m coverage xml
+
+      - name: Calculate backend test metrics
+        run: |
+          TOTAL_TESTS=$(python manage.py test main.tests --verbosity=0 2>&1 | grep -o 'Ran [0-9]* test' | grep -o '[0-9]*' || echo "0")
+          FAILED_TESTS=$(python manage.py test main.tests --verbosity=0 2>&1 | grep -o '[0-9]* failed' | grep -o '[0-9]*' || echo "0")
+          PASSED_TESTS=$((TOTAL_TESTS - FAILED_TESTS))
+          PASS_RATE=$(echo "scale=2; $PASSED_TESTS * 100 / $TOTAL_TESTS" | bc -l || echo "0")
+
+          echo "Backend Test Metrics:" >> $GITHUB_STEP_SUMMARY
+          echo "- Total Tests: $TOTAL_TESTS" >> $GITHUB_STEP_SUMMARY
+          echo "- Passed Tests: $PASSED_TESTS" >> $GITHUB_STEP_SUMMARY
+          echo "- Failed Tests: $FAILED_TESTS" >> $GITHUB_STEP_SUMMARY
+          echo "- Pass Rate: ${PASS_RATE}%" >> $GITHUB_STEP_SUMMARY
+
+          # Set outputs for quality gate
+          echo "total_tests=$TOTAL_TESTS" >> $GITHUB_OUTPUT
+          echo "passed_tests=$PASSED_TESTS" >> $GITHUB_OUTPUT
+          echo "pass_rate=$PASS_RATE" >> $GITHUB_OUTPUT
+
+      - name: Upload backend coverage
+        uses: codecov/codecov-action@v3
+        with:
+          file: ./coverage.xml
+          flags: backend
+          name: backend-coverage
+
+  # Frontend Tests
+  frontend-tests:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.inputs.test_scope == 'all' || github.event.inputs.test_scope == 'frontend' || github.event.inputs.test_scope == '' }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install frontend dependencies
+        working-directory: ./frontend
+        run: npm ci
+
+      - name: Run frontend tests with coverage
+        working-directory: ./frontend
+        run: |
+          npm run test:coverage -- --watchAll=false --passWithNoTests
+
+      - name: Calculate frontend test metrics
+        working-directory: ./frontend
+        run: |
+          # Parse Jest test results
+          TEST_OUTPUT=$(npm test -- --watchAll=false --passWithNoTests --silent 2>&1 || true)
+
+          TOTAL_TESTS=$(echo "$TEST_OUTPUT" | grep -o '[0-9]* total' | grep -o '[0-9]*' | head -1 || echo "0")
+          PASSED_TESTS=$(echo "$TEST_OUTPUT" | grep -o '[0-9]* passed' | grep -o '[0-9]*' | head -1 || echo "0")
+          FAILED_TESTS=$(echo "$TEST_OUTPUT" | grep -o '[0-9]* failed' | grep -o '[0-9]*' | head -1 || echo "0")
+          SKIPPED_TESTS=$(echo "$TEST_OUTPUT" | grep -o '[0-9]* skipped' | grep -o '[0-9]*' | head -1 || echo "0")
+
+          if [ "$TOTAL_TESTS" != "0" ]; then
+            PASS_RATE=$(echo "scale=2; $PASSED_TESTS * 100 / $TOTAL_TESTS" | bc -l)
+          else
+            PASS_RATE="0"
+          fi
+
+          echo "Frontend Test Metrics:" >> $GITHUB_STEP_SUMMARY
+          echo "- Total Tests: $TOTAL_TESTS" >> $GITHUB_STEP_SUMMARY
+          echo "- Passed Tests: $PASSED_TESTS" >> $GITHUB_STEP_SUMMARY
+          echo "- Failed Tests: $FAILED_TESTS" >> $GITHUB_STEP_SUMMARY
+          echo "- Skipped Tests: $SKIPPED_TESTS" >> $GITHUB_STEP_SUMMARY
+          echo "- Pass Rate: ${PASS_RATE}%" >> $GITHUB_STEP_SUMMARY
+
+          # Set outputs for quality gate
+          echo "total_tests=$TOTAL_TESTS" >> $GITHUB_OUTPUT
+          echo "passed_tests=$PASSED_TESTS" >> $GITHUB_OUTPUT
+          echo "pass_rate=$PASS_RATE" >> $GITHUB_OUTPUT
+
+      - name: Upload frontend coverage
+        uses: codecov/codecov-action@v3
+        with:
+          file: ./frontend/coverage/lcov.info
+          flags: frontend
+          name: frontend-coverage
+
+  # E2E Tests
+  e2e-tests:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.inputs.test_scope == 'all' || github.event.inputs.test_scope == 'integration' || github.event.inputs.test_scope == '' }}
+    needs: [backend-tests, frontend-tests]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          cd frontend && npm ci
+
+      - name: Setup test environment
+        run: |
+          python manage.py migrate
+          python manage.py seed_data
+
+      - name: Start backend server
+        run: |
+          python manage.py runserver 8000 &
+          echo $! > backend.pid
+          sleep 10
+
+      - name: Start frontend server
+        working-directory: ./frontend
+        run: |
+          npm run dev &
+          echo $! > frontend.pid
+          sleep 10
+
+      - name: Run E2E tests
+        working-directory: ./frontend
+        run: |
+          npx cypress run --headless
+
+      - name: Stop servers
+        run: |
+          kill $(cat backend.pid) || true
+          kill $(cat frontend/frontend.pid) || true
+
+  # Quality Gates
+  quality-gates:
+    runs-on: ubuntu-latest
+    needs: [backend-tests, frontend-tests]
+    if: always()
+
+    steps:
+      - name: Evaluate quality gates
+        run: |
+          # Get test results from previous jobs
+          BACKEND_PASS_RATE="${{ needs.backend-tests.outputs.pass_rate }}"
+          FRONTEND_PASS_RATE="${{ needs.frontend-tests.outputs.pass_rate }}"
+
+          # Set quality thresholds
+          MIN_BACKEND_PASS_RATE=85
+          MIN_FRONTEND_PASS_RATE=80
+          MIN_COMBINED_PASS_RATE=82
+
+          # Calculate combined pass rate
+          if [ ! -z "$BACKEND_PASS_RATE" ] && [ ! -z "$FRONTEND_PASS_RATE" ]; then
+            COMBINED_PASS_RATE=$(echo "scale=2; ($BACKEND_PASS_RATE + $FRONTEND_PASS_RATE) / 2" | bc -l)
+          else
+            COMBINED_PASS_RATE="0"
+          fi
+
+          echo "Quality Gate Results:" >> $GITHUB_STEP_SUMMARY
+          echo "- Backend Pass Rate: ${BACKEND_PASS_RATE}% (Threshold: ${MIN_BACKEND_PASS_RATE}%)" >> $GITHUB_STEP_SUMMARY
+          echo "- Frontend Pass Rate: ${FRONTEND_PASS_RATE}% (Threshold: ${MIN_FRONTEND_PASS_RATE}%)" >> $GITHUB_STEP_SUMMARY
+          echo "- Combined Pass Rate: ${COMBINED_PASS_RATE}% (Threshold: ${MIN_COMBINED_PASS_RATE}%)" >> $GITHUB_STEP_SUMMARY
+
+          # Check quality gates
+          GATES_PASSED=true
+
+          if (( $(echo "$BACKEND_PASS_RATE < $MIN_BACKEND_PASS_RATE" | bc -l) )); then
+            echo "❌ Backend pass rate below threshold" >> $GITHUB_STEP_SUMMARY
+            GATES_PASSED=false
+          else
+            echo "✅ Backend pass rate meets threshold" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          if (( $(echo "$FRONTEND_PASS_RATE < $MIN_FRONTEND_PASS_RATE" | bc -l) )); then
+            echo "❌ Frontend pass rate below threshold" >> $GITHUB_STEP_SUMMARY
+            GATES_PASSED=false
+          else
+            echo "✅ Frontend pass rate meets threshold" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          if (( $(echo "$COMBINED_PASS_RATE < $MIN_COMBINED_PASS_RATE" | bc -l) )); then
+            echo "❌ Combined pass rate below threshold" >> $GITHUB_STEP_SUMMARY
+            GATES_PASSED=false
+          else
+            echo "✅ Combined pass rate meets threshold" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          if [ "$GATES_PASSED" = false ]; then
+            echo "Quality gates failed - review test results before merging" >> $GITHUB_STEP_SUMMARY
+            exit 1
+          else
+            echo "✅ All quality gates passed!" >> $GITHUB_STEP_SUMMARY
+          fi
+
+  # Test Performance Monitoring
+  performance-monitoring:
+    runs-on: ubuntu-latest
+    needs: [backend-tests, frontend-tests]
+    if: always()
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Monitor test performance
+        run: |
+          echo "Test Performance Monitoring:" >> $GITHUB_STEP_SUMMARY
+
+          # Get job durations (approximate from GitHub Actions)
+          BACKEND_DURATION="${{ needs.backend-tests.conclusion == 'success' && '✅' || '❌' }} Backend Tests"
+          FRONTEND_DURATION="${{ needs.frontend-tests.conclusion == 'success' && '✅' || '❌' }} Frontend Tests"
+
+          echo "- $BACKEND_DURATION" >> $GITHUB_STEP_SUMMARY
+          echo "- $FRONTEND_DURATION" >> $GITHUB_STEP_SUMMARY
+
+          # Set up alerts for long-running tests (implementation specific)
+          echo "Performance monitoring data collected for analysis" >> $GITHUB_STEP_SUMMARY
+
+  # Slack Notification
+  notify-results:
+    runs-on: ubuntu-latest
+    needs: [backend-tests, frontend-tests, quality-gates]
+    if: always() && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+
+    steps:
+      - name: Send Slack notification
+        uses: 8398a7/action-slack@v3
+        with:
+          status: ${{ job.status }}
+          channel: '#development'
+          text: |
+            Test Pipeline Results for ${{ github.repository }}:
+            Backend: ${{ needs.backend-tests.result }}
+            Frontend: ${{ needs.frontend-tests.result }}
+            Quality Gates: ${{ needs.quality-gates.result }}
+
+            View details: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}

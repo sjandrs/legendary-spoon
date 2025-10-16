@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../api';
+import Label from './FormControls/Label';
+import FieldHint from './FormControls/FieldHint';
+import { useLocaleFormatting } from '../hooks/useLocaleFormatting';
 
 const BudgetForm = () => {
   const { id } = useParams();
@@ -16,6 +19,7 @@ const BudgetForm = () => {
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const { formatDate } = useLocaleFormatting();
 
   useEffect(() => {
     if (isEditing) {
@@ -100,10 +104,7 @@ const BudgetForm = () => {
         if (year === currentYear && month < currentMonth) continue;
 
         const periodValue = `${year}-${String(month + 1).padStart(2, '0')}`;
-        const periodLabel = new Date(year, month).toLocaleDateString('en-US', {
-          year: 'numeric',
-          month: 'long'
-        });
+        const periodLabel = formatDate(new Date(year, month), { year: 'numeric', month: 'long' });
         options.push({ value: periodValue, label: periodLabel });
       }
     }
@@ -119,7 +120,7 @@ const BudgetForm = () => {
 
       <form onSubmit={handleSubmit}>
         <div className="form-group">
-          <label htmlFor="category">Category *</label>
+          <Label htmlFor="category" required>Category</Label>
           <select
             id="category"
             name="category"
@@ -136,7 +137,7 @@ const BudgetForm = () => {
         </div>
 
         <div className="form-group">
-          <label htmlFor="period">Period *</label>
+          <Label htmlFor="period" required>Period</Label>
           <select
             id="period"
             name="period"
@@ -153,7 +154,7 @@ const BudgetForm = () => {
         </div>
 
         <div className="form-group">
-          <label htmlFor="amount">Budgeted Amount *</label>
+          <Label htmlFor="amount" required>Budgeted Amount</Label>
           <input
             type="number"
             id="amount"
@@ -163,11 +164,13 @@ const BudgetForm = () => {
             step="0.01"
             min="0"
             required
+            aria-describedby="amount-hint"
           />
+          <FieldHint id="amount-hint">Enter a non-negative amount (USD).</FieldHint>
         </div>
 
         <div className="form-group">
-          <label htmlFor="notes">Notes</label>
+          <Label htmlFor="notes">Notes</Label>
           <textarea
             id="notes"
             name="notes"

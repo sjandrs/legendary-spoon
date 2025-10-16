@@ -4,6 +4,7 @@ from django_mailbox.signals import message_received
 
 from .models import (
     ActivityLog,
+    BudgetV2,
     Contact,
     Deal,
     Interaction,
@@ -350,3 +351,15 @@ def monthly_distribution_post_delete(sender, instance, created, **kwargs):
     rows atomically inside a transaction.
     """
     return
+
+
+@receiver(post_save, sender=BudgetV2)
+def seed_budget_distributions(sender, instance, created, **kwargs):
+    """
+    Automatically seed MonthlyDistribution records when a BudgetV2 is created.
+    This implements Task 1.4: BudgetV2 post_save signal for distribution seeding.
+    """
+    if created and not getattr(instance, "_disable_auto_seed", False):
+        # Only seed if no existing distributions and auto-seeding is not disabled
+        if not instance.monthly_distributions.exists():
+            instance.seed_default_distribution()

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   getWarehouses,
   createWarehouse,
@@ -10,9 +11,12 @@ import {
   deleteWarehouseItem
 } from '../api';
 import './Warehouse.css';
+import { useLocaleFormatting } from '../hooks/useLocaleFormatting';
 import GtinInput from './GtinInput';
 
 const Warehouse = () => {
+  const { t } = useTranslation('warehouse');
+  const { formatCurrency, formatNumber } = useLocaleFormatting();
   const [warehouses, setWarehouses] = useState([]);
   const [warehouseItems, setWarehouseItems] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -54,7 +58,7 @@ const Warehouse = () => {
       setWarehouses(warehousesResponse.data);
       setWarehouseItems(itemsResponse.data);
     } catch (_err) {
-      setError('Failed to fetch warehouse data');
+      setError(t('errors.load_failed'));
       console.error(_err);
     } finally {
       setLoading(false);
@@ -72,7 +76,7 @@ const Warehouse = () => {
       fetchData();
       resetWarehouseForm();
     } catch (_err) {
-      setError('Failed to save warehouse');
+      setError(t('errors.save_failed'));
       console.error(_err);
     }
   };
@@ -95,7 +99,7 @@ const Warehouse = () => {
       fetchData();
       resetItemForm();
     } catch (_err) {
-      setError('Failed to save warehouse item');
+      setError(t('errors.save_item_failed'));
       console.error(_err);
     }
   };
@@ -126,24 +130,24 @@ const Warehouse = () => {
   };
 
   const handleWarehouseDelete = async (id) => {
-    if (window.confirm('Are you sure you want to delete this warehouse? This will also delete all associated items.')) {
+    if (window.confirm(t('confirm.delete_warehouse'))) {
       try {
         await deleteWarehouse(id);
         fetchData();
       } catch (_err) {
-        setError('Failed to delete warehouse');
+        setError(t('errors.delete_failed'));
         console.error(_err);
       }
     }
   };
 
   const handleItemDelete = async (id) => {
-    if (window.confirm('Are you sure you want to delete this warehouse item?')) {
+    if (window.confirm(t('confirm.delete_item'))) {
       try {
         await deleteWarehouseItem(id);
         fetchData();
       } catch (_err) {
-        setError('Failed to delete warehouse item');
+        setError(t('errors.delete_item_failed'));
         console.error(_err);
       }
     }
@@ -181,32 +185,32 @@ const Warehouse = () => {
     return warehouseItems.reduce((total, item) => total + (item.quantity * item.unit_cost), 0);
   };
 
-  if (loading) return <div>Loading warehouse data...</div>;
+  if (loading) return <div>{t('status.loading')}</div>;
   if (error) return <div className="error">{error}</div>;
 
   return (
     <div className="warehouse">
       <div className="warehouse-header">
-        <h1>Warehouse Management</h1>
+        <h1>{t('title', { defaultValue: 'Warehouse Management' })}</h1>
       </div>
 
       {/* Summary Cards */}
       <div className="warehouse-summary">
         <div className="summary-card">
-          <h3>Total Warehouses</h3>
-          <p className="summary-value">{warehouses.length}</p>
+          <h3>{t('summary.total_warehouses')}</h3>
+          <p className="summary-value">{formatNumber(warehouses.length)}</p>
         </div>
         <div className="summary-card">
-          <h3>Total Items</h3>
-          <p className="summary-value">{warehouseItems.length}</p>
+          <h3>{t('summary.total_items')}</h3>
+          <p className="summary-value">{formatNumber(warehouseItems.length)}</p>
         </div>
         <div className="summary-card">
-          <h3>Low Stock Items</h3>
-          <p className="summary-value warning">{getLowStockItems().length}</p>
+          <h3>{t('summary.low_stock_items')}</h3>
+          <p className="summary-value warning">{formatNumber(getLowStockItems().length)}</p>
         </div>
         <div className="summary-card">
-          <h3>Inventory Value</h3>
-          <p className="summary-value">${getTotalInventoryValue().toFixed(2)}</p>
+          <h3>{t('summary.inventory_value')}</h3>
+          <p className="summary-value">{formatCurrency(getTotalInventoryValue())}</p>
         </div>
       </div>
 
@@ -216,13 +220,13 @@ const Warehouse = () => {
           className={`tab-button ${activeTab === 'items' ? 'active' : ''}`}
           onClick={() => setActiveTab('items')}
         >
-          Warehouse Items
+          {t('tabs.items')}
         </button>
         <button
           className={`tab-button ${activeTab === 'warehouses' ? 'active' : ''}`}
           onClick={() => setActiveTab('warehouses')}
         >
-          Warehouses
+          {t('tabs.warehouses')}
         </button>
       </div>
 
@@ -230,23 +234,23 @@ const Warehouse = () => {
       {activeTab === 'items' && (
         <div className="warehouse-tab-content">
           <div className="tab-header">
-            <h2>Warehouse Items</h2>
+            <h2>{t('sections.items')}</h2>
             <button
               className="btn btn-primary"
               onClick={() => setShowItemForm(!showItemForm)}
             >
-              {showItemForm ? 'Cancel' : 'Add Item'}
+              {showItemForm ? t('actions.cancel', { ns: 'common' }) : t('actions.add_item')}
             </button>
           </div>
 
           {/* Item Form */}
           {showItemForm && (
             <div className="warehouse-form">
-              <h3>{editingItem ? 'Edit Warehouse Item' : 'Add New Warehouse Item'}</h3>
+              <h3>{editingItem ? t('forms.edit_item') : t('forms.add_item')}</h3>
               <form onSubmit={handleItemSubmit}>
                 <div className="form-row">
                   <div className="form-group">
-                    <label htmlFor="item-name">Name:</label>
+                    <label htmlFor="item-name">{t('common:common.name')}:</label>
                     <input
                       id="item-name"
                       type="text"
@@ -256,7 +260,7 @@ const Warehouse = () => {
                     />
                   </div>
                   <div className="form-group">
-                    <label htmlFor="item-sku">SKU:</label>
+                    <label htmlFor="item-sku">{t('fields.sku')}:</label>
                     <input
                       id="item-sku"
                       type="text"
@@ -266,7 +270,7 @@ const Warehouse = () => {
                     />
                   </div>
                   <div className="form-group">
-                    <label htmlFor="item-gtin">GTIN:</label>
+                    <label htmlFor="item-gtin">{t('fields.gtin')}:</label>
                     <GtinInput
                       id="item-gtin"
                       value={itemFormData.gtin}
@@ -276,7 +280,7 @@ const Warehouse = () => {
                 </div>
 
                 <div className="form-group">
-                  <label htmlFor="item-description">Description:</label>
+                  <label htmlFor="item-description">{t('common:common.description')}:</label>
                   <textarea
                     id="item-description"
                     value={itemFormData.description}
@@ -286,7 +290,7 @@ const Warehouse = () => {
 
                 <div className="form-row">
                   <div className="form-group">
-                    <label htmlFor="item-quantity">Quantity:</label>
+                    <label htmlFor="item-quantity">{t('common:common.quantity')}:</label>
                     <input
                       id="item-quantity"
                       type="number"
@@ -297,7 +301,7 @@ const Warehouse = () => {
                     />
                   </div>
                   <div className="form-group">
-                    <label htmlFor="item-min-stock">Minimum Stock:</label>
+                    <label htmlFor="item-min-stock">{t('fields.minimum_stock')}:</label>
                     <input
                       id="item-min-stock"
                       type="number"
@@ -308,7 +312,7 @@ const Warehouse = () => {
                     />
                   </div>
                   <div className="form-group">
-                    <label htmlFor="item-unit-cost">Unit Cost:</label>
+                    <label htmlFor="item-unit-cost">{t('fields.unit_cost')}:</label>
                     <input
                       id="item-unit-cost"
                       type="number"
@@ -322,14 +326,14 @@ const Warehouse = () => {
                 </div>
 
                 <div className="form-group">
-                  <label htmlFor="warehouse-select">Warehouse:</label>
+                  <label htmlFor="warehouse-select">{t('fields.warehouse')}:</label>
                   <select
                     id="warehouse-select"
                     value={itemFormData.warehouse}
                     onChange={(e) => setItemFormData({...itemFormData, warehouse: e.target.value})}
                     required
                   >
-                    <option value="">Select Warehouse</option>
+                    <option value="">{t('tabs.warehouses')}</option>
                     {warehouses.map(warehouse => (
                       <option key={warehouse.id} value={warehouse.id}>
                         {warehouse.name}
@@ -340,10 +344,10 @@ const Warehouse = () => {
 
                 <div className="form-actions">
                   <button type="submit" className="btn btn-primary">
-                    {editingItem ? 'Update Item' : 'Add Item'}
+                    {editingItem ? t('actions.update_item') : t('actions.add_item')}
                   </button>
                   <button type="button" className="btn btn-secondary" onClick={resetItemForm}>
-                    Cancel
+                    {t('common:actions.cancel')}
                   </button>
                 </div>
               </form>
@@ -353,36 +357,37 @@ const Warehouse = () => {
           {/* Items List */}
           <div className="warehouse-items-list">
             {warehouseItems.length === 0 ? (
-              <p>No warehouse items found. Add your first item!</p>
+              <p>{t('messages.no_items')}</p>
             ) : (
               <div className="striped-table">
-                <table>
+                <table role="table" aria-label={t('tabs.items')}>
+                  <caption className="sr-only">{t('tabs.items')} — {t('fields.sku')}, {t('common:common.quantity')}, {t('fields.minimum_stock')}, {t('fields.unit_cost')}, {t('fields.total_value')}, {t('common:common.status')}</caption>
                   <thead>
                     <tr>
-                      <th>Name</th>
-                      <th>SKU</th>
-                      <th>Warehouse</th>
-                      <th>Quantity</th>
-                      <th>Min Stock</th>
-                      <th>Unit Cost</th>
-                      <th>Total Value</th>
-                      <th>Status</th>
-                      <th>Actions</th>
+                      <th scope="col">{t('common:common.name')}</th>
+                      <th scope="col">{t('fields.sku')}</th>
+                      <th scope="col">{t('fields.warehouse')}</th>
+                      <th scope="col">{t('common:common.quantity')}</th>
+                      <th scope="col">{t('fields.minimum_stock')}</th>
+                      <th scope="col">{t('fields.unit_cost')}</th>
+                      <th scope="col">{t('fields.total_value')}</th>
+                      <th scope="col">{t('common:common.status')}</th>
+                      <th scope="col">{t('columns.actions', { defaultValue: 'Actions' })}</th>
                     </tr>
                   </thead>
                   <tbody>
                     {warehouseItems.map(item => (
                       <tr key={item.id}>
-                        <td>{item.name}</td>
+                        <th scope="row">{item.name}</th>
                         <td>{item.sku}</td>
                         <td>{item.warehouse_name}</td>
-                        <td>{item.quantity}</td>
-                        <td>{item.minimum_stock}</td>
-                        <td>${item.unit_cost.toFixed(2)}</td>
-                        <td>${(item.quantity * item.unit_cost).toFixed(2)}</td>
+                        <td>{formatNumber(item.quantity)}</td>
+                        <td>{formatNumber(item.minimum_stock)}</td>
+                        <td>{formatCurrency(item.unit_cost)}</td>
+                        <td>{formatCurrency(item.quantity * item.unit_cost)}</td>
                         <td>
                           <span className={`status ${item.quantity <= item.minimum_stock ? 'low-stock' : 'in-stock'}`}>
-                            {item.quantity <= item.minimum_stock ? 'Low Stock' : 'In Stock'}
+                            {item.quantity <= item.minimum_stock ? t('status.low_stock') : t('status.in_stock')}
                           </span>
                         </td>
                         <td>
@@ -390,13 +395,13 @@ const Warehouse = () => {
                             className="btn btn-small btn-secondary"
                             onClick={() => handleItemEdit(item)}
                           >
-                            Edit
+                            {t('common:actions.edit')}
                           </button>
                           <button
                             className="btn btn-small btn-danger"
                             onClick={() => handleItemDelete(item.id)}
                           >
-                            Delete
+                            {t('common:actions.delete')}
                           </button>
                         </td>
                       </tr>
@@ -413,23 +418,23 @@ const Warehouse = () => {
       {activeTab === 'warehouses' && (
         <div className="warehouse-tab-content">
           <div className="tab-header">
-            <h2>Warehouses</h2>
+            <h2>{t('sections.warehouses')}</h2>
             <button
               className="btn btn-primary"
               onClick={() => setShowWarehouseForm(!showWarehouseForm)}
             >
-              {showWarehouseForm ? 'Cancel' : 'Add Warehouse'}
+              {showWarehouseForm ? t('actions.cancel', { ns: 'common' }) : t('actions.add_warehouse')}
             </button>
           </div>
 
           {/* Warehouse Form */}
           {showWarehouseForm && (
             <div className="warehouse-form">
-              <h3>{editingWarehouse ? 'Edit Warehouse' : 'Add New Warehouse'}</h3>
+              <h3>{editingWarehouse ? t('forms.edit_warehouse') : t('forms.add_warehouse')}</h3>
               <form onSubmit={handleWarehouseSubmit}>
                 <div className="form-row">
                   <div className="form-group">
-                    <label htmlFor="warehouse-name">Name:</label>
+                    <label htmlFor="warehouse-name">{t('common:common.name')}:</label>
                     <input
                       id="warehouse-name"
                       type="text"
@@ -439,7 +444,7 @@ const Warehouse = () => {
                     />
                   </div>
                   <div className="form-group">
-                    <label htmlFor="warehouse-location">Location:</label>
+                    <label htmlFor="warehouse-location">{t('fields.location')}:</label>
                     <input
                       id="warehouse-location"
                       type="text"
@@ -451,7 +456,7 @@ const Warehouse = () => {
                 </div>
 
                 <div className="form-group">
-                  <label htmlFor="warehouse-description">Description:</label>
+                  <label htmlFor="warehouse-description">{t('common:common.description')}:</label>
                   <textarea
                     id="warehouse-description"
                     value={warehouseFormData.description}
@@ -461,10 +466,10 @@ const Warehouse = () => {
 
                 <div className="form-actions">
                   <button type="submit" className="btn btn-primary">
-                    {editingWarehouse ? 'Update Warehouse' : 'Add Warehouse'}
+                    {editingWarehouse ? t('actions.update_warehouse') : t('actions.add_warehouse')}
                   </button>
                   <button type="button" className="btn btn-secondary" onClick={resetWarehouseForm}>
-                    Cancel
+                    {t('common:actions.cancel')}
                   </button>
                 </div>
               </form>
@@ -474,18 +479,19 @@ const Warehouse = () => {
           {/* Warehouses List */}
           <div className="warehouses-list">
             {warehouses.length === 0 ? (
-              <p>No warehouses found. Add your first warehouse!</p>
+              <p>{t('messages.no_warehouses')}</p>
             ) : (
               <div className="striped-table">
-                <table>
+                <table role="table" aria-label={t('tabs.warehouses')}>
+                  <caption className="sr-only">{t('tabs.warehouses')} — {t('fields.location')}, {t('common:common.description')}, {t('fields.item_count')}, {t('fields.total_value')}</caption>
                   <thead>
                     <tr>
-                      <th>Name</th>
-                      <th>Location</th>
-                      <th>Description</th>
-                      <th>Item Count</th>
-                      <th>Total Value</th>
-                      <th>Actions</th>
+                      <th scope="col">{t('common:common.name')}</th>
+                      <th scope="col">{t('fields.location')}</th>
+                      <th scope="col">{t('common:common.description')}</th>
+                      <th scope="col">{t('fields.item_count')}</th>
+                      <th scope="col">{t('fields.total_value')}</th>
+                      <th scope="col">{t('columns.actions', { defaultValue: 'Actions' })}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -497,23 +503,23 @@ const Warehouse = () => {
 
                       return (
                         <tr key={warehouse.id}>
-                          <td>{warehouse.name}</td>
+                          <th scope="row">{warehouse.name}</th>
                           <td>{warehouse.location}</td>
                           <td>{warehouse.description}</td>
-                          <td>{warehouseItemsCount}</td>
-                          <td>${warehouseValue.toFixed(2)}</td>
+                          <td>{formatNumber(warehouseItemsCount)}</td>
+                          <td>{formatCurrency(warehouseValue)}</td>
                           <td>
                             <button
                               className="btn btn-small btn-secondary"
                               onClick={() => handleWarehouseEdit(warehouse)}
                             >
-                              Edit
+                              {t('common:actions.edit')}
                             </button>
                             <button
                               className="btn btn-small btn-danger"
                               onClick={() => handleWarehouseDelete(warehouse.id)}
                             >
-                              Delete
+                              {t('common:actions.delete')}
                             </button>
                           </td>
                         </tr>

@@ -34,21 +34,19 @@ class Command(BaseCommand):
             except FieldDoesNotExist:
                 return False
 
-        # Accounts where phone is empty but legacy phone_number exists (if present)
+        # Accounts where phone_number exists (this would be affected by migration)
         if has_field(Account, "phone_number"):
             accounts_qs = Account.objects.filter(
-                Q(phone__isnull=True) | Q(phone="")
-            ).exclude(Q(phone_number__isnull=True) | Q(phone_number=""))
+                ~(Q(phone_number__isnull=True) | Q(phone_number=""))
+            )
             accounts_count = accounts_qs.count()
         else:
             accounts_qs = Account.objects.none()
             accounts_count = 0
 
-        # Deals where name is empty but legacy title exists (if present)
+        # Deals where title exists (this would be affected by migration)
         if has_field(Deal, "title"):
-            deals_qs = Deal.objects.filter(Q(name__isnull=True) | Q(name="")).exclude(
-                Q(title__isnull=True) | Q(title="")
-            )
+            deals_qs = Deal.objects.filter(~(Q(title__isnull=True) | Q(title="")))
             deals_count = deals_qs.count()
         else:
             deals_qs = Deal.objects.none()

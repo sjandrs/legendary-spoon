@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import api from '../api';
 
 const ExpenseForm = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const isEditing = !!id;
+  const { t } = useTranslation('financial');
 
   const [formData, setFormData] = useState({
     date: new Date().toISOString().split('T')[0],
@@ -38,7 +40,7 @@ const ExpenseForm = () => {
         receipt: null // File inputs can't be pre-populated
       });
     } catch (_err) {
-      setError('Failed to load expense');
+      setError(t('expense.errors.load_failed', 'Failed to load expense'));
       console.error('Error fetching expense:', _err);
     }
   };
@@ -76,7 +78,7 @@ const ExpenseForm = () => {
 
       navigate('/expenses');
     } catch (_err) {
-      setError('Failed to save expense');
+      setError(t('expense.errors.save_failed', 'Failed to save expense'));
       console.error('Error saving expense:', _err);
     } finally {
       setLoading(false);
@@ -84,27 +86,27 @@ const ExpenseForm = () => {
   };
 
   const expenseCategories = [
-    { value: 'office_supplies', label: 'Office Supplies' },
-    { value: 'travel', label: 'Travel' },
-    { value: 'meals', label: 'Meals & Entertainment' },
-    { value: 'utilities', label: 'Utilities' },
-    { value: 'rent', label: 'Rent' },
-    { value: 'marketing', label: 'Marketing' },
-    { value: 'software', label: 'Software & Subscriptions' },
-    { value: 'equipment', label: 'Equipment' },
-    { value: 'professional_services', label: 'Professional Services' },
-    { value: 'other', label: 'Other' },
+    { value: 'office_supplies', label: t('expense.categories.office_supplies', 'Office Supplies') },
+    { value: 'travel', label: t('expense.categories.travel', 'Travel') },
+    { value: 'meals', label: t('expense.categories.meals', 'Meals & Entertainment') },
+    { value: 'utilities', label: t('expense.categories.utilities', 'Utilities') },
+    { value: 'rent', label: t('expense.categories.rent', 'Rent') },
+    { value: 'marketing', label: t('expense.categories.marketing', 'Marketing') },
+    { value: 'software', label: t('expense.categories.software', 'Software & Subscriptions') },
+    { value: 'equipment', label: t('expense.categories.equipment', 'Equipment') },
+    { value: 'professional_services', label: t('expense.categories.professional_services', 'Professional Services') },
+    { value: 'other', label: t('expense.categories.other', 'Other') },
   ];
 
   return (
     <div className="expense-form">
-      <h2>{isEditing ? 'Edit Expense' : 'Add Expense'}</h2>
+  <h2>{isEditing ? t('expense.title_edit', 'Edit Expense') : t('expense.title_add', 'Add Expense')}</h2>
 
       {error && <div className="error-message">{error}</div>}
 
       <form onSubmit={handleSubmit}>
         <div className="form-group">
-          <label htmlFor="date">Date *</label>
+          <label htmlFor="date">{t('expense.fields.date', 'Date')} *</label>
           <input
             type="date"
             id="date"
@@ -116,7 +118,7 @@ const ExpenseForm = () => {
         </div>
 
         <div className="form-group">
-          <label htmlFor="category">Category *</label>
+          <label htmlFor="category">{t('expense.fields.category', 'Category')} *</label>
           <select
             id="category"
             name="category"
@@ -133,7 +135,7 @@ const ExpenseForm = () => {
         </div>
 
         <div className="form-group">
-          <label htmlFor="description">Description *</label>
+          <label htmlFor="description">{t('expense.fields.description', 'Description')} *</label>
           <input
             type="text"
             id="description"
@@ -146,7 +148,7 @@ const ExpenseForm = () => {
         </div>
 
         <div className="form-group">
-          <label htmlFor="vendor">Vendor</label>
+          <label htmlFor="vendor">{t('expense.fields.vendor', 'Vendor')}</label>
           <input
             type="text"
             id="vendor"
@@ -158,7 +160,7 @@ const ExpenseForm = () => {
         </div>
 
         <div className="form-group">
-          <label htmlFor="amount">Amount *</label>
+          <label htmlFor="amount">{t('expense.fields.amount', 'Amount')} *</label>
           <input
             type="number"
             id="amount"
@@ -172,7 +174,7 @@ const ExpenseForm = () => {
         </div>
 
         <div className="form-group">
-          <label htmlFor="receipt">Receipt</label>
+          <label htmlFor="receipt">{t('expense.fields.receipt', 'Receipt')}</label>
           <input
             type="file"
             id="receipt"
@@ -181,16 +183,16 @@ const ExpenseForm = () => {
             accept="image/*,.pdf"
           />
           {isEditing && (
-            <small>If you don't select a new file, the existing receipt will be kept.</small>
+            <small>{t('expense.hints.receipt_existing', "If you don't select a new file, the existing receipt will be kept.")}</small>
           )}
         </div>
 
         <div className="form-actions">
           <button type="submit" disabled={loading} className="btn btn-primary">
-            {loading ? 'Saving...' : (isEditing ? 'Update Expense' : 'Add Expense')}
+            {loading ? t('expense.status.saving', 'Saving...') : (isEditing ? t('expense.actions.update', 'Update Expense') : t('expense.actions.add', 'Add Expense'))}
           </button>
           <button type="button" onClick={() => navigate('/expenses')} className="btn btn-secondary">
-            Cancel
+            {t('expense.actions.cancel', 'Cancel')}
           </button>
         </div>
       </form>

@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { createPayment } from '../api';
 
 const PaymentForm = ({ onSuccess }) => {
   const [form, setForm] = useState({ content_type: '', object_id: '', amount: '', payment_date: '', method: '', received_by: '' });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const { t } = useTranslation('financial');
 
   const handleChange = e => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -19,7 +21,7 @@ const PaymentForm = ({ onSuccess }) => {
       setForm({ content_type: '', object_id: '', amount: '', payment_date: '', method: '', received_by: '' });
       if (onSuccess) onSuccess();
     } catch (_err) {
-      setError('Failed to create payment');
+      setError(t('payments.errors.create_failed', 'Failed to create payment'));
     }
     setLoading(false);
   };
@@ -30,14 +32,14 @@ const PaymentForm = ({ onSuccess }) => {
         name="content_type"
         value={form.content_type}
         onChange={handleChange}
-        placeholder="Content Type (e.g. invoice)"
+        placeholder={t('payments.form.content_type', 'Content Type (e.g. invoice)')}
         required
       />
       <input
         name="object_id"
         value={form.object_id}
         onChange={handleChange}
-        placeholder="Object ID"
+        placeholder={t('payments.form.object_id', 'Object ID')}
         required
       />
       <input
@@ -45,7 +47,7 @@ const PaymentForm = ({ onSuccess }) => {
         type="number"
         value={form.amount}
         onChange={handleChange}
-        placeholder="Amount"
+        placeholder={t('payments.form.amount', 'Amount')}
         required
       />
       <input
@@ -59,16 +61,16 @@ const PaymentForm = ({ onSuccess }) => {
         name="method"
         value={form.method}
         onChange={handleChange}
-        placeholder="Method"
+        placeholder={t('payments.form.method', 'Method')}
         required
       />
       <input
         name="received_by"
         value={form.received_by}
         onChange={handleChange}
-        placeholder="Received By (User ID)"
+        placeholder={t('payments.form.received_by', 'Received By (User ID)')}
       />
-      <button type="submit" disabled={loading}>Create</button>
+      <button type="submit" disabled={loading}>{loading ? t('payments.status.creating', 'Creating...') : t('payments.actions.create', 'Create')}</button>
       {error && <div style={{ color: 'red' }}>{error}</div>}
     </form>
   );

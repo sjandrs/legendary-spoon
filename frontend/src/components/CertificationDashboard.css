@@ -1,3 +1,41 @@
+.certification-dashboard {
+  position: relative;
+}
+
+.certification-dashboard .overview-card {
+  border-radius: 0.5rem;
+  border: 1px solid #e5e7eb;
+  background: white;
+  padding: 1rem;
+}
+
+.certification-dashboard .status-badge {
+  display: inline-block;
+  padding: 0.125rem 0.5rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.status-badge.active {
+  background-color: #dcfce7;
+  color: #065f46;
+}
+
+.status-badge.expiring {
+  background-color: #fef9c3;
+  color: #92400e;
+}
+
+.status-badge.critical {
+  background-color: #fee2e2;
+  color: #991b1b;
+}
+
+.status-badge.expired {
+  background-color: #fecaca;
+  color: #7f1d1d;
+}
 /* CertificationDashboard.css */
 
 .certification-dashboard {

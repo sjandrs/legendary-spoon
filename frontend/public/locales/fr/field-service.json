@@ -1,0 +1,26 @@
+{
+	"scheduling": {
+		"schedule": "__STRING_NOT_TRANSLATED__",
+		"appointment": "__STRING_NOT_TRANSLATED__",
+		"booking": "__STRING_NOT_TRANSLATED__",
+		"time_slot": "__STRING_NOT_TRANSLATED__",
+		"availability": "__STRING_NOT_TRANSLATED__",
+		"calendar": "__STRING_NOT_TRANSLATED__",
+		"schedule_appointment": "__STRING_NOT_TRANSLATED__",
+		"reschedule": "__STRING_NOT_TRANSLATED__",
+		"cancel_appointment": "__STRING_NOT_TRANSLATED__",
+		"confirm_appointment": "__STRING_NOT_TRANSLATED__",
+		"optimize_route": "__STRING_NOT_TRANSLATED__",
+		"route_optimization": "__STRING_NOT_TRANSLATED__",
+		"total_distance": "__STRING_NOT_TRANSLATED__",
+		"estimated_time": "__STRING_NOT_TRANSLATED__",
+		"suggested_order": "__STRING_NOT_TRANSLATED__",
+		"start_datetime": "__STRING_NOT_TRANSLATED__",
+		"end_datetime": "__STRING_NOT_TRANSLATED__",
+		"recurrence_rule": "__STRING_NOT_TRANSLATED__",
+		"rrule_example": "__STRING_NOT_TRANSLATED__",
+		"recurrence_hint": "__STRING_NOT_TRANSLATED__",
+		"saving": "__STRING_NOT_TRANSLATED__",
+		"save_appointment": "__STRING_NOT_TRANSLATED__"
+	}
+}

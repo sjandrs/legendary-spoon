@@ -134,7 +134,9 @@ describe('SchedulePage Component - REQ-203.1', () => {
     it('renders schedule page with header and calendar', async () => {
       renderWithProviders(<SchedulePage />);
 
-      expect(screen.getByText('Field Service Schedule')).toBeInTheDocument();
+      const heading = screen.getByRole('heading', { level: 1 });
+      expect(heading).toHaveTextContent('Field Service Schedule');
+      expect(screen.getByText('+ Schedule Appointment')).toBeInTheDocument();
       expect(screen.getByText('+ New Appointment')).toBeInTheDocument();
       expect(screen.getByText('Optimize Route')).toBeInTheDocument();
       expect(screen.getByTestId('fullcalendar')).toBeInTheDocument();
@@ -169,7 +171,7 @@ describe('SchedulePage Component - REQ-203.1', () => {
     it('opens new appointment modal when button is clicked', async () => {
       renderWithProviders(<SchedulePage />);
 
-      await user.click(screen.getByText('+ New Appointment'));
+  await user.click(screen.getByText('+ New Appointment'));
 
       expect(screen.getByText('Schedule Appointment')).toBeInTheDocument();
       expect(screen.getByLabelText('Title')).toBeInTheDocument();
@@ -179,7 +181,7 @@ describe('SchedulePage Component - REQ-203.1', () => {
     it('closes modal when cancel button is clicked', async () => {
       renderWithProviders(<SchedulePage />);
 
-      await user.click(screen.getByText('+ New Appointment'));
+  await user.click(screen.getByText('+ New Appointment'));
       expect(screen.getByText('Schedule Appointment')).toBeInTheDocument();
 
       await user.click(screen.getByText('Cancel'));
@@ -189,7 +191,7 @@ describe('SchedulePage Component - REQ-203.1', () => {
     it('closes modal when close button is clicked', async () => {
       renderWithProviders(<SchedulePage />);
 
-      await user.click(screen.getByText('+ New Appointment'));
+  await user.click(screen.getByText('+ New Appointment'));
       expect(screen.getByText('Schedule Appointment')).toBeInTheDocument();
 
       await user.click(screen.getByText('×'));
@@ -209,7 +211,7 @@ describe('SchedulePage Component - REQ-203.1', () => {
       });
 
       // Open modal
-      await user.click(screen.getByText('+ New Appointment'));
+    await user.click(screen.getByText('+ New Appointment'));
 
       // Fill form
       await user.type(screen.getByLabelText('Title'), 'New Service Call');
@@ -244,7 +246,7 @@ describe('SchedulePage Component - REQ-203.1', () => {
         expect(screen.getByTestId('fullcalendar')).toBeInTheDocument();
       });
 
-      await user.click(screen.getByText('+ New Appointment'));
+    await user.click(screen.getByText('+ New Appointment'));
       await user.click(screen.getByText('Save Appointment'));
 
       // Form should still be open due to validation
@@ -260,7 +262,7 @@ describe('SchedulePage Component - REQ-203.1', () => {
         expect(screen.getByTestId('fullcalendar')).toBeInTheDocument();
       });
 
-      await user.click(screen.getByText('+ New Appointment'));
+    await user.click(screen.getByText('+ New Appointment'));
 
       // Fill required fields quickly
       await user.type(screen.getByLabelText('Title'), 'Test');
@@ -286,7 +288,7 @@ describe('SchedulePage Component - REQ-203.1', () => {
       await user.click(screen.getByTestId('calendar-date-click'));
 
       // Open modal
-      await user.click(screen.getByText('+ New Appointment'));
+    await user.click(screen.getByText('+ New Appointment'));
 
       // Fill form (title is required, technician for optimization)
       await user.type(screen.getByLabelText('Title'), 'Optimized Event');
@@ -371,7 +373,7 @@ describe('SchedulePage Component - REQ-203.1', () => {
 
       // Select date and technician
       await user.click(screen.getByTestId('calendar-date-click'));
-      await user.click(screen.getByText('+ New Appointment'));
+  await user.click(screen.getByText('+ Schedule Appointment'));
       await user.selectOptions(screen.getByLabelText('Technician'), '1');
 
       await user.click(screen.getByText('Optimize Route'));
@@ -406,7 +408,7 @@ describe('SchedulePage Component - REQ-203.1', () => {
       await user.click(screen.getByTestId('calendar-date-click'));
 
       // Open modal and select technician
-      await user.click(screen.getByText('+ New Appointment'));
+  await user.click(screen.getByText('+ Schedule Appointment'));
       await user.selectOptions(screen.getByLabelText('Technician'), '1');
 
       // Click Optimize Route button (in header)

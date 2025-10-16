@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useLocaleFormatting } from '../hooks/useLocaleFormatting';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../api';
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, BarElement, Title, Tooltip, Legend } from 'chart.js';
@@ -8,6 +9,7 @@ import './CustomerLifetimeValue.css';
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, BarElement, Title, Tooltip, Legend);
 
 function CustomerLifetimeValue() {
+  const { formatCurrency } = useLocaleFormatting();
   const { contactId } = useParams();
   const navigate = useNavigate();
   const [contacts, setContacts] = useState([]);
@@ -57,14 +59,7 @@ function CustomerLifetimeValue() {
     }
   };
 
-  const formatCurrency = (value) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(value || 0);
-  };
+  const formatCurrency0 = (value) => formatCurrency(value || 0, 'USD', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
 
   const renderRevenueChart = () => {
     if (!clvData?.revenue_history) return null;
@@ -95,7 +90,7 @@ function CustomerLifetimeValue() {
         tooltip: {
           callbacks: {
             label: function (context) {
-              return `Revenue: ${formatCurrency(context.parsed.y)}`;
+              return `Revenue: ${formatCurrency0(context.parsed.y)}`;
             },
           },
         },
@@ -105,7 +100,8 @@ function CustomerLifetimeValue() {
           beginAtZero: true,
           ticks: {
             callback: function (value) {
-              return '$' + (value / 1000).toFixed(0) + 'K';
+              const v = Number(value) || 0;
+              return `${(v / 1000).toFixed(0)}K`;
             },
           },
         },
@@ -172,7 +168,8 @@ function CustomerLifetimeValue() {
           beginAtZero: true,
           ticks: {
             callback: function (value) {
-              return '$' + (value / 1000).toFixed(0) + 'K';
+              const v = Number(value) || 0;
+              return `${(v / 1000).toFixed(0)}K`;
             },
           },
         },
@@ -250,7 +247,7 @@ function CustomerLifetimeValue() {
               <div className="card-icon">💎</div>
               <div className="card-content">
                 <h3>Total Lifetime Value</h3>
-                <p className="clv-value">{formatCurrency(clvData.lifetime_value)}</p>
+                <p className="clv-value">{formatCurrency0(clvData.lifetime_value)}</p>
                 {getSegmentBadge()}
               </div>
             </div>
@@ -259,7 +256,7 @@ function CustomerLifetimeValue() {
               <div className="card-icon">📈</div>
               <div className="card-content">
                 <h3>Average Order Value</h3>
-                <p className="metric-value">{formatCurrency(clvData.average_order_value)}</p>
+                <p className="metric-value">{formatCurrency0(clvData.average_order_value)}</p>
                 <p className="metric-label">Per transaction</p>
               </div>
             </div>
@@ -295,7 +292,7 @@ function CustomerLifetimeValue() {
               <div className="card-icon">💵</div>
               <div className="card-content">
                 <h3>Total Revenue</h3>
-                <p className="metric-value">{formatCurrency(clvData.total_revenue)}</p>
+                <p className="metric-value">{formatCurrency0(clvData.total_revenue)}</p>
                 <p className="metric-label">All-time</p>
               </div>
             </div>

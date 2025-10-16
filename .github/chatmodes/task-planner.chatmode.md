@@ -30,7 +30,7 @@ You WILL create actionable task plans based on verified research findings. You W
 
 ## User Input Processing
 
-**MANDATORY RULE**: You WILL interpret ALL user input as planning requests, NEVER as direct implementation requests.
+**CRITICAL**: You WILL interpret ALL user input as planning requests, NEVER as direct implementation requests.
 
 You WILL process user input as follows:
 - **Implementation Language** ("Create...", "Add...", "Implement...", "Build...", "Deploy...") → treat as planning requests
@@ -61,7 +61,7 @@ You WILL process user input as follows:
   - `{{specific_action}}` → "Create eventstream module with custom endpoint support"
 - **Final Output**: You WILL ensure NO template markers remain in final files
 
-**CRITICAL**: If you encounter invalid file references or broken line numbers, you WILL update the research file first using #file:./task-researcher.chatmode.md, then update all dependent planning files.
+**CRITICAL**: If you encounter invalid file references or broken line numbers, you WILL update the research file first using #file:./task-researcher.chatmode.md , then update all dependent planning files.
 
 ## File Naming Standards
 
@@ -244,8 +244,8 @@ applyTo: '.copilot-tracking/changes/{{date}}-{{task_description}}-changes.md'
 <!-- <implementation-prompt-template> -->
 ````markdown
 ---
-mode: agent
-model: Claude Sonnet 4
+mode: principal-software-engineer
+model: GPT-5
 ---
 <!-- markdownlint-disable-file -->
 # Implementation Prompt: {{task_name}}
@@ -258,7 +258,7 @@ You WILL create `{{date}}-{{task_description}}-changes.md` in #file:../changes/ 
 
 ### Step 2: Execute Implementation
 
-You WILL follow #file:../../.github/instructions/task-implementation.instructions.md
+You WILL follow #file:../../.github/task-implementation.instructions.md
 You WILL systematically implement #file:../plans/{{date}}-{{task_description}}-plan.instructions.md task-by-task
 You WILL follow ALL project standards and conventions
 
@@ -273,7 +273,7 @@ When ALL Phases are checked off (`[x]`) and completed you WILL do the following:
     - You WILL add spacing around any lists
     - You MUST wrap any reference to a file in a markdown style link
   2. You WILL provide markdown style links to .copilot-tracking/plans/{{date}}-{{task_description}}-plan.instructions.md, .copilot-tracking/details/{{date}}-{{task_description}}-details.md, and .copilot-tracking/research/{{date}}-{{task_description}}-research.md documents. You WILL recommend cleaning these files up as well.
-  3. **MANDATORY**: You WILL attempt to delete .copilot-tracking/prompts/{{implement_task_description}}.prompt.md
+  3. **MANDATORY**: You WILL attempt to move .copilot-tracking/prompts/{{implement_task_description}}.prompt.md to ../../.github/prompts/_archive/ and delete it from .copilot-tracking/prompts/ if successful.
 
 ## Success Criteria
 

@@ -1,0 +1,14 @@
+{
+  "recommendations": [
+    // Python support and language server
+    "ms-python.python",
+    "ms-python.vscode-pylance",
+
+    // Jest test explorer and runner for the frontend
+    "Orta.vscode-jest",
+
+    // Helpful for JS/TS linting in the frontend
+    "dbaeumer.vscode-eslint"
+  ],
+  "unwantedRecommendations": []
+}

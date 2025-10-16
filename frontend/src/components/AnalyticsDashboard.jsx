@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useLocaleFormatting } from '../hooks/useLocaleFormatting';
 import { getAdvancedAnalyticsDashboard, predictDealOutcome, calculateCustomerLifetimeValue, generateRevenueForecast } from '../api';
 import './AnalyticsDashboard.css';
 
@@ -20,6 +21,7 @@ const PredictionControls = ({ selectedDeal, setSelectedDeal, handlePredictDeal, 
 );
 
 const AnalyticsDashboard = () => {
+    const { formatCurrency, formatDate, formatNumber } = useLocaleFormatting();
     const [analytics, setAnalytics] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
@@ -37,7 +39,7 @@ const AnalyticsDashboard = () => {
         try {
             setLoading(true);
             const response = await getAdvancedAnalyticsDashboard();
-            setAnalytics(response.data);
+            setAnalytics(response.data || {});
         } catch (_err) {
             setError('Failed to fetch advanced analytics.');
             console.error(_err);
@@ -128,32 +130,32 @@ const AnalyticsDashboard = () => {
                 <div className="metrics-grid">
                     <div className="metric-card">
                         <h3>Total Revenue</h3>
-                        <div className="metric-value">${analytics.current_metrics.total_revenue.toLocaleString()}</div>
+                        <div className="metric-value">{formatCurrency(analytics?.current_metrics?.total_revenue ?? 0)}</div>
                         <div className="metric-label">Current period</div>
                     </div>
                     <div className="metric-card">
                         <h3>Total Deals</h3>
-                        <div className="metric-value">{analytics.current_metrics.total_deals}</div>
+                        <div className="metric-value">{formatNumber(analytics?.current_metrics?.total_deals ?? 0)}</div>
                         <div className="metric-label">Active deals</div>
                     </div>
                     <div className="metric-card">
                         <h3>Won Deals</h3>
-                        <div className="metric-value">{analytics.current_metrics.won_deals}</div>
-                        <div className="metric-label">{analytics.current_metrics.conversion_rate}% conversion</div>
+                        <div className="metric-value">{formatNumber(analytics?.current_metrics?.won_deals ?? 0)}</div>
+                        <div className="metric-label">{formatNumber(analytics?.current_metrics?.conversion_rate ?? 0)}% conversion</div>
                     </div>
                     <div className="metric-card">
                         <h3>Active Projects</h3>
-                        <div className="metric-value">{analytics.current_metrics.active_projects}</div>
+                        <div className="metric-value">{formatNumber(analytics?.current_metrics?.active_projects ?? 0)}</div>
                         <div className="metric-label">In progress</div>
                     </div>
                     <div className="metric-card">
                         <h3>Inventory Value</h3>
-                        <div className="metric-value">${analytics.current_metrics.inventory_value.toLocaleString()}</div>
+                        <div className="metric-value">{formatCurrency(analytics?.current_metrics?.inventory_value ?? 0)}</div>
                         <div className="metric-label">Total stock value</div>
                     </div>
                     <div className="metric-card">
                         <h3>Outstanding Invoices</h3>
-                        <div className="metric-value">${analytics.current_metrics.outstanding_invoices.toLocaleString()}</div>
+                        <div className="metric-value">{formatCurrency(analytics?.current_metrics?.outstanding_invoices ?? 0)}</div>
                         <div className="metric-label">Awaiting payment</div>
                     </div>
                 </div>
@@ -168,7 +170,7 @@ const AnalyticsDashboard = () => {
                     handlePredictDeal={handlePredictDeal}
                     dealPredictionFeedback={dealPredictionFeedback}
                 />
-                {analytics.predictions.deal_predictions && analytics.predictions.deal_predictions.length > 0 && (
+                {analytics?.predictions?.deal_predictions && analytics.predictions.deal_predictions.length > 0 && (
                     <div className="predictions-table">
                         <table>
                             <thead>
@@ -210,7 +212,7 @@ const AnalyticsDashboard = () => {
                         Calculate CLV
                     </button>
                 </div>
-                {analytics.insights.customer_lifetime_value && analytics.insights.customer_lifetime_value.length > 0 && (
+                {analytics?.insights?.customer_lifetime_value && analytics.insights.customer_lifetime_value.length > 0 && (
                     <div className="clv-table">
                         <table>
                             <thead>
@@ -258,10 +260,10 @@ const AnalyticsDashboard = () => {
                 <div className="forecast-summary">
                     <div className="forecast-metric">
                         <span className="forecast-label">Next Week Forecast:</span>
-                        <span className="forecast-value">${analytics.predictions.revenue_forecast_next_week.toLocaleString()}</span>
+                        <span className="forecast-value">{formatCurrency(analytics?.predictions?.revenue_forecast_next_week ?? 0)}</span>
                     </div>
                 </div>
-                {analytics.predictions.forecast_data && analytics.predictions.forecast_data.length > 0 && (
+                {analytics?.predictions?.forecast_data && analytics.predictions.forecast_data.length > 0 && (
                     <div className="forecast-table">
                         <table>
                             <thead>
@@ -275,10 +277,10 @@ const AnalyticsDashboard = () => {
                             <tbody>
                                 {analytics.predictions.forecast_data.map((forecast, index) => (
                                     <tr key={index}>
-                                        <td>{new Date(forecast.date).toLocaleDateString()}</td>
+                                        <td>{formatDate(forecast.date)}</td>
                                         <td>{forecast.period}</td>
-                                        <td>${forecast.predicted_revenue.toLocaleString()}</td>
-                                        <td>${forecast.confidence_lower.toLocaleString()} - ${forecast.confidence_upper.toLocaleString()}</td>
+                                        <td>{formatCurrency(forecast.predicted_revenue)}</td>
+                                        <td>{formatCurrency(forecast.confidence_lower)} - {formatCurrency(forecast.confidence_upper)}</td>
                                     </tr>
                                 ))}
                             </tbody>
@@ -290,13 +292,13 @@ const AnalyticsDashboard = () => {
             {/* Revenue Trend Chart */}
             <div className="analytics-section">
                 <h2>Revenue Trend (Last 2 Weeks)</h2>
-                {analytics.insights.revenue_trend && analytics.insights.revenue_trend.length > 0 && (
+                {analytics?.insights?.revenue_trend && analytics.insights.revenue_trend.length > 0 && (
                     <div className="trend-chart">
                         <div className="trend-data">
                             {analytics.insights.revenue_trend.map((point, index) => (
                                 <div key={index} className="trend-point">
-                                    <span className="trend-date">{new Date(point.date).toLocaleDateString()}</span>
-                                    <span className="trend-value">${point.revenue.toLocaleString()}</span>
+                                    <span className="trend-date">{formatDate(point.date)}</span>
+                                    <span className="trend-value">{formatCurrency(point.revenue)}</span>
                                 </div>
                             ))}
                         </div>
@@ -307,7 +309,7 @@ const AnalyticsDashboard = () => {
             {/* Top Performing Segments */}
             <div className="analytics-section">
                 <h2>Top Performing Customer Segments</h2>
-                {analytics.insights.top_performing_segments && analytics.insights.top_performing_segments.length > 0 && (
+                {analytics?.insights?.top_performing_segments && analytics.insights.top_performing_segments.length > 0 && (
                     <div className="segments-table">
                         <table>
                             <thead>

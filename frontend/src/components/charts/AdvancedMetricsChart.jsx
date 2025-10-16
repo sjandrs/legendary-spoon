@@ -6,6 +6,7 @@
 import React, { useState, useEffect, useMemo, memo } from 'react';
 // Chart.js components - simplified for compatibility
 import { FieldServiceAnalytics, RealTimeAnalytics } from '../../utils/analytics-calculations';
+import { useLocaleFormatting } from '../../hooks/useLocaleFormatting';
 
 // Advanced chart configuration
 const CHART_COLORS = {
@@ -69,13 +70,15 @@ const TechnicianUtilizationChart = memo(({ data, timeRange = '30days' }) => {
 
 // Service Completion Trends Chart
 const ServiceCompletionTrendsChart = memo(({ data, timeRange = '30days' }) => {
+  const { formatDate, formatCurrency, formatNumber } = useLocaleFormatting();
+
   const chartData = useMemo(() => {
     if (!data || !data.trendsData) {
       return { datasets: [] };
     }
 
     const labels = data.trendsData.map(item =>
-      new Date(item.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+      formatDate(new Date(item.date), { month: 'short', day: 'numeric' })
     );
 
     return {
@@ -272,10 +275,7 @@ const RevenueDistributionChart = memo(({ data }) => {
           label: (context) => {
             const total = context.dataset.data.reduce((sum, val) => sum + val, 0);
             const percentage = ((context.parsed / total) * 100).toFixed(1);
-            const value = context.parsed.toLocaleString('en-US', {
-              style: 'currency',
-              currency: 'USD'
-            });
+            const value = formatCurrency(context.parsed);
             return `${context.label}: ${value} (${percentage}%)`;
           }
         }
@@ -471,7 +471,7 @@ const AdvancedMetricsChart = memo(({
         <div className="summary-card">
           <h4>Total Revenue</h4>
           <span className="metric-value">
-            ${metrics.revenueMetrics?.totalRevenue?.toLocaleString() || 0}
+            {formatCurrency(metrics.revenueMetrics?.totalRevenue || 0)}
           </span>
         </div>
 

@@ -1,6 +1,6 @@
 ---
 description: 'Task research specialist for comprehensive project analysis - Brought to you by microsoft/edge-ai'
-tools: ['changes', 'codebase', 'editFiles', 'extensions', 'fetch', 'findTestFiles', 'githubRepo', 'new', 'openSimpleBrowser', 'problems', 'runCommands', 'runNotebooks', 'runTests', 'search', 'searchResults', 'terminalLastCommand', 'terminalSelection', 'testFailure', 'usages', 'vscodeAPI', 'terraform', 'Microsoft Docs', 'azure_get_schema_for_Bicep', 'context7']
+tools: ['changes', 'search/codebase', 'edit/editFiles', 'extensions', 'fetch', 'findTestFiles', 'githubRepo', 'new', 'openSimpleBrowser', 'problems', 'runCommands', 'runNotebooks', 'runTests', 'search', 'search/searchResults', 'runCommands/terminalLastCommand', 'runCommands/terminalSelection', 'testFailure', 'usages', 'vscodeAPI', 'terraform', 'Microsoft Docs', 'azure_get_schema_for_Bicep', 'context7']
 ---
 
 # Task Researcher Instructions
@@ -67,7 +67,7 @@ You WILL provide brief, focused updates without overwhelming details. You WILL p
 
 You MUST reference existing project conventions from:
 - `copilot/` - Technical standards and language-specific conventions
-- `.github/instructions/` - Project instructions, conventions, and standards
+- `.github/` - Project instructions, conventions, and standards
 - Workspace configuration files - Linting rules and build configurations
 
 You WILL use date-prefixed descriptive names:
@@ -151,7 +151,7 @@ You WILL conduct thorough internal project research by:
 - Using `#search` to find specific implementations, configurations, and coding conventions
 - Using `#usages` to understand how patterns are applied across the codebase
 - Executing read operations to analyze complete files for standards and conventions
-- Referencing `.github/instructions/` and `copilot/` for established guidelines
+- Referencing `.github/` and `copilot/` for established guidelines
 
 You WILL conduct comprehensive external research by:
 - Using `#fetch` to gather official documentation, specifications, and standards

@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { get } from '../api';
 import LoadingSkeleton from './LoadingSkeleton'; // TASK-083
 import './AccountList.css';
+import { getHeaderIds } from '../utils/a11yTable';
 
 /**
  * AccountList - Display and manage company accounts
@@ -16,6 +17,7 @@ const AccountList = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const itemsPerPage = 20;
+  const headerIds = getHeaderIds('accounts', ['name','industry','website','owner','contacts','created','actions']);
 
   useEffect(() => {
     loadAccounts();
@@ -26,18 +28,14 @@ const AccountList = () => {
       setLoading(true);
       const offset = (currentPage - 1) * itemsPerPage;
       let url = `/api/accounts/?limit=${itemsPerPage}&offset=${offset}`;
-
       if (searchQuery) {
         url += `&search=${encodeURIComponent(searchQuery)}`;
       }
-
       const response = await get(url);
       setAccounts(response.data.results || response.data);
-
-      if (response.data.count) {
+      if (response.data && response.data.count) {
         setTotalPages(Math.ceil(response.data.count / itemsPerPage));
       }
-
       setError(null);
     } catch (_err) {
       setError('Failed to load accounts. Please try again.');
@@ -114,42 +112,43 @@ const AccountList = () => {
         </div>
       ) : (
         <>
-          <table className="account-table striped-table">
+          <table className="account-table striped-table" role="table" aria-label="Accounts">
+            <caption className="sr-only">Accounts list including name, industry, website, owner, contacts, created date, and actions</caption>
             <thead>
               <tr>
-                <th>Account Name</th>
-                <th>Industry</th>
-                <th>Website</th>
-                <th>Owner</th>
-                <th>Contacts</th>
-                <th>Created</th>
-                <th>Actions</th>
+                <th scope="col" id={headerIds.name}>Account Name</th>
+                <th scope="col" id={headerIds.industry}>Industry</th>
+                <th scope="col" id={headerIds.website}>Website</th>
+                <th scope="col" id={headerIds.owner}>Owner</th>
+                <th scope="col" id={headerIds.contacts}>Contacts</th>
+                <th scope="col" id={headerIds.created}>Created</th>
+                <th scope="col" id={headerIds.actions}>Actions</th>
               </tr>
             </thead>
             <tbody>
               {accounts.map((account) => (
                 <tr key={account.id} data-testid={`account-row-${account.id}`}>
-                  <td>
+                  <th scope="row" headers={headerIds.name}>
                     <Link to={`/accounts/${account.id}`} className="account-link">
                       {account.name}
                     </Link>
-                  </td>
-                  <td>{account.industry || '-'}</td>
-                  <td>
+                  </th>
+                  <td headers={headerIds.industry}>{account.industry || '-'}</td>
+                  <td headers={headerIds.website}>
                     {account.website ? (
                       <a href={account.website} target="_blank" rel="noopener noreferrer">
                         {account.website}
                       </a>
                     ) : '-'}
                   </td>
-                  <td>{
+                  <td headers={headerIds.owner}>{
                     typeof account.owner_name === 'string' ? account.owner_name :
                     (typeof account.owner === 'string' ? account.owner :
                       (account.owner && account.owner.username) ? account.owner.username : '-')
                   }</td>
-                  <td>{account.contact_count || 0}</td>
-                  <td>{new Date(account.created_at).toLocaleDateString()}</td>
-                  <td>
+                  <td headers={headerIds.contacts}>{account.contact_count || 0}</td>
+                  <td headers={headerIds.created}>{new Date(account.created_at).toLocaleDateString()}</td>
+                  <td headers={headerIds.actions}>
                     <div className="action-buttons">
                       <Link to={`/accounts/${account.id}`} className="btn btn-sm btn-view">
                         View

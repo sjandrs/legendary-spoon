@@ -5,6 +5,7 @@
 
 // Add cypress-axe commands for accessibility testing
 import 'cypress-axe';
+import tinycolor from 'tinycolor2';
 
 /**
  * Enhanced accessibility checking with field service specific rules
@@ -23,7 +24,40 @@ Cypress.Commands.add('checkFieldServiceA11y', (context, options = {}) => {
     ...options
   };
 
-  cy.checkA11y(context, defaultOptions);
+  cy.checkA11y(context, defaultOptions, (violations) => {
+    if (violations && violations.length) {
+      // Fail test with summarized output
+      const summary = violations
+        .map(v => `${v.id} (${v.impact})\n  ${v.help}: ${v.nodes?.length ?? 0} node(s)`)
+        .join('\n');
+      throw new Error(`Axe violations found:\n${summary}`);
+    }
+  });
+});
+
+/**
+ * Strict a11y check that fails the test when any violation is found.
+ * @param {Array<string>} includedImpacts - e.g., ['critical','serious','moderate','minor']
+ * @param {any} context - optional context selector
+ * @param {object} options - extra axe options
+ */
+Cypress.Commands.add('checkA11yFail', (
+  includedImpacts = ['critical', 'serious'],
+  context = null,
+  options = {}
+) => {
+  cy.checkA11y(
+    context,
+    { includedImpacts, ...options },
+    (violations) => {
+      if (violations && violations.length) {
+        const summary = violations
+          .map(v => `${v.id} (${v.impact})\n  ${v.help}: ${v.nodes?.length ?? 0} node(s)\n  Help: ${v.helpUrl}`)
+          .join('\n\n');
+        throw new Error(`Axe violations (${includedImpacts.join(', ')}):\n${summary}`);
+      }
+    }
+  );
 });
 
 /**
@@ -271,21 +305,39 @@ Cypress.Commands.add('testCalendarAccessibility', (calendarSelector) => {
 /**
  * Verify color contrast ratios
  */
-Cypress.Commands.add('verifyColorContrast', (selector, minRatio = 4.5) => {
-  cy.get(selector).each($element => {
-    cy.wrap($element).then($el => {
-      const element = $el[0];
-      const styles = window.getComputedStyle(element);
-      const bgColor = styles.backgroundColor;
-      const textColor = styles.color;
+const resolveEffectiveBackground = (el) => {
+  let node = el;
+  // Walk up DOM to find non-transparent background
+  while (node && node !== document.documentElement) {
+    const cs = window.getComputedStyle(node);
+    const bg = cs.backgroundColor;
+    const color = tinycolor(bg);
+    if (bg && color.getAlpha() > 0.01) return color.toRgbString();
+    node = node.parentElement;
+  }
+  return 'rgb(255, 255, 255)'; // default to white
+};
 
-      // Note: Actual color contrast calculation would require additional library
-      // This is a placeholder for the concept
-      cy.log(`Checking contrast between ${textColor} and ${bgColor}`);
-
-      // In real implementation, use a color contrast library here
-      // expect(contrastRatio).to.be.at.least(minRatio);
-    });
+/**
+ * Verify color contrast ratios using WCAG formula via tinycolor2
+ */
+Cypress.Commands.add('verifyColorContrast', (selector, minRatio = 4.5, largeText = false) => {
+  const required = minRatio ?? (largeText ? 3 : 4.5);
+  cy.get(selector).each(($element) => {
+    const element = $element[0];
+    const styles = window.getComputedStyle(element);
+    const fg = styles.color;
+    const bg = resolveEffectiveBackground(element);
+    const ratio = tinycolor.readability(bg, fg);
+    if (!Number.isFinite(ratio)) {
+      // Log and skip invalid
+      cy.log(`Skipped contrast check (invalid colors): fg=${fg} bg=${bg}`);
+      return;
+    }
+    expect(
+      ratio,
+      `Expected contrast ratio >= ${required} for ${selector}, got ${ratio.toFixed(2)} (fg=${fg}, bg=${bg})`
+    ).to.be.at.least(required);
   });
 });
 

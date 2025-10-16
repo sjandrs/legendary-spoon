@@ -1,0 +1,41 @@
+{
+  "staff": {
+    "title": "__STRING_NOT_TRANSLATED__",
+    "description": "__STRING_NOT_TRANSLATED__"
+  },
+  "work_orders": {
+    "title": "__STRING_NOT_TRANSLATED__",
+    "description": "__STRING_NOT_TRANSLATED__",
+    "columns": {
+      "id": "__STRING_NOT_TRANSLATED__",
+      "project": "__STRING_NOT_TRANSLATED__",
+      "description": "__STRING_NOT_TRANSLATED__",
+      "technician": "__STRING_NOT_TRANSLATED__",
+      "customer": "__STRING_NOT_TRANSLATED__",
+      "status": "__STRING_NOT_TRANSLATED__",
+      "created": "__STRING_NOT_TRANSLATED__",
+      "actions": "__STRING_NOT_TRANSLATED__"
+    },
+    "buttons": {
+      "on_my_way": "__STRING_NOT_TRANSLATED__",
+      "sending": "__STRING_NOT_TRANSLATED__"
+    },
+    "messages": {
+      "sent": "__STRING_NOT_TRANSLATED__",
+      "error": "__STRING_NOT_TRANSLATED__"
+    },
+    "statuses": {
+      "pending": "__STRING_NOT_TRANSLATED__",
+      "assigned": "__STRING_NOT_TRANSLATED__",
+      "in_progress": "__STRING_NOT_TRANSLATED__",
+      "en_route": "__STRING_NOT_TRANSLATED__",
+      "completed": "__STRING_NOT_TRANSLATED__",
+      "cancelled": "__STRING_NOT_TRANSLATED__",
+      "unassigned": "__STRING_NOT_TRANSLATED__",
+      "unknown": "__STRING_NOT_TRANSLATED__"
+    },
+    "aria": {
+      "send_on_my_way": "__STRING_NOT_TRANSLATED__"
+    }
+  }
+}

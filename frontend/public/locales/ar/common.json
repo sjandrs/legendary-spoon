@@ -1,0 +1,95 @@
+{
+  "navigation": {
+    "dashboard": "__STRING_NOT_TRANSLATED__",
+    "analytics": "__STRING_NOT_TRANSLATED__",
+    "advanced": "__STRING_NOT_TRANSLATED__",
+    "crm": "__STRING_NOT_TRANSLATED__",
+    "contacts": "__STRING_NOT_TRANSLATED__",
+    "deals": "__STRING_NOT_TRANSLATED__",
+    "accounts": "__STRING_NOT_TRANSLATED__",
+    "quotes": "__STRING_NOT_TRANSLATED__",
+    "interactions": "__STRING_NOT_TRANSLATED__",
+    "sales_marketing": "__STRING_NOT_TRANSLATED__",
+    "projects_tasks": "__STRING_NOT_TRANSLATED__",
+    "time_tracking": "__STRING_NOT_TRANSLATED__",
+    "orders": "__STRING_NOT_TRANSLATED__",
+    "invoicing": "__STRING_NOT_TRANSLATED__",
+    "work_orders": "__STRING_NOT_TRANSLATED__",
+    "warehouse": "__STRING_NOT_TRANSLATED__",
+    "operations": "__STRING_NOT_TRANSLATED__",
+    "staff_resources": "__STRING_NOT_TRANSLATED__",
+    "field_service": "__STRING_NOT_TRANSLATED__",
+    "accounting": "__STRING_NOT_TRANSLATED__",
+    "reports": "__STRING_NOT_TRANSLATED__",
+    "payments": "__STRING_NOT_TRANSLATED__",
+    "expenses": "__STRING_NOT_TRANSLATED__",
+    "budgets": "__STRING_NOT_TRANSLATED__",
+    "tax_report": "__STRING_NOT_TRANSLATED__",
+    "resources": "__STRING_NOT_TRANSLATED__",
+    "knowledge_base": "__STRING_NOT_TRANSLATED__",
+    "settings": "__STRING_NOT_TRANSLATED__",
+    "logout": "__STRING_NOT_TRANSLATED__"
+  },
+  "validation": {
+    "invalid_credentials": "__STRING_NOT_TRANSLATED__"
+  },
+  "auth": {
+    "login": "__STRING_NOT_TRANSLATED__",
+    "username": "__STRING_NOT_TRANSLATED__",
+    "password": "__STRING_NOT_TRANSLATED__"
+  },
+  "language_selector": {
+    "select_language": "__STRING_NOT_TRANSLATED__",
+    "tooltip": "__STRING_NOT_TRANSLATED__"
+  },
+  "status": {
+    "loading": "__STRING_NOT_TRANSLATED__"
+  },
+  "common": {
+    "name": "__STRING_NOT_TRANSLATED__",
+    "email": "__STRING_NOT_TRANSLATED__",
+    "phone": "__STRING_NOT_TRANSLATED__",
+    "not_available": "__STRING_NOT_TRANSLATED__"
+  },
+  "actions": {
+    "back": "__STRING_NOT_TRANSLATED__"
+  },
+  "preferences": {
+    "timezone": {
+      "label": "__STRING_NOT_TRANSLATED__",
+      "aria": "__STRING_NOT_TRANSLATED__",
+      "tooltip": "__STRING_NOT_TRANSLATED__"
+    },
+    "currency": {
+      "label": "__STRING_NOT_TRANSLATED__",
+      "aria": "__STRING_NOT_TRANSLATED__",
+      "tooltip": "__STRING_NOT_TRANSLATED__"
+    }
+  },
+  "nav": { "utility": "__STRING_NOT_TRANSLATED__" },
+  "search": {
+    "global_label": "__STRING_NOT_TRANSLATED__",
+    "placeholder": "__STRING_NOT_TRANSLATED__",
+    "aria": "__STRING_NOT_TRANSLATED__",
+    "submit": "__STRING_NOT_TRANSLATED__"
+  },
+  "notifications": {
+    "label": "__STRING_NOT_TRANSLATED__",
+    "title": "__STRING_NOT_TRANSLATED__",
+    "view_all": "__STRING_NOT_TRANSLATED__",
+    "examples": {
+      "new_deal": "__STRING_NOT_TRANSLATED__",
+      "task_assigned": "__STRING_NOT_TRANSLATED__",
+      "follow_up": "__STRING_NOT_TRANSLATED__",
+      "work_order_completed": "__STRING_NOT_TRANSLATED__",
+      "work_order_completed_desc": "__STRING_NOT_TRANSLATED__"
+    }
+  },
+  "time": {
+    "minutes_ago": "__STRING_NOT_TRANSLATED__",
+    "hour_ago": "__STRING_NOT_TRANSLATED__",
+    "hours_ago": "__STRING_NOT_TRANSLATED__"
+  },
+  "chat": "__STRING_NOT_TRANSLATED__",
+  "profile": { "settings": "__STRING_NOT_TRANSLATED__" }
+}

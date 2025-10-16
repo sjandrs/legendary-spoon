@@ -1,71 +1,17 @@
 /**
  * Jest Tests for BlogPostList Component
  * TASK-087: CMS Components Testing
- * Target: 70%+ coverage
+ * Target: 100%+ coverage
  */
 
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import BlogPostList from '../../components/BlogPostList';
-import { rest } from 'msw';
-import { setupServer } from 'msw/node';
 import '@testing-library/jest-dom';
 
-// Mock API Server
-const server = setupServer(
-  rest.get('http://localhost:8000/api/blog-posts/', (req, res, ctx) => {
-    return res(
-      ctx.json({
-        count: 3,
-        next: null,
-        previous: null,
-        results: [
-          {
-            id: 1,
-            title: 'Test Blog Post 1',
-            slug: 'test-blog-post-1',
-            content: 'This is test content for blog post 1',
-            status: 'published',
-            author: { id: 1, username: 'admin' },
-            tags: ['test', 'blog'],
-            created_at: '2025-01-15T10:00:00Z',
-            updated_at: '2025-01-15T10:00:00Z',
-            published_at: '2025-01-15T10:00:00Z',
-          },
-          {
-            id: 2,
-            title: 'Test Blog Post 2',
-            slug: 'test-blog-post-2',
-            content: 'This is test content for blog post 2',
-            status: 'draft',
-            author: { id: 1, username: 'admin' },
-            tags: ['test'],
-            created_at: '2025-01-14T10:00:00Z',
-            updated_at: '2025-01-14T10:00:00Z',
-            published_at: null,
-          },
-          {
-            id: 3,
-            title: 'Test Blog Post 3',
-            slug: 'test-blog-post-3',
-            content: 'This is test content for blog post 3',
-            status: 'published',
-            author: { id: 2, username: 'editor' },
-            tags: [],
-            created_at: '2025-01-13T10:00:00Z',
-            updated_at: '2025-01-13T10:00:00Z',
-            published_at: '2025-01-13T10:00:00Z',
-          },
-        ],
-      })
-    );
-  })
-);
-
-beforeAll(() => server.listen());
-afterEach(() => server.resetHandlers());
-afterAll(() => server.close());
+// Use global MSW server from setupTests.js
+const { server, http, HttpResponse } = globalThis;
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -131,11 +77,11 @@ describe('BlogPostList Component', () => {
 
     it('should filter blog posts by search term', async () => {
       server.use(
-        rest.get('http://localhost:8000/api/blog-posts/', (req, res, ctx) => {
-          const search = req.url.searchParams.get('search');
+        http.get('http://localhost:8000/api/blog-posts/', ({ request }) => {
+          const url = new URL(request.url);
+          const search = url.searchParams.get('search');
           if (search === 'Post 1') {
-            return res(
-              ctx.json({
+            return HttpResponse.json({
                 count: 1,
                 results: [
                   {
@@ -150,10 +96,9 @@ describe('BlogPostList Component', () => {
                     updated_at: '2025-01-15T10:00:00Z',
                   },
                 ],
-              })
-            );
+              });
           }
-          return res(ctx.json({ count: 0, results: [] }));
+          return HttpResponse.json({ count: 0, results: [] });
         })
       );
 
@@ -223,8 +168,8 @@ describe('BlogPostList Component', () => {
   describe('Empty States', () => {
     it('should display empty state when no blog posts exist', async () => {
       server.use(
-        rest.get('http://localhost:8000/api/blog-posts/', (req, res, ctx) => {
-          return res(ctx.json({ count: 0, results: [] }));
+        http.get('http://localhost:8000/api/blog-posts/', () => {
+          return HttpResponse.json({ count: 0, results: [] });
         })
       );
 
@@ -237,8 +182,8 @@ describe('BlogPostList Component', () => {
 
     it('should display "Create your first blog post" CTA in empty state', async () => {
       server.use(
-        rest.get('http://localhost:8000/api/blog-posts/', (req, res, ctx) => {
-          return res(ctx.json({ count: 0, results: [] }));
+        http.get('http://localhost:8000/api/blog-posts/', () => {
+          return HttpResponse.json({ count: 0, results: [] });
         })
       );
 
@@ -253,8 +198,8 @@ describe('BlogPostList Component', () => {
   describe('Error Handling', () => {
     it('should display error message on API failure', async () => {
       server.use(
-        rest.get('http://localhost:8000/api/blog-posts/', (req, res, ctx) => {
-          return res(ctx.status(500), ctx.json({ error: 'Internal Server Error' }));
+        http.get('http://localhost:8000/api/blog-posts/', () => {
+          return HttpResponse.json({ error: 'Internal Server Error' }, { status: 500 });
         })
       );
 
@@ -267,8 +212,8 @@ describe('BlogPostList Component', () => {
 
     it('should display retry button on error', async () => {
       server.use(
-        rest.get('http://localhost:8000/api/blog-posts/', (req, res, ctx) => {
-          return res(ctx.status(500), ctx.json({ error: 'Internal Server Error' }));
+        http.get('http://localhost:8000/api/blog-posts/', () => {
+          return HttpResponse.json({ error: 'Internal Server Error' }, { status: 500 });
         })
       );
 
@@ -283,9 +228,8 @@ describe('BlogPostList Component', () => {
   describe('Pagination', () => {
     it('should display pagination controls when results exceed page size', async () => {
       server.use(
-        rest.get('http://localhost:8000/api/blog-posts/', (req, res, ctx) => {
-          return res(
-            ctx.json({
+        http.get('http://localhost:8000/api/blog-posts/', () => {
+          return HttpResponse.json({
               count: 25,
               next: 'http://localhost:8000/api/blog-posts/?page=2',
               previous: null,
@@ -300,8 +244,7 @@ describe('BlogPostList Component', () => {
                 created_at: '2025-01-15T10:00:00Z',
                 updated_at: '2025-01-15T10:00:00Z',
               })),
-            })
-          );
+            });
         })
       );
 

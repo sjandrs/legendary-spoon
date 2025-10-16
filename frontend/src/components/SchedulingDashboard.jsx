@@ -1,18 +1,17 @@
 import React, {
-  memo,
-  useMemo,
-  useCallback,
   useState,
   useEffect,
-  useRef,
-  startTransition
 } from 'react';
+import { useLocaleFormatting } from '../hooks/useLocaleFormatting';
 import { Line, Bar, Doughnut } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, BarElement, ArcElement, Title, Tooltip, Legend } from 'chart.js';
-import { useFieldServiceOptimization, useChartOptimization } from '../hooks/useFieldServiceOptimization';
+// Field service optimization hooks - removed unused imports
 import { VirtualizationUtils } from '../utils/component-performance';
 import AdvancedMetricsChart from './charts/AdvancedMetricsChartSimplified';
 import InteractiveVisualizationDashboard from './charts/InteractiveVisualization';
+import TechnicianUtilizationChart from './charts/TechnicianUtilizationChart';
+import ServiceCompletionTrends from './charts/ServiceCompletionTrends';
+import CustomerSatisfactionMetrics from './charts/CustomerSatisfactionMetrics';
 import api from '../api';
 import './SchedulingDashboard.css';
 
@@ -30,9 +29,10 @@ ChartJS.register(
 );
 
 const SchedulingDashboard = () => {
+  const { formatDate } = useLocaleFormatting();
   const [dashboardData, setDashboardData] = useState(null);
   const [analyticsData, setAnalyticsData] = useState([]);
-  const [selectedPeriod, setSelectedPeriod] = useState('week');
+  const [selectedPeriod, setSelectedPeriod] = useState('week'); // 'week' maps to "Last 7 Days"
   const [loading, setLoading] = useState(true);
   const [selectedTechnician, setSelectedTechnician] = useState('all');
   const [technicians, setTechnicians] = useState([]);
@@ -57,23 +57,27 @@ const SchedulingDashboard = () => {
       const workOrdersResponse = await api.get('/api/work-orders/', {
         params: { period: selectedPeriod }
       });
-      setWorkOrders(workOrdersResponse.data.results || workOrdersResponse.data);
+  const wo = workOrdersResponse.data.results ?? workOrdersResponse.data ?? [];
+  setWorkOrders(Array.isArray(wo) ? wo : []);
 
       // Load time entries
       const timeEntriesResponse = await api.get('/api/time-entries/', {
         params: { period: selectedPeriod }
       });
-      setTimeEntries(timeEntriesResponse.data.results || timeEntriesResponse.data);
+  const te = timeEntriesResponse.data.results ?? timeEntriesResponse.data ?? [];
+  setTimeEntries(Array.isArray(te) ? te : []);
 
       // Load expenses
       const expensesResponse = await api.get('/api/expenses/', {
         params: { period: selectedPeriod }
       });
-      setExpenses(expensesResponse.data.results || expensesResponse.data);
+  const ex = expensesResponse.data.results ?? expensesResponse.data ?? [];
+  setExpenses(Array.isArray(ex) ? ex : []);
 
       // Load warehouse items
       const warehouseResponse = await api.get('/api/warehouse-items/');
-      setWarehouseItems(warehouseResponse.data.results || warehouseResponse.data);
+  const wh = warehouseResponse.data.results ?? warehouseResponse.data ?? [];
+  setWarehouseItems(Array.isArray(wh) ? wh : []);
 
       // Mock feedback data for now
       setFeedbackData([
@@ -122,9 +126,7 @@ const SchedulingDashboard = () => {
   const getUtilizationData = () => {
     if (!analyticsData.length) return null;
 
-    const labels = analyticsData.map(item =>
-      new Date(item.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-    );
+    const labels = analyticsData.map(item => formatDate(new Date(item.date), { month: 'short', day: 'numeric' }));
 
     return {
       labels,
@@ -175,9 +177,7 @@ const SchedulingDashboard = () => {
   const getEfficiencyData = () => {
     if (!analyticsData.length) return null;
 
-    const labels = analyticsData.map(item =>
-      new Date(item.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-    );
+    const labels = analyticsData.map(item => formatDate(new Date(item.date), { month: 'short', day: 'numeric' }));
 
     return {
       labels,
@@ -316,6 +316,35 @@ const SchedulingDashboard = () => {
           timeEntries={timeEntries}
           expenses={expenses}
           realTimeEnabled={true}
+        />
+      </div>
+
+      {/* Advanced Analytics Charts */}
+      <div className="advanced-charts-section">
+        <TechnicianUtilizationChart
+          technicians={technicians}
+          timeEntries={timeEntries}
+          workOrders={workOrders}
+          dateRange={selectedPeriod}
+          realTimeEnabled={true}
+          onDataExport={(data) => console.log('Technician chart export:', data)}
+        />
+
+        <ServiceCompletionTrends
+          workOrders={workOrders}
+          timeEntries={timeEntries}
+          dateRange={selectedPeriod}
+          realTimeEnabled={true}
+          onDataExport={(data) => console.log('Service trends export:', data)}
+        />
+
+        <CustomerSatisfactionMetrics
+          workOrders={workOrders}
+          feedbackData={feedbackData}
+          timeEntries={timeEntries}
+          dateRange={selectedPeriod}
+          realTimeEnabled={true}
+          onDataExport={(data) => console.log('Satisfaction metrics export:', data)}
         />
       </div>
 

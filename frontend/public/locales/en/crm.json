@@ -1,0 +1,66 @@
+{
+  "contacts": {
+    "my_contacts": "My Contacts",
+    "no_contacts": "No contacts found.",
+    "add_contact": "Add Contact",
+    "title": "Contacts",
+    "description": "This is the central repository for all people and companies the business interacts with.",
+    "create_new": "Create New Contact",
+    "owner": "Owner",
+    "no_contacts_get_started": "No contacts found. Get started by creating one!",
+    "edit_contact": "Edit Contact",
+    "save_contact": "Save Contact",
+    "not_found": "No contact found.",
+    "create_task": "Create Task",
+    "custom_fields": "Custom Fields"
+  },
+  "deals": {
+    "title": "Deals",
+    "errors": {
+      "load_failed": "Could not load deals. Please try again later."
+    },
+    "status": {
+      "loading": "Loading deals..."
+    },
+    "filtered_by_stage": "Filtered by Stage:",
+    "clear_filter": "Clear Filter",
+    "no_results": "No deals found.",
+    "table": {
+      "name": "Deal Name",
+      "account": "Account",
+      "stage": "Stage",
+      "value": "Value",
+      "close_date": "Close Date"
+    },
+    "a11y": {
+      "table_label": "Deals",
+      "table_caption": "Deals list including account, stage, value, and expected close date"
+    }
+  },
+  "tasks": {
+    "loading_dashboard": "Loading dashboard...",
+    "title": "Task & Activity Management",
+    "refresh": "Refresh",
+    "settings_title": "Task Settings",
+    "stats": {
+      "total": "Total Tasks",
+      "pending": "Pending",
+      "in_progress": "In Progress",
+      "completed": "Completed",
+      "overdue": "Overdue",
+      "due_week": "Due This Week"
+    },
+    "tabs": {
+      "calendar": "Calendar View",
+      "list": "Task List",
+      "activity": "Activity Timeline"
+    },
+    "recent": "Recent Tasks",
+    "view_all": "View All Tasks →",
+    "no_tasks": "No tasks found. Create your first task to get started!",
+    "no_status": "No Status",
+    "no_type": "No Type",
+    "due": "Due:",
+    "overdue_exclaim": "Overdue!"
+  }
+}

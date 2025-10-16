@@ -1,0 +1,65 @@
+# Codecov Configuration for Converge CRM
+# Enhanced coverage reporting and quality gates for Phase 6 Test Coverage Lift
+
+coverage:
+  status:
+    project:
+      default:
+        target: 100%  # Phase 6 target (exceeds 60% requirement)
+        threshold: 2%  # Allow 2% coverage drop before failing
+        base: auto
+        paths:
+          - "main/"
+          - "frontend/src/"
+    patch:
+      default:
+        target: 100%  # New code coverage minimum
+        threshold: 5%  # Allow more flexibility for patches
+
+  range: "60...100"  # Coverage display range
+
+comment:
+  layout: "reach,diff,flags,tree"
+  behavior: default
+  require_changes: false
+
+flag_management:
+  default_rules:
+    carryforward: true
+    statuses:
+      - type: "project"
+        target: "85%"
+
+flags:
+  backend:
+    paths:
+      - main/
+      - web/
+    carryforward: true
+  frontend:
+    paths:
+      - frontend/src/
+    carryforward: true
+
+ignore:
+  - "**/__pycache__/"
+  - "**/*.pyc"
+  - "*/migrations/*.py"
+  - "frontend/node_modules/"
+  - "frontend/dist/"
+  - "frontend/build/"
+  - "frontend/coverage/"
+  - "frontend/src/__tests__/"
+  - "frontend/cypress/"
+  - "*/test*.py"
+  - "*/tests/"
+  - "*.test.js"
+  - "*.test.jsx"
+  - "*.spec.js"
+  - "*.spec.jsx"
+
+# Phase 6 Quality Gates Configuration
+github_checks:
+  annotations: true
+
+round_down: false

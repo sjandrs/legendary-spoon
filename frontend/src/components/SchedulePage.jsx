@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
@@ -11,6 +12,7 @@ import './SchedulePage.css';
 import '../styles/mobile-scheduling.css';
 
 const SchedulePage = () => {
+  const { t } = useTranslation('field-service');
   const [events, setEvents] = useState([]);
   const [selectedDate, setSelectedDate] = useState(null);
   const [showEventModal, setShowEventModal] = useState(false);
@@ -220,20 +222,20 @@ const SchedulePage = () => {
   return (
     <div className="schedule-page">
       <div className="schedule-header">
-        <h1>Field Service Schedule</h1>
+        <h1>{t('scheduling.schedule', 'Schedule')}</h1>
         <div className="schedule-actions">
           <button
             className="btn btn-primary"
             onClick={() => setShowEventModal(true)}
           >
-            + New Appointment
+            + {t('scheduling.schedule_appointment', 'Schedule Appointment')}
           </button>
           <button
             className="btn btn-secondary"
             onClick={() => optimizeRoute(selectedDate)}
             disabled={!selectedDate || loading}
           >
-            Optimize Route
+            {t('scheduling.optimize_route', 'Optimize Route')}
           </button>
         </div>
       </div>
@@ -278,12 +280,12 @@ const SchedulePage = () => {
 
         {routeOptimization && (
           <div className="route-optimization">
-            <h3>Route Optimization Suggestions</h3>
+            <h3>{t('scheduling.route_optimization', 'Route Optimization Suggestions')}</h3>
             <div className="optimization-results">
-              <p><strong>Total Distance:</strong> {routeOptimization.total_distance} miles</p>
-              <p><strong>Estimated Time:</strong> {routeOptimization.total_time} minutes</p>
+              <p><strong>{t('scheduling.total_distance', 'Total Distance')}:</strong> {routeOptimization.total_distance} miles</p>
+              <p><strong>{t('scheduling.estimated_time', 'Estimated Time')}:</strong> {routeOptimization.total_time} minutes</p>
               <div className="route-order">
-                <h4>Suggested Order:</h4>
+                <h4>{t('scheduling.suggested_order', 'Suggested Order')}:</h4>
                 <ol>
                   {routeOptimization.route_order?.map((stop, index) => (
                     <li key={index}>
@@ -302,7 +304,7 @@ const SchedulePage = () => {
         <div className="modal-overlay">
           <div className="modal-content">
             <div className="modal-header">
-              <h3>Schedule Appointment</h3>
+              <h3>{t('scheduling.schedule_appointment', 'Schedule Appointment')}</h3>
               <button
                 className="modal-close"
                 onClick={() => setShowEventModal(false)}
@@ -313,7 +315,7 @@ const SchedulePage = () => {
 
             <form onSubmit={handleSaveEvent}>
               <div className="form-group">
-                <label htmlFor="event-title">Title</label>
+                <label htmlFor="event-title">{t('customer_portal.service_report', 'Title')}</label>
                 <input
                   id="event-title"
                   type="text"
@@ -325,7 +327,7 @@ const SchedulePage = () => {
               </div>
 
               <div className="form-group">
-                <label htmlFor="event-description">Description</label>
+                <label htmlFor="event-description">{t('customer_portal.feedback', 'Description')}</label>
                 <textarea
                   id="event-description"
                   value={eventForm.description}
@@ -336,7 +338,7 @@ const SchedulePage = () => {
 
               <div className="form-row">
                 <div className="form-group">
-                  <label htmlFor="event-start">Start Date/Time</label>
+                  <label htmlFor="event-start">{t('scheduling.start_datetime', 'Start Date/Time')}</label>
                   <input
                     id="event-start"
                     type="datetime-local"
@@ -346,7 +348,7 @@ const SchedulePage = () => {
                   />
                 </div>
                 <div className="form-group">
-                  <label htmlFor="event-end">End Date/Time</label>
+                  <label htmlFor="event-end">{t('scheduling.end_datetime', 'End Date/Time')}</label>
                   <input
                     id="event-end"
                     type="datetime-local"
@@ -358,13 +360,13 @@ const SchedulePage = () => {
 
               <div className="form-row">
                 <div className="form-group">
-                  <label htmlFor="event-technician">Technician</label>
+                  <label htmlFor="event-technician">{t('technicians.technician', 'Technician')}</label>
                   <select
                     id="event-technician"
                     value={eventForm.technician}
                     onChange={(e) => setEventForm({...eventForm, technician: e.target.value})}
                   >
-                    <option value="">Select Technician</option>
+                    <option value="">{t('technicians.technician', 'Technician')}</option>
                     {technicians.map(tech => (
                       <option key={tech.id} value={tech.id}>
                         {tech.first_name} {tech.last_name}
@@ -373,13 +375,13 @@ const SchedulePage = () => {
                   </select>
                 </div>
                 <div className="form-group">
-                  <label htmlFor="event-workorder">Work Order</label>
+                  <label htmlFor="event-workorder">{t('work_orders.work_order', 'Work Order')}</label>
                   <select
                     id="event-workorder"
                     value={eventForm.workOrder}
                     onChange={(e) => setEventForm({...eventForm, workOrder: e.target.value})}
                   >
-                    <option value="">Select Work Order</option>
+                    <option value="">{t('work_orders.work_order', 'Work Order')}</option>
                     {workOrders.map(wo => (
                       <option key={wo.id} value={wo.id}>
                         #{wo.id} - {wo.description}
@@ -390,23 +392,23 @@ const SchedulePage = () => {
               </div>
 
               <div className="form-group">
-                <label htmlFor="event-recurrence">Recurrence Rule (RRULE format)</label>
+                <label htmlFor="event-recurrence">{t('scheduling.recurrence_rule', 'Recurrence Rule (RRULE format)')}</label>
                 <input
                   id="event-recurrence"
                   type="text"
                   value={eventForm.recurrenceRule}
                   onChange={(e) => setEventForm({...eventForm, recurrenceRule: e.target.value})}
-                  placeholder="e.g., FREQ=WEEKLY;BYDAY=MO,WE,FR"
+                  placeholder={t('scheduling.rrule_example', 'e.g., FREQ=WEEKLY;BYDAY=MO,WE,FR')}
                 />
-                <small>Leave empty for one-time appointment</small>
+                <small>{t('scheduling.recurrence_hint', 'Leave empty for one-time appointment')}</small>
               </div>
 
               <div className="form-actions">
                 <button type="button" onClick={() => setShowEventModal(false)}>
-                  Cancel
+                  {t('paperwork.clear_signature', 'Cancel')}
                 </button>
                 <button type="submit" disabled={loading}>
-                  {loading ? 'Saving...' : 'Save Appointment'}
+                  {loading ? t('scheduling.saving', 'Saving...') : t('scheduling.save_appointment', 'Save Appointment')}
                 </button>
               </div>
             </form>

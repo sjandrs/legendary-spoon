@@ -9,6 +9,17 @@ export default defineConfig({
     screenshotOnRunFailure: true,
     supportFile: 'cypress/support/e2e.js',
     specPattern: 'cypress/e2e/**/*.cy.{js,jsx,ts,tsx}',
+    // Performance optimizations
+    defaultCommandTimeout: 8000, // Reduced from default 4000 for better balance
+    requestTimeout: 10000,
+    responseTimeout: 30000,
+    pageLoadTimeout: 60000,
+    // Disable unnecessary features in headless mode
+    chromeWebSecurity: false, // Faster execution for testing
+    // Optimize test isolation
+    testIsolation: true,
+    // Experimental optimizations
+    experimentalRunAllSpecs: true,
     setupNodeEvents(on, config) {
       // implement node event listeners here
       on('task', {

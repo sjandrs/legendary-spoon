@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { get, del } from '../api';
 import './AccountList.css';
+import { useLocaleFormatting } from '../hooks/useLocaleFormatting';
 
 /**
  * AccountDetail - Display detailed account information
@@ -72,7 +73,14 @@ const AccountDetail = () => {
         <div>
           <h1>{account.name}</h1>
           <p className="account-meta">
-            Created {new Date(account.created_at).toLocaleDateString()} |
+            {(() => {
+              const { formatDate } = useLocaleFormatting();
+              return (
+                <>
+                  Created {formatDate(account.created_at)} |
+                </>
+              );
+            })()}
             Owner: {account.owner_name || account.owner}
           </p>
         </div>
@@ -200,8 +208,8 @@ const AccountDetail = () => {
                         {deal.stage}
                       </span>
                     </td>
-                    <td>${deal.value ? Number(deal.value).toLocaleString() : '0'}</td>
-                    <td>{deal.expected_close_date ? new Date(deal.expected_close_date).toLocaleDateString() : '-'}</td>
+                    <td>{(() => { const { formatNumber } = useLocaleFormatting(); return `$${formatNumber(deal.value ? Number(deal.value) : 0)}`; })()}</td>
+                    <td>{(() => { const { formatDate } = useLocaleFormatting(); return deal.expected_close_date ? formatDate(deal.expected_close_date) : '-'; })()}</td>
                     <td>
                       <Link to={`/deals/${deal.id}`} className="btn btn-sm btn-view">
                         View

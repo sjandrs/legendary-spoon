@@ -49,7 +49,51 @@ class IsOwnerOrManager(BasePermission):
     """
 
     def has_permission(self, request: Any, view: Any) -> bool:  # type: ignore[override]
-        return _is_authenticated(request)
+        if not _is_authenticated(request):
+            return False
+
+        # For QuoteItem access, check ownership through the quote->deal->account chain
+        if (
+            hasattr(view, "get_queryset")
+            and getattr(view.get_queryset().model, "__name__", "") == "QuoteItem"
+        ):
+            user = getattr(request, "user", None)
+            # Managers always allowed
+            if _in_groups(user, ["Sales Manager", "Admin"]):
+                return True
+
+            # For quote item creation, check if user owns the related deal
+            if request.method == "POST":
+                quote_id = request.data.get("quote")
+                if quote_id:
+                    try:
+                        # Import here to avoid circular imports
+                        from main.models import Quote
+
+                        quote = Quote.objects.select_related("deal__account").get(
+                            id=quote_id
+                        )
+                        return quote.deal.account.owner == user
+                    except Exception:
+                        return False
+                return False
+
+            # For GET requests (list/detail), check if user owns quote items through deal ownership
+            if request.method == "GET":
+                try:
+                    from main.models import QuoteItem
+
+                    has_accessible_items = QuoteItem.objects.filter(
+                        quote__deal__account__owner=user
+                    ).exists()
+                    return has_accessible_items
+                except Exception:
+                    return False
+
+            # For other methods, deny
+            return False
+
+        return True
 
     def has_object_permission(
         self, request: Any, view: Any, obj: Any
@@ -59,10 +103,19 @@ class IsOwnerOrManager(BasePermission):
             return True
         # Read-only access for owners on SAFE methods
         if request.method in SAFE_METHODS:
-            # Try common ownership attributes
+            user = getattr(request, "user", None)
+
+            # Special handling for QuoteItem - check ownership through quote->deal->account chain
+            if (
+                hasattr(obj, "quote")
+                and hasattr(obj.quote, "deal")
+                and hasattr(obj.quote.deal, "account")
+            ):
+                return obj.quote.deal.account.owner == user
+
+            # Try common ownership attributes for other models
             for attr in ["owner", "submitted_by", "user", "created_by"]:
-                u: Any = getattr(request, "user", None)
-                if hasattr(obj, attr) and getattr(obj, attr) == u:
+                if hasattr(obj, attr) and getattr(obj, attr) == user:
                     return True
         # Write access restricted to managers only
         return False
@@ -81,12 +134,21 @@ class FinancialDataPermission(BasePermission):
 
 class CustomFieldValuePermission(BasePermission):
     """
-    Allow managers full access; owners can read values linked to objects
-    they own (basic heuristic).
+    Allow managers full access; restrict creation to managers only.
+    Owners can read values linked to objects they own (basic heuristic).
     """
 
     def has_permission(self, request: Any, view: Any) -> bool:  # type: ignore[override]
-        return _is_authenticated(request)
+        if not _is_authenticated(request):
+            return False
+
+        user = getattr(request, "user", None)
+        # For creation/modification, only managers allowed
+        if request.method not in SAFE_METHODS:
+            return _in_groups(user, ["Sales Manager", "Admin"])
+
+        # Read access allowed for authenticated users (further restricted by has_object_permission)
+        return True
 
     def has_object_permission(
         self, request: Any, view: Any, obj: Any

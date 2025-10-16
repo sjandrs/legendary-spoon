@@ -7,10 +7,20 @@ echo "Setting up automated testing environment..."
 echo "Installing Python testing tools..."
 pip install -r requirements.txt
 
-# Install frontend testing dependencies
+# Install frontend testing dependencies (include devDependencies like MSW)
 echo "Installing frontend testing tools..."
 cd frontend
-npm install
+# Prefer clean install; ensure dev deps are included
+export NODE_ENV=development
+if [ -f package-lock.json ]; then
+  npm ci --include=dev || npm ci
+else
+  npm install
+fi
+# Fallback: explicitly install MSW if missing
+if ! npm ls msw >/dev/null 2>&1; then
+  npm install --save-dev msw@^2.11.3
+fi
 cd ..
 
 # Install pre-commit hooks

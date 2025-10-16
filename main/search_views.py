@@ -223,12 +223,101 @@ class BulkUpdateAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
-        """Perform bulk update"""
+        """Perform bulk update
+
+        Compatibility shim: also accept frontend payload shape
+          { action: 'update'|'delete'|'export', items: ['type:id', ...], data: {...} }
+        and translate it to the internal bulk update contract.
+        """
+        # Prefer new-style parameters; fall back to shim
         entity_type = request.data.get("entity_type")
         filters = request.data.get("filters", {})
-        update_data = request.data.get("update_data", {})
+        update_data = request.data.get("update_data")
         batch_size = int(request.data.get("batch_size", 100))
 
+        # Shim path: action/items/data
+        action = request.data.get("action")
+        items = request.data.get("items")
+        data = request.data.get("data")
+
+        if update_data is None and action and items:
+            # Map shim to one or more entity operations by type
+            # items are like "contacts:123" — group by entity type
+            by_type: dict[str, list[int]] = {}
+            for ref in items:
+                try:
+                    t, sid = str(ref).split(":", 1)
+                    sid_i = int(sid)
+                except Exception:
+                    continue
+                by_type.setdefault(t, []).append(sid_i)
+
+            # Only implement 'update' shim here; others can be extended later
+            if action != "update":
+                return Response(
+                    {"error": "Only 'update' action is supported at this endpoint"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            update_data = data or {}
+            if not update_data:
+                return Response(
+                    {"error": "No update fields provided"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            # Execute grouped updates per entity type using the DB provider
+            from .search.db_provider import DatabaseSearchProvider
+
+            provider = DatabaseSearchProvider(request.user)
+            results = {}
+            total_updated = 0
+
+            for t, ids in by_type.items():
+                model = DatabaseSearchProvider.SEARCHABLE_MODELS.get(t)
+                if not model:
+                    results[t] = {"updated": 0, "error": "Unsupported entity type"}
+                    continue
+
+                qs = provider._get_user_queryset(model, request.user).filter(id__in=ids)
+                updated = 0
+                for obj in qs:
+                    dirty = False
+                    for field, value in update_data.items():
+                        if hasattr(obj, field):
+                            setattr(obj, field, value)
+                            dirty = True
+                    if dirty:
+                        obj.save()
+                        updated += 1
+                results[t] = {"updated": updated}
+                total_updated += updated
+
+            # Record a BulkOperation for auditing
+            bulk_op = BulkOperation.objects.create(
+                operation_type="update",
+                status="completed",
+                user=request.user,
+                entity_type=",".join(by_type.keys()) or "mixed",
+                total_records=sum(len(v) for v in by_type.values()),
+                processed_records=total_updated,
+                successful_records=total_updated,
+                failed_records=(sum(len(v) for v in by_type.values()) - total_updated),
+                filters={"ids": by_type},
+                operation_data=update_data,
+                results=results,
+            )
+
+            return Response(
+                {
+                    "message": "Bulk update completed",
+                    "updated": total_updated,
+                    "results": results,
+                    "bulk_operation": BulkOperationSerializer(bulk_op).data,
+                }
+            )
+
+        # Original contract: entity_type + update_data (+ optional filters)
         if not entity_type or not update_data:
             return Response(
                 {"error": "entity_type and update_data are required"},

@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { get } from '../api'; // Using the custom 'get' function
 
 const ContactList = () => {
-    const { t } = useTranslation();
+    const { t } = useTranslation(['crm', 'common', 'errors']);
     const [contacts, setContacts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);

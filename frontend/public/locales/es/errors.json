@@ -1,0 +1,11 @@
+{
+  "api": {
+    "contacts": {
+      "load_failed": "__STRING_NOT_TRANSLATED__",
+      "fetch_failed": "__STRING_NOT_TRANSLATED__"
+    },
+    "deals": {
+      "fetch_failed": "__STRING_NOT_TRANSLATED__"
+    }
+  }
+}

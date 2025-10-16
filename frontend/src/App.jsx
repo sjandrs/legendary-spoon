@@ -1,6 +1,7 @@
-import React, { useState, useContext, Suspense, lazy } from 'react';
+import React, { useState, useContext, Suspense, lazy, useEffect } from 'react';
 import { Route, Routes, Link, useNavigate, Outlet, useLocation } from 'react-router-dom';
 import { I18nextProvider } from 'react-i18next';
+import { useTranslation } from 'react-i18next';
 import i18n from './i18n';
 
 // TASK-084: Core components loaded immediately (critical for initial render)
@@ -13,6 +14,7 @@ import LoadingSkeleton from './components/LoadingSkeleton';
 import LanguageSelector from './components/LanguageSelector';
 import './App.css';
 import AuthContext from './contexts/AuthContext';
+import SkipLink from './components/SkipLink';
 
 // TASK-084: Code splitting - Lazy load all other components
 // Phase 1 Components
@@ -249,12 +251,53 @@ const MainLayout = () => {
     navigate('/login');
   };
 
+  // Accessibility: Keep document <title> and <html lang> in sync with route and i18n
+  useEffect(() => {
+    const path = location.pathname;
+    const titleMap = new Map([
+      ['/dashboard', t('navigation.dashboard', 'Dashboard')],
+      ['/analytics', t('navigation.analytics', 'Analytics')],
+      ['/accounts', t('navigation.accounts', 'Accounts')],
+      ['/contacts', t('navigation.contacts', 'Contacts')],
+      ['/deals', t('navigation.deals', 'Deals')],
+      ['/quotes', t('navigation.quotes', 'Quotes')],
+      ['/interactions', t('navigation.interactions', 'Interactions')],
+      ['/tasks', t('navigation.projects_tasks', 'Projects & Tasks')],
+      ['/time-tracking', t('navigation.time_tracking', 'Time Tracking')],
+      ['/orders', t('navigation.orders', 'Orders')],
+      ['/invoicing', t('navigation.invoicing', 'Invoicing')],
+      ['/work-orders', t('navigation.work_orders', 'Work Orders')],
+      ['/work-orders/list', t('navigation.work_orders', 'Work Orders')],
+      ['/warehouse', t('navigation.warehouse', 'Warehouse')],
+      ['/staff', t('navigation.staff_resources', 'Staff & Resources')],
+      ['/schedule', t('navigation.field_service', 'Field Service Schedule')],
+      ['/scheduling-dashboard', t('navigation.field_service', 'Scheduling Dashboard')],
+      ['/reports', t('navigation.reports', 'Reports')],
+      ['/payments', t('navigation.payments', 'Payments')],
+      ['/expenses', t('navigation.expenses', 'Expenses')],
+      ['/budgets', t('navigation.budgets', 'Budgets')],
+      ['/tax-report', t('navigation.tax_report', 'Tax Report')],
+      ['/blog', 'Blog'],
+      ['/pages', 'Pages'],
+      ['/resources', t('navigation.resources', 'Resources')],
+      ['/kb', t('navigation.knowledge_base', 'Knowledge Base')],
+    ]);
+
+    const matching = Array.from(titleMap.keys()).find(key => path === key || path.startsWith(key + '/'));
+    const pageTitle = matching ? titleMap.get(matching) : 'App';
+    document.title = `Converge CRM — ${pageTitle}`;
+    document.documentElement.lang = i18n.language || 'en';
+  }, [location, t]);
+
   return (
     <div className="container">
+      {/* Skip to Content Link for keyboard users */}
+      <SkipLink />
+
       {/* Utility Navigation Bar - Phase 1 TASK-003 */}
       <UtilityNavigation />
 
-      <nav>
+      <nav role="banner" aria-label="Top Navigation">
         <ul>
           <div className="nav-links">
             {/* Core Navigation */}
@@ -486,18 +529,34 @@ const MainLayout = () => {
           <li><button onClick={handleLogout} className="logout-button" data-testid="logout-button">{t('navigation.logout')}</button></li>
         </ul>
       </nav>
-      <main>
+      <main id="main-content" role="main" tabIndex={-1}>
         {/* TASK-084: Suspense boundary for all lazy-loaded route components */}
         <Suspense fallback={<SuspenseFallback />}>
           <Outlet />
         </Suspense>
       </main>
+      <footer role="contentinfo" aria-label="Footer">
+        <small>&copy; {new Date().getFullYear()} Converge CRM</small>
+      </footer>
     </div>
   );
 };
 
 function App() {
   const { loading } = useContext(AuthContext);
+  // Initialize document direction for RTL languages on mount and language changes
+  useEffect(() => {
+    const applyDir = () => {
+      const lang = i18n.language || 'en';
+      document.documentElement.lang = lang;
+      document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+    };
+    applyDir();
+    i18n.on('languageChanged', applyDir);
+    return () => {
+      i18n.off('languageChanged', applyDir);
+    };
+  }, []);
 
   if (loading) {
     return <div>Loading...</div>;

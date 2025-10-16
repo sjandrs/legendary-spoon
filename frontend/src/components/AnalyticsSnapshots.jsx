@@ -3,6 +3,7 @@ import api from '../api';
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, BarElement, Title, Tooltip, Legend, Filler } from 'chart.js';
 import { Line, Bar } from 'react-chartjs-2';
 import './AnalyticsSnapshots.css';
+import { useLocaleFormatting } from '../hooks/useLocaleFormatting';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, BarElement, Title, Tooltip, Legend, Filler);
 
@@ -12,6 +13,7 @@ function AnalyticsSnapshots() {
   const [error, setError] = useState(null);
   const [dateRange, setDateRange] = useState('30'); // days
   const [metricType, setMetricType] = useState('all');
+  const { formatCurrency, formatDate } = useLocaleFormatting();
 
   useEffect(() => {
     fetchSnapshots();
@@ -35,22 +37,7 @@ function AnalyticsSnapshots() {
     }
   };
 
-  const formatCurrency = (value) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(value || 0);
-  };
-
-  const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-    });
-  };
+  // Using locale-aware formatters from hook
 
   const getLatestSnapshot = () => {
     if (snapshots.length === 0) return null;
@@ -108,7 +95,8 @@ function AnalyticsSnapshots() {
           beginAtZero: true,
           ticks: {
             callback: function (value) {
-              return '$' + (value / 1000).toFixed(0) + 'K';
+              // Locale-aware currency ticks
+              return formatCurrency(value);
             },
           },
         },
