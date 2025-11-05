@@ -23,7 +23,9 @@ Our repo enforces a spec-driven development workflow. A lightweight validator en
 
 - CI workflow:
   - GitHub Actions: “Spec Validation” runs on push and pull_request
-  - Branch protection should require this check to pass before merge
+  - Branch protection is **enabled** on `master` and `Development` branches requiring this check to pass before merge
+    - Settings: `strict=false` (allows merge with out-of-date branch), `enforce_admins=false`
+    - Pull requests will be blocked if Spec Validation fails
 
 ### Common failures and fixes
 
